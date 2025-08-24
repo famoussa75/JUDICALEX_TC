@@ -1,0 +1,217 @@
+{% extends 'role/layout.html' %}
+
+
+{% block title %}Nouveau rôle{% endblock title %}
+    
+{% block content %}
+{% load static %}
+
+<section class="content">
+
+    <div class="content__header rounded-0">
+        <div class="content__wrap">
+          <h1 class="text-center my-2"><i class="pli-calendar-4 fs-1"></i> Gestion des rôles</h1>
+          <p class="text-center mb-4">Gerez les rôles d'audiences du tribunal</p>
+          <nav aria-label="breadcrumb" style="font-size: 18px;">
+            <ol class="breadcrumb">
+               <li class="breadcrumb-item"><a href="{% url 'role.index' %}">Accueil</a></li>
+               <li class="breadcrumb-item"><a href="{% url 'role.liste' %}">Rôles d'audiences</a></li>
+               <li class="breadcrumb-item active" aria-current="page">Nouveau rôle</li>
+            </ol>
+         </nav>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="p-2">
+            <!-- Page title -->
+            <div class="page-header d-print-none">
+                <div class="row align-items-center mt-4 mb-2">
+                    <div class="col">
+                        <!-- Page pre-title -->
+                    
+                        <h1 class="" style="color:white">
+                            <span class="text-primary"><i class="fa fa-plus-circle"></i> Nouveau rôle</span>
+                        </h1>
+                    </div>
+                    {{ affaire_form2.errors }}
+                    <!-- Page title actions -->
+                    <div class="col-auto ms-auto d-print-none">
+                        <div class="btn-list">
+
+                            <a href="{% url 'role.liste' %}" class="btn btn-primary d-none d-sm-inline-block">
+                              <!-- Download SVG icon from http://tabler-icons.io/i/list-numbers -->
+	                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M11 6h9" /><path d="M11 12h9" /><path d="M12 18h8" /><path d="M4 16a2 2 0 1 1 4 0c0 .591 -.5 1 -1 1.5l-3 2.5h4" /><path d="M6 10v-6l-2 2" /></svg>
+                                Tous les rôles
+                            </a>
+                            <a href="#" class="btn btn-primary d-sm-none btn-icon" data-bs-toggle="modal"
+                                data-bs-target="#modal-report" aria-label="Create new report">
+                                <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
+                                <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
+                                    viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                    <line x1="12" y1="5" x2="12" y2="19" />
+                                    <line x1="5" y1="12" x2="19" y2="12" />
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="page-body">
+            <div class="p-2">
+                {% if form.errors %}
+                <div class="alert alert-danger alert-dismissible" role="alert">
+                    <div class="d-flex">
+                        <div>
+                         
+                        </div>
+                        <div>
+                            <h4 class="alert-title">Erreur de formulaire !</h4>
+                            <div class="text-muted"> {{form.errors}}</div>
+                        </div>
+                    </div>
+                    <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+                </div><br /> 
+                {% endif %}
+                {% if formset.errors %}
+                <div class="alert alert-danger alert-dismissible" role="alert">
+                    <div class="d-flex">
+                        <div>
+                         
+                        </div>
+                        <div>
+                            <h4 class="alert-title">Erreur de formulaire !</h4>
+                            <div class="text-muted"> {{formset.errors}}</div>
+                        </div>
+                    </div>
+                    <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+                </div><br /> 
+                {% endif %}
+                {% if formset2.errors %}
+                <div class="alert alert-danger alert-dismissible" role="alert">
+                    <div class="d-flex">
+                        <div>
+                         
+                        </div>
+                        <div>
+                            <h4 class="alert-title">Erreur de formulaire !</h4>
+                            <div class="text-muted"> {{formset2.errors}}</div>
+                        </div>
+                    </div>
+                    <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+                </div><br /> 
+                {% endif %}
+                <div class="row row-deck row-cards">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <!-- Download SVG icon from http://tabler-icons.io/i/menu-2 -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
+                                        viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                                        stroke-linecap="round" stroke-linejoin="round">
+                                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                        <line x1="4" y1="6" x2="20" y2="6" />
+                                        <line x1="4" y1="12" x2="20" y2="12" />
+                                        <line x1="4" y1="18" x2="20" y2="18" />
+                                    </svg> Remplir le formulaire
+                                </h3>
+                            </div>
+
+                            <form action="" method="POST" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <div class="card-body border-bottom py-3">
+                                    <p>(<span style="color:red">*</span>) Champs obligatoires</p>
+
+                                    <!-- Initiation des des champs en fonction du type -->
+                                    <div class="form-selectgroup-boxes row mb-3">
+                                        <div class="col-lg-3">
+                                            <div class="mb-3">
+                                                <label class="form-label">{{form.juridiction.label}}<span style="color:red">*</span></label>
+                                                <select name="juridiction_id" class="form-select" id="select_box"  required>
+                                                     <option value="">Selectionner une juridiction</option>
+                            
+                                                     {% for juridiction in juridictions  %}
+                                                         <option value="{{juridiction.id}}">{{juridiction.name}}</option>                              
+                                                     {% endfor %}
+                                                </select>
+                                                <span>{% if form.juridiction.errors %}{{form.juridiction.errors}}{% endif %}</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-3">
+                                            <div class="mb-3">
+                                                <label class="form-label">{{form.typeAudience.label}}<span style="color:red">*</span></label>
+                                               
+                                                <select name="typeAudience" class="form-select" id="select_box2" required>
+                                                    <option value="" >Selectionner un type</option>
+                                                    
+                                                    {% for option, label in form.fields.typeAudience.choices %}
+                                                         <option value="{{ option }}">{{ label }}</option>
+                                                    {% endfor %}
+                                                
+                                               </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-3">
+                                            <div class="mb-3">
+                                                <label class="form-label">{{form.section.label}}<span style="color:red">*</span></label>
+                                               
+                                                <select name="section" class="form-select" id="select_box_section" required>
+                                                    <option value="" >Selectionner une section</option>
+                                                    
+                                                    {% for option, label in form.fields.section.choices %}
+                                                         <option value="{{ option }}">{{ label }}</option>
+                                                    {% endfor %}
+                                                
+                                               </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-3">
+                                            <div class="mb-3">
+                                                <label class="form-label">Rôle du<span style="color:red">*</span></label>
+                                                <input type="date" class="form-control" name="{{form.dateEnreg.name}}" id="dateRole">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-12 d-flex justify-content-center" id="myDiv" style="display: none;">
+                                        <div id="loader" class="loader_enroller" style="display: none;"></div>
+                                    </div>
+
+                                    <!-- Formulaire de roles -->
+                                    <div id="dynamicContentContainer"></div>
+                                    
+                                </div>
+                               
+                               
+                            </form>
+                        </div>
+
+                      
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+
+<script>
+
+    $(document).ready(function () {
+        $('#nav-role').addClass('bg-primary text-white');
+        $('#txt-role').addClass('text-white');
+    });
+    
+    </script>
+
+{% endblock %}
+
+
+
+
+
+    

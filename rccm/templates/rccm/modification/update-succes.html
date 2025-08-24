@@ -1,0 +1,97 @@
+{% extends 'rccm/layout.html' %}
+
+
+{% block title %}Modification{% endblock title %}
+
+{% block content %}
+{% load static %}
+
+<style>
+   .label-required::after {
+      content: " *";
+      color: red;
+      font-weight: bold;
+   }
+
+   .div1 {    
+      z-index: 1; /* Derrière div2 */
+      display: flex;
+      
+   }
+
+   .div2 {        
+         z-index: 2; /* Devant div1 */
+         display: flex;
+         background-color: rgba(255, 255, 255, 0.5); /* Transparence */
+         filter: blur(5px); /* Applique un flou de 5 pixels */
+      }
+</style>
+
+<section id="content" class="content">
+   <div class="content__header content__boxed rounded-0">
+      <div class="content__wrap mb-3">
+         <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+               <li class="breadcrumb-item fs-4"><a href="#" class="nav-toggler" aria-label="Nav Toggler">Menu</a></li>
+               <li class="breadcrumb-item fs-4"><a href="{% url 'rccm.modification' %}">Déclaration modificative</a>
+               </li>
+               <li class="breadcrumb-item active fs-4" aria-current="page">Formalité</li>
+            </ol>
+         </nav>
+
+      </div>
+
+   </div>
+
+
+   <div class="content__boxed">
+      <div class="content__wrap">
+         <div class="col-md-12" style="padding-left: 200px; padding-right: 200px;">
+            <h2 class="mt-5 mb-3 text-center"><i class="demo-pli-file-edit"></i> Modification de la formalité</h2>
+            <!-- Form wizard with validation -->
+            <div class="card ">
+              
+               <div class="card-body">
+
+                     <!-- Submit state -->
+                     <section data-step="finish" 
+                         class="text-center">
+                        <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                           <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none" />
+                           <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
+                        </svg>
+                        <p class="h3">Vous avez enregistré les modifications avec succès !</p>
+                        <p>Visualisez votre formulaire ou créez à nouveau.</p>
+                        <div class="mt-4 d-flex flex-wrap justify-content-center gap-2">
+                            <a href="{% url 'rccm.formalite.detail' formalite.slug %}" type="button" class="btn btn-primary rounded-pill" ><i class="demo-pli-file"></i> Voir la formalité</a>
+                            <a href="{% url 'rccm.modification' %}" type="button" class="btn btn-secondary rounded-pill"><i class="demo-pli-add"></i> Déclaration modificative</a>
+                        </div>
+                     </section>
+                     <!-- END : Submit state -->
+
+
+               </div>
+            </div>
+            <!-- END : Form wizard with validation -->
+
+
+         </div>
+      </div>
+   </div>
+
+
+   {% include 'rccm/tools/footer.html' %}
+
+</section>
+
+
+<script>
+   $(document).ready(function() {
+       $('#nav-modification').addClass('bg-primary text-white');
+       $('#txt-modification').addClass('text-white');
+   });
+</script>
+
+
+
+{% endblock %}

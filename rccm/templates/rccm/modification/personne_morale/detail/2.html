@@ -1,0 +1,147 @@
+<style>
+
+    .valeurChoisie{
+        font-weight: bold;
+        text-decoration: underline;
+    }
+	
+</style>
+
+<style>
+    .table-bordered td,
+    .table-bordered th {
+        border: 1px solid #000 !important; /* noir foncé */
+    }
+
+    .table-bordered {
+        border: 1px solid #000 !important; /* bordure extérieure plus épaisse et foncée */
+    }
+</style>
+
+<div id="p2" class="first_div text-center">
+
+	<div class="container">
+        <div class="row mb-0 mt-4">
+            <div class="col-md-2" >
+
+                <div style="border: 1px solid; height: 70px; width: 90px; margin-left: 15px; padding: 10px;">
+                    <p class="police-15" style="text-align: left;font-weight: bold;" >RCCM <br> 2010 - P2 </p>
+                </div>
+
+            </div>
+            <div class="col-md-8">
+                <p class="police-18 mb-0"><b>FORMULAIRE DE MODIFICATION</b></p>
+                <p class="police-15 mb-0"><span class="fake-checkbox checked"></span>&nbsp;Relative à la PERSONNE MORALE  <b style="text-decoration: underline;">ETABLISSEMENT PRINCIPAL</b> </p>
+                <p class="police-15 mb-0"><span class="fake-checkbox checked"></span>&nbsp;Relative à UN ETABLISSEMENT SECONDAIRE ou à UNE SUCCURSALE </p>
+            </div>
+            <div class="col-md-2">
+                <div class="">
+                    <div id="qrcode2" style=" margin-left: 30px;"></div>
+                </div>
+            </div>
+        </div>
+        <p class="police-15 mb-2"><span class="fake-checkbox"></span>&nbsp;<span id="Identification_value">Caractéristiques</span>&nbsp;<span class="fake-checkbox {% if formalite.declarationModificative == 'A L\'ACTIVITE' %}checked{% endif %}"></span>&nbsp;<span id="activite_value" class="{% if formalite.declarationModificative == "A L'ACTIVITE"  %}  valeurChoisie  {% endif %}">Activités</span>&nbsp;<span class="fake-checkbox"></span>&nbsp;Dirigeants&nbsp;<span class="fake-checkbox"></span>&nbsp;Transfert&nbsp;<span class="fake-checkbox"></span>&nbsp;Fermeture&nbsp;<span class="fake-checkbox"></span>&nbsp;Dissolution </p>
+
+        <!-- RENSEIGNEMENTS RELATIFS A LA PERSONNE PHYSIQUE -->
+        <div class="mb-3">
+            <p class="police-15" style="margin-bottom: -13px;position: relative; z-index: 2;"><span style="border: 1px solid;padding: 10px;background-color: whitesmoke;"><b>MODIFICATIONS RELATIVES A LA PERSONNE MORALE</b></span></p>
+            <div class="d-flex justify-content-center align-items-center" style="position: relative; z-index: 1;">
+                <div style="text-align: left; border: 1px solid; padding: 23px; width: 22em;">
+                    <p class="police-15 mb-0 "><span style="text-decoration: underline;">PERSONNE MORALE MODIFIE :</span> <b>RCCM/{{ formalite.rccm.numeroRccm }} du <span id="dateCreationRccm">{{ formalite.rccm.dateEnreg }}</b></p>
+                    <p class="police-15 mb-0 "><span class="police-15" style="margin-left: -40px;margin-right: 32px;">1</span>SIEGE : <span id="dateEtLieu" style="font-weight: bold;">{{ personne_morale.siege }}</span></p>
+                    <p class="police-15 mb-0 "><span class="police-15" style="margin-left: -40px;margin-right: 32px;">2</span>FORME JURIDIQUE : <span id="adressePostale_value" style="font-weight: bold;">{{ personne_morale.formeJuridique }}</span> &nbsp;CAPITAL SOCIAL : <span id="telephone_value" style="font-weight: bold;">{{ personne_morale.capitalSocial }}</span></p>
+                    <p class="police-15 mb-0 "><span class="police-15" style="margin-left: -45px;margin-right: 30px;">10</span>NOM COMMERCIAL <span class="police-11">(s'il y a lieu)</span> : {{ personne_morale.nomCommercial }} <span class="police-11">(Nouveau) </span><span id="nouveauNomcommercial_value" style="text-transform: uppercase;">{{ etablissement.nomCommercial }}</span></p>
+                    <p class="police-15 mb-0 "><span class="police-15" style="margin-left: -45px;margin-right: 30px;">11</span>SIGLE OU ENSEIGNE <span class="police-11">(s'il y a lieu)</span> : {{ personne_morale.sigle }} <span class="police-11">(Nouveau) </span><span id="nouveauSigle_value" style="text-transform: uppercase;">{{ etablissement.sigle }}</span></p>
+                    <p class="police-15 mb-0 "><span class="police-15" style="margin-left: -45px;margin-right: 30px;">12</span><span class="fake-checkbox"></span>&nbsp;ACTIVITE(S) : {{ etablissement_morale.activite }} <span id="activites_value">{{ etablissement.activites }}</span></p>
+                    <p class="police-15 mb-0 "  {% for option in formalite.optionDeclaration.all %} {% if option.id == 2 %} style="font-weight: bold;"  {% endif %}  {% endfor %}><span class="fake-checkbox {% for option in formalite.optionDeclaration.all %} {% if option.id == 2 %} checked {% endif %}  {% endfor %}"></span>&nbsp;Activité(s) supprimée(s) : (préciser) <span id="activiteSupprimer_value"> {% if etablissement  %}  {{ etablissement.activitesSupprimer }} {% else %} ......... {% endif %}</span></p>
+                    <p class="police-15 mb-0 "  {% for option in formalite.optionDeclaration.all %} {% if option.id == 1 %} style="font-weight: bold;"  {% endif %}  {% endfor %}><span class="fake-checkbox {% for option in formalite.optionDeclaration.all %} {% if option.id == 1 %} checked {% endif %}  {% endfor %}"></span>&nbsp;Activité(s) ajoutée(s) : (préciser) <span id="activitesAjouter_value2"> {% if etablissement  %}  {{ etablissement.activitesAjouter }} {% else %} ......... {% endif %}</span></p>
+                    <p class="police-15 mb-0 " style="font-weight: bold;"><span class="fake-checkbox"></span>&nbsp;Activité(s) actualisée(s) : <span id="activitesActualiser_value">{{ etablissement.activitesActualiser }}</span></p>
+                    <p class="police-15 mb-0 "><span class="police-15" style="margin-left: -40px;margin-right: 32px;">8</span>MODIFICATION PERSONNE PHYSIQUE <span class="police-11">(Préciser Modification et la date)</span> : 
+                        
+                        <span id="textModification">Modification relative 
+                            {% for f in formalite.declarationModificative.all %}
+
+                                {% if f.id == 5 %}
+                                    <span style="text-align: center;" class="">aux dirigeants 
+                                        (
+                                            {% for option in formalite.optionDeclaration.all %}
+                                                {% if option.declaration.id == f.id %}
+                                                    {% if not forloop.first %}{% if forloop.last %}  {% else %}, {% endif %}{% endif %}
+                                                    {{ option }}
+                                                {% endif %}
+                                            {% endfor %}
+                                        )
+                                    </span> 
+                                
+                                {% endif %}
+
+                            {% endfor %}
+                       </span>
+                            
+                    </p>
+                </div>
+            </div>
+        </div>
+
+         <!-- MODIFICATIONS RELATIVES A L'ETABLISSEMENT -->
+         <div class="mb-3">
+            <p class="police-15" style="margin-bottom: -13px;position: relative; z-index: 2;"><span style="border: 1px solid;padding: 10px;background-color: whitesmoke;"><b>MODIFICATIONS RELATIVES A L'ETABLISSEMENT</b></span> </p>
+            <div class="d-flex justify-content-center align-items-center" style="position: relative; z-index: 1;">
+                <div style="text-align: left; border: 1px solid; padding: 23px; width: 22em;">
+                    <p class="police-15 mb-0 "><span class="police-15" style="margin-left: -45px;margin-right: 30px;">9</span><span id="numRccm_value2" style="font-weight: bold;">N°RCCM ACTUEL : {{ formalite.rccm.numeroRccm }}</span></p>
+                    <p class="police-15 mb-0 ">ADRESSE DE L'ETABLISSEMENT PRINCIPAL : {{ personne_morale.siege }}</p>
+                    <p class="police-15 mb-0 " style="text-decoration: underline;">Cet etablissement est :</p>
+                    <p class="police-15 mb-0 "><b>TRANSFERE</b>, Ancienne adresse : ............................Date : .............</p>
+                    <p class="police-15 mb-0 "><b>VENDU</b>, Acquéreur : .........................................</p>
+                    <p class="police-15 mb-0 ">RCCM de l'acquéreur : .........................................Date :...........</p>
+                    <p class="police-15 mb-0 "><b>MODIFIE</b> Activités supprimées : ..............</p>
+                </div>
+            </div>
+        </div>
+
+         <!-- MODIFICATIONS RELATIVES A L'ETABLISSEMENT SECONDAIRE OU A LA SUCCURSALE -->
+         <div>
+            <p class="police-15" style="margin-bottom: -13px;position: relative; z-index: 2;"><span style="border: 1px solid;padding: 10px;background-color: whitesmoke;"><b>MODIFICATIONS RELATIVES AUX ASSOCIES (*)</b></span> </p>
+            <div class="d-flex justify-content-center align-items-center" style="position: relative; z-index: 1;">
+                <div style="text-align: left; border: 1px solid; padding: 23px; width: 22em;">
+                    <p class="police-15 mb-0 "><span class="police-15" style="margin-left: -45px;margin-right: 30px;">15</span><span id="">(*) La totalité des modifications et informations relatives aux associés indéfiniment et personnellement responsables doit IMPERATIVEMENT figurer sur le formulaire complémentaires M.2 Bis annexé.</span></p>
+                    <p class="police-15 mb-0 "><span class="police-15" style="margin-left: -45px;margin-right: 30px;">16</span>RESUME DES INFORMATIONS :</p>
+                    <p class="police-15 mb-0 "><span class="police-15" style="margin-left: -45px;margin-right: 30px;">17</span>Identité: <span class="police-11">.......................... ,</span> Nouveau, Partant, Maintenu - modifié</p>
+                    <p class="police-15 mb-0 "><span class="police-15" style="margin-left: -45px;margin-right: 30px;">17</span>Ancienne qualité: <span class="police-11">.......................... ,</span> Nouvelle qualité</p>
+                           
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <p class="police-15" style="margin-bottom: -13px;position: relative; z-index: 2;"><span style="border: 1px solid;padding: 10px;background-color: whitesmoke;"><b>MODIFICATIONS RELATIVES AUX DIRIGEANTS (*)</b></span> </p>
+            <div class="d-flex justify-content-center align-items-center" style="position: relative; z-index: 1;">
+                <div style="text-align: left; border: 1px solid; padding: 23px; width: 22em;">
+                    <p class="police-15 mb-0 "><span class="police-15" style="margin-left: -45px;margin-right: 30px;">15</span><span id="">(*) Concerne les Gérants, Administrateurs ou associés <span style="text-decoration: underline;">ayant le pouvoir d'engager la personne morale</span></span></p>
+                    <p class="police-15 mb-0 "><span class="police-15" style="margin-left: -45px;margin-right: 30px;">15</span><span id="">(*) La totalité des modifications et informations relatives aux associés indéfiniment et personnellement responsables doit IMPERATIVEMENT figurer sur le formulaire complémentaires M.2 Bis annexé.</span></p>
+                    <p class="police-15 mb-0 "><span class="police-15" style="margin-left: -45px;margin-right: 30px;">16</span>RESUME DES INFORMATIONS :</p>
+                    <p class="police-15 mb-0 "><span class="police-15" style="margin-left: -45px;margin-right: 30px;">17</span>Identité: <span class="police-11">.......................... ,</span> Nouveau, Partant, Maintenu - modifié</p>
+                    <p class="police-15 mb-0 "><span class="police-15" style="margin-left: -45px;margin-right: 30px;">18</span>(Voir intercalaire)</p>
+                           
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <p class="police-15" style="margin-bottom: -13px;position: relative; z-index: 2;"><span style="border: 1px solid;padding: 10px;background-color: whitesmoke;"><b>COMMISSAIRES AUX COMPTES (*)</b></span> </p>
+            <div class="d-flex justify-content-center align-items-center" style="position: relative; z-index: 1;">
+                <div style="text-align: left; border: 1px solid; padding: 23px; width: 22em;">
+                    <p class="police-15 mb-0 "><span class="police-15" style="margin-left: -45px;margin-right: 30px;">15</span><span id="">(*) La totalité des modifications et informations relatives aux associés indéfiniment et personnellement responsables doit IMPERATIVEMENT figurer sur le formulaire complémentaires M.2 Bis annexé.</span></p>
+                    <p class="police-15 mb-0 "><span class="police-15" style="margin-left: -45px;margin-right: 30px;">16</span>Changement de Commissaire aux comptes: OUI,  NON :</p>
+                    <p class="police-15 mb-0 "><span class="police-15" style="margin-left: -45px;margin-right: 30px;">16</span>Modification des informations sur les Commissaires aux comptes: OUI,  NON :</p>
+                    <p class="police-15 mb-0 "><span class="police-15" style="margin-left: -45px;margin-right: 30px;">17</span>Identité: <span class="police-11">.......................... ,</span> Nouveau, Partant, Maintenu - modifié</p>
+                           
+                </div>
+            </div>
+        </div>
+		
+	</div>
+
+</div>
+
+

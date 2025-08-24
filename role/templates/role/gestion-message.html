@@ -1,0 +1,141 @@
+{% extends 'role/layout.html' %}
+
+{% block title %}Message{% endblock title %}
+
+
+{% block content %}
+{% load static %}
+
+<section class="content">
+
+  <div class="content__header rounded-0">
+    <div class="content__wrap">
+      <h1 class="text-center my-2"><i class="pli-mail fs-1"></i> Messages defilants</h1>
+      <p class="text-center mb-4">Gerez les rôles d'audiences du tribunal</p>
+      <nav aria-label="breadcrumb" style="font-size: 18px;">
+        <ol class="breadcrumb">
+           <li class="breadcrumb-item"><a href="{% url 'role.index' %}">Accueil</a></li>
+           <li class="breadcrumb-item"><a href="{% url 'role.affaires' %}">Affaires</a></li>
+           <li class="breadcrumb-item active" aria-current="page">Décisions</li>
+        </ol>
+     </nav>
+    </div>
+  </div>
+
+  <div class="container-fluid">
+
+    <div class="page-body">
+        <div class="card mt-4 p-2">
+          <div class="container">
+              <div class="row">
+                  <div class="col-md-12">
+                      <h2 class="mb-3 text-center"><i class="fa fa-envelope"></i> GEREZ LES MESSAGES DE DEFILEMENTS</h2>
+                  </div>
+                  
+              </div>
+            
+          </div>
+
+          <div class="container mt-4">
+              <h2 class="mb-4">{{ form_title }}</h2>
+            
+              <form method="post" class="mb-4">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="btn btn-success">Enregistrer</button>
+                {% if edit_mode %}
+                  <a href="{% url 'ges_message' %}" class="btn btn-secondary">Annuler</a>
+                {% endif %}
+              </form>
+            
+              <hr>
+            
+              <h3>Messages existants</h3>
+              <table class="table table-bordered table-striped">
+                <thead>
+                  <tr>
+                    <th>Contenu</th>
+                    <th>Actif</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for msg in messages %}
+                    <tr>
+                      <td>{{ msg.contenu|linebreaksbr }}</td>
+                      <td>{{ msg.actif|yesno:"✅,❌" }}</td>
+                      <td>{{ msg.date_creation|date:"d/m/Y H:i" }}</td>
+                      <td>
+                        <a href="{% url 'gestion_messages_edit' msg.pk 'edit' %}" class="btn btn-warning btn-sm">✏️</a>
+                        <form method="post" style="display:inline;">
+                          {% csrf_token %}
+                          <input type="hidden" name="delete_id" value="{{ msg.pk }}">
+                          <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Supprimer ce message ?')">🗑️</button>
+                        </form>
+                      </td>
+                    </tr>
+                  {% empty %}
+                    <tr><td colspan="4">Aucun message trouvé.</td></tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+          </div>
+        </div>
+    </div>
+
+  </div>
+</section>
+
+
+<script src="{% static 'start/assets/dist/js/virtual-select.min.js'%}"></script>
+
+<script>
+
+  $(document).ready(function () {
+      $('#nav-info').addClass('bg-primary text-white');
+      $('#txt-info').addClass('text-white');
+  });
+  
+</script>
+<script>
+    VirtualSelect.init({
+        ele: '#multipleSelect1',
+        multiple: true,
+        selectAllText: 'Tout selectionner',
+        allOptionsSelectedText: 'Cours d\'appels',
+
+    });
+</script>
+<script>
+    VirtualSelect.init({
+        ele: '#multipleSelect2',
+        multiple: true,
+        selectAllText: 'Tout selectionner',
+        allOptionsSelectedText: 'juridictions Spécialisées',
+
+    });
+</script>
+<script>
+    VirtualSelect.init({
+        ele: '#multipleSelect3',
+        multiple: true,
+        selectAllText: 'Tout selectionner',
+        allOptionsSelectedText: 'Tribunaux de première instance',
+
+    });
+</script>
+<script>
+    VirtualSelect.init({
+        ele: '#multipleSelect4',
+        multiple: true,
+        selectAllText: 'Tout selectionner',
+        allOptionsSelectedText: 'Justice de paix',
+
+    });
+</script>
+
+
+
+
+{% endblock %}

@@ -1,0 +1,239 @@
+{% extends 'role/layout.html' %}
+
+
+{% block title %}Gestion des rôles{% endblock title %}
+
+{% block content %}
+{% load static %}
+
+<section class="content">
+
+    <div class="content__header rounded-0">
+        <div class="content__wrap">
+          <h1 class="text-center my-2"><i class="pli-calendar-4 fs-1"></i> Gestion des rôles</h1>
+          <p class="text-center mb-4">Gerez les rôles d'audiences du tribunal</p>
+          <nav aria-label="breadcrumb" style="font-size: 18px;">
+            <ol class="breadcrumb">
+               <li class="breadcrumb-item"><a href="{% url 'role.index' %}">Accueil</a></li>
+               <li class="breadcrumb-item active" aria-current="page">Rôles d'audiences</li>
+            </ol>
+         </nav>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="p-2">
+
+            <!-- Page title -->
+            <div class="page-header d-print-none mt-4">
+                <div class="row align-items-center mb-2">
+                    <div class="col-4">
+                        <!-- Page pre-title -->
+
+                        <h1 class="" style="color:white">
+                            <span class="text-primary"><i class="fa fa-book"></i> Registre des rôles</span>
+                           
+                        </h1>
+                    </div>
+            
+                    <!-- Page title actions -->
+                    <div class="col-auto ms-auto d-print-none">
+                        <div class="btn-list">
+
+                            <a href="{% url 'role.create' %}" class="btn btn-primary d-none d-sm-inline-block">
+                                <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
+                                <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
+                                    viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                    <line x1="12" y1="5" x2="12" y2="19" />
+                                    <line x1="5" y1="12" x2="19" y2="12" />
+                                </svg>
+                                Nouveau rôle
+                            </a>
+                            <a href="#" class="btn btn-primary d-sm-none btn-icon" data-bs-toggle="modal"
+                                data-bs-target="#modal-report" aria-label="Create new report">
+                                <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
+                                <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
+                                    viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                    <line x1="12" y1="5" x2="12" y2="19" />
+                                    <line x1="5" y1="12" x2="19" y2="12" />
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- <div class="alert alert-success alert-dismissible mt-3" role="alert">
+                <div class="d-flex">
+                    <div>
+                        
+                    </div>
+                    <div>
+                        <h4 class="alert-title">Felicitation !</h4>
+                        <div class="text-muted"> Message</div>
+                    </div>
+                </div>
+                <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+            </div><br /> -->
+
+        </div>
+        <div class="page-body">
+            <div class="p-2">
+                <div class="row row-deck row-cards">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="row">
+                                    <div class="col-md-4">
+
+                                        <h3 class="card-title">
+                                            <!-- Download SVG icon from http://tabler-icons.io/i/menu-2 -->
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
+                                                viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                                                stroke-linecap="round" stroke-linejoin="round">
+                                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                                <line x1="4" y1="6" x2="20" y2="6" />
+                                                <line x1="4" y1="12" x2="20" y2="12" />
+                                                <line x1="4" y1="18" x2="20" y2="18" />
+                                            </svg> Tous les rôles
+                                        </h3>
+
+                                    </div>
+                                    <div class="col-2">
+                                        <span>
+                                            <form method="get" action="">
+                                                <div class="input-group mb-3">
+                                                    <button class="btn btn-primary" type="button">Année</button>
+                                                    <select name="year" class="form-select" onchange="this.form.submit()">
+                                                        <option value="" disabled>Années</option>
+                                                        {% for y in available_years %}
+                                                          <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>
+                                                        {% endfor %}
+                                                      </select>
+                                                 </div>
+                                              </form>
+                                        </span> 
+                                    </div>
+                                    <div class="col-md-4">
+                                        <form method="get" action="">
+                                            <div class="input-group">
+                                                <input type="text" name="q" class="form-control" placeholder="Rechercher un rôle..." value="{{ request.GET.q }}">
+                                                <button class="btn btn-primary" type="submit">Rechercher</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div class="col-md-2 text-end">
+                                        <a href="{% url 'role.export' %}?q={{ request.GET.q }}" class="btn btn-success">
+                                            <i class="fa fa-file-excel"></i> Exporter Excel
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body border-bottom py-3">
+
+                                <div class="table-responsive">
+                                    <table class="table table-striped align-middle">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col" style="width:5px ;">No.</th>
+                                                <th scope="col">Type d'audience</th>
+                                                <th scope="col">Section</th>
+                                                <th scope="col">President(e)</th>
+                                                <th scope="col">Greffier(e)</th>
+                                                <th scope="col">Date d'audience</th>
+                                                <th scope="col">Statut</th>
+                                                <th scope="col"></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+
+                                            {% for role in page_obj %}
+
+                                            <tr>
+                                                <td scope="col">{{forloop.counter}}</td>
+                                                <td scope="col">{{role.typeAudience}}</td>
+                                                <td scope="col">{{role.section}}</td>
+                                                <td scope="col">{{role.president}}</td>
+                                                <td scope="col">{{role.greffier}}</td>
+                                                <td scope="col">{{role.dateEnreg}}</td>
+                                                <td scope="col">
+                                                    {% if role.statut == 'En-attente' %}
+                                                        <span class="badge bg-warning rounded fs-6"><i class="fa fa-clock"></i> En attente</span>
+                                                    {% else %}
+                                                        <span class="badge bg-success rounded fs-6"><i class="fa fa-check"></i> Validé</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <a href="{% url 'role.detail' role.idRole %}" title="detail">
+                                                        Détail
+                                                    <!-- Download SVG icon from http://tabler-icons.io/i/arrow-big-right -->
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24"
+                                                        height="24" viewBox="0 0 24 24" stroke-width="2"
+                                                        stroke="currentColor" fill="none" stroke-linecap="round"
+                                                        stroke-linejoin="round">
+                                                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                                        <path
+                                                            d="M4 9h8v-3.586a1 1 0 0 1 1.707 -.707l6.586 6.586a1 1 0 0 1 0 1.414l-6.586 6.586a1 1 0 0 1 -1.707 -.707v-3.586h-8a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1z" />
+                                                    </svg>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+
+                                        </tbody>
+                                    </table>
+                                    <div class="pagination mt-3 d-flex justify-content-center">
+                                        <nav aria-label="Page navigation">
+                                            <ul class="pagination">
+                                                {% if page_obj.has_previous %}
+                                                    <li class="page-item">
+                                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Précédent</a>
+                                                    </li>
+                                                {% else %}
+                                                    <li class="page-item disabled"><span class="page-link">Précédent</span></li>
+                                                {% endif %}
+                                    
+                                                {% for num in page_obj.paginator.page_range %}
+                                                    {% if page_obj.number == num %}
+                                                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                                        <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                                                    {% endif %}
+                                                {% endfor %}
+                                    
+                                                {% if page_obj.has_next %}
+                                                    <li class="page-item">
+                                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Suivant</a>
+                                                    </li>
+                                                {% else %}
+                                                    <li class="page-item disabled"><span class="page-link">Suivant</span></li>
+                                                {% endif %}
+                                            </ul>
+                                        </nav>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+
+    $(document).ready(function () {
+        $('#nav-role').addClass('bg-primary text-white');
+        $('#txt-role').addClass('text-white');
+    });
+    
+</script>
+
+
+{% endblock %}

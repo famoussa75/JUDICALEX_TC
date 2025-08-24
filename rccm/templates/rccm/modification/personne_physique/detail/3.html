@@ -1,0 +1,187 @@
+<style>
+
+	.parent-qr {
+
+		margin-top: 40px;
+		display: flex;
+		justify-content: flex-end;
+		margin-right: 80px;
+
+	}
+
+	.signature-container {
+		width: 300px;
+		height: auto;
+		padding: 10px;
+		text-align: center;
+		margin-top: -20px;
+		margin-left: 480px;
+	}
+
+	.signature-image {
+		max-width: 100%;
+		height: auto;
+	}
+	
+
+</style>
+
+<div id="p2" class="first_div text-center">
+
+	<div class="container">
+		<div class="row mb-4 mt-4">
+            <div class="col-md-2" >
+
+                <div style="border: 1px solid; height: 70px; width: 90px; margin-left: 15px; padding: 10px;">
+                    <p class="police-15" style="text-align: left;font-weight: bold;" >RCCM <br> 2010 - P2 </p>
+                </div>
+
+            </div>
+            <div class="col-md-8">
+               
+            </div>
+            <div class="col-md-2">
+                <div class="" >
+                    <div id="qrcode3" style=" margin-left: 30px; "></div>
+                </div>
+            </div>
+        </div>
+           
+
+        <!-- MODIFICATION RELATIVES AUX PERSONNES POUVANT ENGAGER LA PERSONNE PHYSIQUE -->
+        <div class="mb-3">
+            <p class="police-15" style="margin-bottom: -13px;position: relative; z-index: 2;"><span style="border: 1px solid;padding: 10px;background-color: whitesmoke;"><b>MODIFICATION RELATIVES AUX PERSONNES POUVANT ENGAGER LA PERSONNE PHYSIQUE</b></span> </p>
+            <div class="d-flex justify-content-center align-items-center" style="position: relative; z-index: 1;">
+                <div style="text-align: left; border: 1px solid; padding: 23px; width: 22em;">
+					<p class="police-15 mb-0 "><span class="police-15" style="margin-left: -45px;margin-right: 30px;">21</span>Les personnes ayant le pouvoir d'engager la personne physique assujettie ont été modifiées comme suit :</p>
+
+					{% for personne in personne_physique_engager %}
+						<div>
+							<p class="police-15 mb-0 ">&nbsp;&nbsp;&nbsp;&nbsp; {{ forloop.counter }}- &nbsp;&nbsp;&nbsp;&nbsp;Nom, prénom : 
+								{% if personne.prenom %} <b>{{ personne.prenom }} {{ personne.nom }}</b> 
+								{% else %}<span>............................................</span>{% endif %}
+							</p>
+
+							<p class="police-15 mb-0 ">
+								<span style="margin-left: 50px;">Date, lieu de naissance :</span> 
+								{% if personne.dateNaissance  %}
+									<b><span id="dateNaissance2">{{ personne.dateNaissance }}</span> à {{ personne.lieuNaissance }}</b> 
+									Nationalité <b>{{ personne.nationnalite }}</b>
+								{% else %}
+									<span>...............................................................</span> Nationalité................................................ 
+								{% endif %}
+							</p>
+
+							<p class="police-15 mb-0 ">
+								<span style="margin-left: 50px;">Domicile personnel :</span> 
+								{% if personne.domicile %}
+									<b>{{ personne.domicile }}</b> 
+								{% else %}
+									....................................................
+								{% endif %}
+								(Préciser):
+								<span class="fake-checkbox {% if personne.modeDomicilier == 'Partante' %}checked{% endif %}"></span>&nbsp;Partante 
+								<span class="fake-checkbox {% if personne.modeDomicilier == 'Nouvelle' %}checked{% endif %}"></span>&nbsp;Nouvelle 
+								<span class="fake-checkbox {% if personne.modeDomicilier == 'En place' %}checked{% endif %}"></span>&nbsp;En place
+							</p>
+
+							<p class="police-15 mb-0 ">
+								<span style="margin-left: 50px;">Préciser l'objet de la modification : </span> 
+								{% if personne.objetModification %}<b>{{ personne.objetModification }}</b>{% else %}...............................................................................................................{% endif %}
+							</p>
+
+							<p class="police-15 mb-0 ">
+								<span style="margin-left: 50px;">Préciser la date de modification : </span> 
+								{% if personne.dateModification2 %}<b id="dateModification_value{{ forloop.counter }}">{{ personne.dateModification2 }}</b>{% else %}...............................................................................................................{% endif %}
+							</p>
+						</div>
+
+					{% empty %}
+
+					<!-- Personne 2 -->
+					<div>
+						<p class="police-15 mb-0 ">&nbsp;&nbsp;&nbsp;&nbsp; 1- &nbsp;&nbsp;&nbsp;&nbsp;Nom, prénom .......... ..................................</p>
+						<p class="police-15 mb-0 "><span style="margin-left: 50px;">Date, lieu de naissance</span> ...............................................................Nationalité................................................</p>
+						<p class="police-15 mb-0 "><span style="margin-left: 50px;">Domicile personnel :</span> ....................................................(Préciser): <span class="fake-checkbox"></span>&nbsp;Partante &nbsp;<span class="fake-checkbox"></span>&nbsp;Nouvelle &nbsp;<span class="fake-checkbox"></span>&nbsp;En place</p>
+						<p class="police-15 mb-0 "><span style="margin-left: 50px;">Préciser l'objet de la modification</span> ...............................................................................................................</p>
+					</div>
+                    
+					
+					{% endfor %}
+					
+                </div>
+            </div>
+        </div>
+
+         <!-- ----------------- -->
+         <div class="mb-3">
+            <div class="d-flex justify-content-center align-items-center" style="position: relative; z-index: 1;">
+                <div style="text-align: left; border: 1px solid; padding: 23px; width: 22em;">
+                    <p class="police-15 mb-0 "><span class="police-15" style="margin-left: -45px;margin-right: 30px;">22</span>LE SOUSSIGNE <span class="police-11">(préciser si mandataire)</span> : <span id="mandataire_value">{% if formalite.mandataire %} {{ formalite.mandataire }} {% else %}...............................{% endif %}</span></p>
+                    <p class="police-15 mb-0 ">Demande à ce que la présente constitue</p>
+					<div class="row">
+						<div class="col-md-8">
+							<p class="police-11 mb-0 "><span class="fake-checkbox checked"></span>&nbsp;UNE DEMANDE DE MODIFICATION DE LA PERSONNE PHYSIQUE ET OU DE SON ETABLISSEMENT</p>
+							<p class="police-11 mb-0 "><span class="fake-checkbox"></span>&nbsp;UNE DEMANDE DE MODIFICATION D'UN ETABLISSEMENT SECONDAIRE OU UNE SUCCURSALE</p>
+						</div>
+						<div class="col-md-4">
+							<div style=" height: 90px; width: 150px; border: 1px solid;"  class="p-2">
+								<p class="police-11 mb-0">Fait à : Conakry</p>
+								<p class="police-11 mb-2" id="dateModification_value2">{{ formalite.dateModification }}</p>
+								<p class="police-11">Signature</p>
+							</div>
+						</div>
+					</div>
+                </div>
+            </div>
+        </div>
+
+         <!-- ---------------- -->
+		<div class="d-flex justify-content-center align-items-center mb-0" style="position: relative; z-index: 1;">
+			<div style="text-align: left; border: 1px solid; padding: 23px; width: 22em;">
+				<p class="police-15 mb-0 " style="font-style:italic;font-weight: bold;"><span class="police-15" style="margin-left: -45px;margin-right: 30px;">23</span>Le greffier ou le responsable de l’organe compétent soussigné a reçu le formulaire sous le numéro d’ordre :.................du registre d’arrivée.
+					La régularité de la demande a été vérifiée en application de l’article 62 de l’Acte uniforme portant sur le droit commercial général par le Greffier ou le responsable de l’organe compétent qui a :
+				</p>
+				<p class="police-15 mb-0 " style="font-style:italic;font-weight: bold;"><span class="police-15" style="margin-left: -45px;margin-right: 30px;">24</span>Modifié le <span id="dateModification_value3">{{ formalite.dateModification }}</span> sous le numéro : <span id="numeroFormalite_value2" style="font-weight: bold;" class="police-18">{{ formalite.numeroFormalite }}</span> et délivré un accusé d’enregistrement, rejeté la demande au(x) motif(s) que : …………………………………………………………….</p>
+				<p class="police-15 mb-0 ">Intercalaire (s) complétant la ou les rubrique(s) n°(s)...............................  OUI NON (si OUI, nombre de pages intercalaires :</p>
+				<p class="police-15 mb-0 ">Fait, à Conakry,  <span id="dateModification_value4">{{ formalite.dateModification }}</span> </p>
+				<p class="police-15 mb-0 ">{{ formalite.chef_greffe }}, Chef du Greffe du Tribunal de Commerce-Conakry </p>
+			</div>
+		</div>
+
+		<!-- ---------------- -->
+		<div class="d-flex justify-content-center align-items-center" style="position: relative; z-index: 1;">
+			<div style="text-align: left; border: 1px solid; padding: 23px; width: 22em;">
+				<p class="police-15 mb-0 ">(En cas de rejet de la demande par le greffier ou le responsable de l’organe compétent) <b>Le demandeur atteste que le présent formulaire y compris</b></p>
+				<p class="police-15 mb-0 "><b>le(s) intercalaire (s) y relatifs</b> (s’il y a lieu) <b>comportant les motifs du rejet de sa demande lui a été remis le </b>........./......../........ (JJ/MM/AAAA)</p>
+				<p class="police-15 mb-0 "><b>et reconnaît que cette remise vaut notification de ce rejet.</b> (Signature du Demandeur)</p>
+				<div class="signature-container" >
+					{% if formalite.chef_greffe.signature and formalite.chef_greffe.signature.image %}
+						
+						{% if formalite.statut == 'SIGNER' %}
+							<img src="{{ formalite.chef_greffe.signature.image.url }}" alt="Signature du Chef de Greffe" class="signature-image">
+						{% else %}
+							<p class="h1 mt-5" style="color: gray;">NON SIGNÉE.</p>
+						{% endif %}
+							
+					{% else %}
+						<p class="h2 mt-5" style="color: gray;">Aucune signature disponible.</p>
+					{% endif %}
+				</div>
+			</div>
+		</div>
+
+	
+		
+		
+	</div>
+
+
+</div>
+
+
+
+
+
+
+

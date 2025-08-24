@@ -1,0 +1,120 @@
+{% extends 'rccm/layout.html' %}
+
+
+{% block title %}Rccms{% endblock title %}
+
+{% block content %}
+{% load static %}
+
+<style>
+   .error-icon {
+    width: 80px;
+    height: 80px;
+    stroke: #e74c3c; /* Couleur rouge pour indiquer une erreur */
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.error-icon__circle {
+    stroke-dasharray: 150;
+    stroke-dashoffset: 150;
+    animation: circle-draw 0.6s ease-in-out forwards;
+}
+
+.error-icon__cross {
+    stroke-dasharray: 50;
+    stroke-dashoffset: 50;
+    animation: cross-draw 0.4s ease-in-out 0.6s forwards;
+}
+
+@keyframes circle-draw {
+    0% {
+        stroke-dashoffset: 150;
+    }
+    100% {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes cross-draw {
+    0% {
+        stroke-dashoffset: 50;
+    }
+    100% {
+        stroke-dashoffset: 0;
+    }
+}
+
+</style>
+
+
+<section id="content" class="content">
+   <div class="content__header content__boxed rounded-0">
+      <div class="content__wrap mb-3">
+         <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+               <li class="breadcrumb-item fs-4"><a href="#" class="nav-toggler" aria-label="Nav Toggler">Menu</a></li>
+               <li class="breadcrumb-item fs-4"><a href="{% url 'rccm.list' %}">RCCMs</a>
+               </li>
+               <li class="breadcrumb-item active fs-4" aria-current="page">Nouveau RCCM</li>
+            </ol>
+         </nav>
+
+      </div>
+
+   </div>
+
+
+   <div class="content__boxed">
+      <div class="content__wrap">
+         <div class="col-md-12 container">
+            <h2 class="mt-5 mb-3 text-center text-danger"><i class="demo-pli-information"></i> Attention</h2>
+            <!-- Form wizard with validation -->
+            <div class="card">
+              
+               <div class="card-body">
+
+                     <!-- Submit state -->
+                     <section data-step="finish" 
+                         class="text-center">
+                         <div class="icon-container mb-5">
+                           <svg class="error-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                               <circle class="error-icon__circle" cx="26" cy="26" r="25" fill="none" />
+                               <path class="error-icon__cross" fill="none" d="M16 16L36 36M36 16L16 36" />
+                           </svg>
+                         </div>
+                                    
+                        <p class="h3">Un RCCM avec ce numéro existe déjà !</p>
+                        <div class="mt-4 d-flex flex-wrap justify-content-center gap-2">
+                            <a href="{% url 'rccm.list' %}" type="button" class="btn btn-primary rounded-pill" ><i class="demo-pli-file"></i> RCCMs</a>
+                            <a href="{% url 'rccm.create' %}" type="button" class="btn btn-secondary rounded-pill"><i class="demo-pli-add"></i> Réessayer</a>
+                        </div>
+                     </section>
+                     <!-- END : Submit state -->
+
+
+               </div>
+            </div>
+            <!-- END : Form wizard with validation -->
+   
+         </div>
+      </div>
+   </div>
+
+
+   {% include 'rccm/tools/footer.html' %}
+
+</section>
+
+
+<script>
+   $(document).ready(function() {
+       $('#nav-rccm').addClass('bg-primary text-white');
+       $('#txt-rccm').addClass('text-white');
+   });
+</script>
+
+
+
+{% endblock %}

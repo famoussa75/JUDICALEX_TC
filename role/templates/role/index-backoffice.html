@@ -1,0 +1,572 @@
+{% extends 'role/layout.html' %}
+
+{% block title %}Accueil{% endblock title %}
+
+{% block content %}
+{% load static %}
+
+<style>
+  .roles {
+    position: relative;
+    background-image: url('/static/_base/assets_role/statics/bg-fullscreen.png'); /* ou tribunal.png */
+    background-size: cover;
+    background-position: center;
+    height: auto; /* ou ce que tu veux */
+    overflow: hidden;
+  }
+  
+  .roles::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* noir à 40% d’opacité */
+    z-index: 1;
+  }
+  
+  .roles > * {
+    position: relative;
+    z-index: 2;
+  }
+</style>
+<section id="apps" class="content">
+    <div class="content__header rounded-0">
+        <div class="content__wrap">
+          <h1 class="text-center my-2"><i class="fa fa-home"></i> Accueil</h1>
+          <p class="text-center mb-4">Gerez les rôles d'audiences du tribunal</p>
+        </div>
+    </div>
+    <div class="container-fluid mt-4">
+    
+        <div class="page-body">
+
+            <div class="container-fluid p-2">
+                <div class="row">
+                    <div class="col-md-10">
+                        <h2 class="mb-3"><i class="fa fa-dashboard"></i> TABLEAU DE BORD</h2>
+                    </div>
+                    <div class="col-md-2">
+                        <form method="get" action="">
+                            <select name="year" class="form-select" onchange="this.form.submit()">
+                            <option value="" disabled>Années</option>
+                            {% for y in available_years %}
+                                <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>
+                            {% endfor %}
+                            </select>
+                        </form>
+                    </div>
+                </div>
+                <div class="row row-cards mb-4">
+                    <div class="col-md-6 col-xl-3">
+                        <div class="card card-sm">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-auto">
+                                        <h2><i class="fas fa-balance-scale mb-3 text-success fs-1"></i></h2>
+                                    </div>
+                                    <div class="col">
+                                        <div class="font-weight-medium">
+                                            <h3><span class="badge bg-success">{{ T_roles }}</span> Rôle(s)</h3>
+                                        </div>
+                                        <div class="text-muted">
+                                            {{ T_roles_today }} enregistré(s) aujourd'hui
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-xl-3">
+                        <div class="card card-sm">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-auto">
+                                        <h2><i class="fas fa-suitcase fs-1 mb-3 text-info"></i></h2> 
+                                    </div>
+                                    <div class="col">
+                                        <div class="font-weight-medium">
+                                            <h3><span class="badge bg-info"> {{ T_affaires }}</span> Affaire(s)</h3>
+                                        </div>
+                                        <div class="text-muted">
+                                            {{ T_affaires_today }} enregistrée(s) aujourd'hui
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-xl-3">
+                        <div class="card card-sm">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-auto">
+                                        <h2><i class="fas fa-file-text fs-1 mb-3 text-warning"></i></h2>
+                                    </div>
+                                    <div class="col">
+                                        <div class="font-weight-medium">
+                                            <h3><span class="badge bg-warning"> {{ T_decisions }}</span>  Décision(s)</h3>
+                                        </div>
+                                        <div class="text-muted">
+                                            {{ T_decisions_today }} enregistrée(s) aujourd'hui
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-xl-3">
+                        <div class="card card-sm">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-auto">
+                                        <h2><i class="fas fa-users fs-1 mb-3 text-primary"></i></h2>
+                                    </div>
+                                    <div class="col">
+                                        <div class="font-weight-medium">
+                                            <h3><span class="badge bg-primary"> {{ visiteurs_users }}</span> Visiteurs</h3>
+                                        </div>
+                                        <div class="text-muted">
+                                            {{ tribunal_users }} Utilisateurs du tribunal
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-2 mb-2">
+                    <div class="col-lg-8 col-xl-8">
+                        <div class="card">
+                            <div class="card-body">
+                                <div id="chart-completion-tasks-3"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <h2>
+                            <!-- Download SVG icon from http://tabler-icons.io/i/chart-pie -->
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M10 3.2a9 9 0 1 0 10.8 10.8a1 1 0 0 0 -1 -1h-6.8a2 2 0 0 1 -2 -2v-7a0.9 .9 0 0 0 -1 -.8" /><path d="M15 3.5a9 9 0 0 1 5.5 5.5h-4.5a1 1 0 0 1 -1 -1v-4.5" /></svg>
+                            Statistique des décisions
+                        </h2>
+                        <div class="card">
+                            <div class="card-body">
+                            <div id="chart-demo-pie"></div>
+                            </div>
+                        </div>
+                    </div>
+                
+
+                </div>
+                <div class="row mb-4">
+                    <div class="col-lg-6">
+                        <div class="card">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                              
+                                <div class="col-md-10">
+                                    <h3 class="card-title mb-1">
+                                    <a href="project-overview.html" class="text-reset">Rôles au Fond</a>
+                                    </h3>
+                                    <div class="text-muted">
+                                    Total : {{ T_roles_fond }}
+                                    </div>
+                                    <div class="mt-3">
+                                    <div class="row g-2 align-items-center">
+                                        <div class="col-auto">
+                                        {{ fond_pourcentage }}%
+                                        </div>
+                                        <div class="col">
+                                        <div class="progress progress-sm">
+                                            <div class="progress-bar" style="width: {{ fond_pourcentage }}%" role="progressbar" aria-valuenow="{{ fond_pourcentage }}" aria-valuemin="0" aria-valuemax="100">
+                                            </div>
+                                        </div>
+                                        </div>
+                                    </div>
+                                    </div>
+                                </div>
+                            
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="card">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                           
+                            <div class="col">
+                                <h3 class="card-title mb-1">
+                                <a href="project-overview.html" class="text-reset">Rôles au Référé</a>
+                                </h3>
+                                <div class="text-muted">
+                                Total : {{ T_roles_refere }}
+                                </div>
+                                <div class="mt-3">
+                                <div class="row g-2 align-items-center">
+                                    <div class="col-auto">
+                                    {{ refere_pourcentage }}%
+                                    </div>
+                                    <div class="col">
+                                    <div class="progress progress-sm">
+                                        <div class="progress-bar" style="width: {{ refere_pourcentage }}%" role="progressbar" aria-valuenow="{{ refere_pourcentage }}" aria-valuemin="0" aria-valuemax="100">
+                                        </div>
+                                    </div>
+                                    </div>
+                                </div>
+                                </div>
+                            </div>
+                            
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row row-cards">
+                    <div class="col-md-12 col-lg-12">
+                        <h2>
+                            <!-- Download SVG icon from http://tabler-icons.io/i/layout-grid -->
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><rect x="4" y="4" width="6" height="6" rx="1" /><rect x="14" y="4" width="6" height="6" rx="1" /><rect x="4" y="14" width="6" height="6" rx="1" /><rect x="14" y="14" width="6" height="6" rx="1" /></svg>
+                            Données Globales des Sections
+                        </h2>
+                        <div class="row row-cards mb-4">
+                            <div class="col-4">
+                                <div class="card card-sm">
+                                    <div class="card-body">
+                                        <div class="row align-items-center">
+                                            <div class="col-auto">
+                                                <span class="avatar">
+                                                <!-- Download SVG icon from http://tabler-icons.io/i/box-model -->
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M8 8h8v8h-8z" /><rect x="4" y="4" width="16" height="16" rx="2" /><path d="M16 16l3.3 3.3" /><path d="M16 8l3.3 -3.3" /><path d="M8 8l-3.3 -3.3" /><path d="M8 16l-3.3 3.3" /></svg>
+                                                </span>
+                                            </div>
+                                            <div class="col">
+                                                <div class="font-weight-medium">
+                                                    Section présidentielle
+                                                </div>
+                                                <div class="text-muted">
+                                                {{ president_sp.role.president }}
+                                                </div>
+                                            </div>
+                                            <div class="col-auto">
+                                                {{ T_affaires_sp }} Affaires
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-4">
+                                <div class="card card-sm">
+                                    <div class="card-body">
+                                        <div class="row align-items-center">
+                                            <div class="col-auto">
+                                                <span class="avatar">
+                                                    <!-- Download SVG icon from http://tabler-icons.io/i/box-multiple-1 -->
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><rect x="7" y="3" width="14" height="14" rx="2" /><path d="M17 17v2a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-10a2 2 0 0 1 2 -2h2" /><path d="M14 14v-8l-2 2" /></svg>
+                                                </span>
+                                            </div>
+                                            <div class="col">
+                                                <div class="font-weight-medium">
+                                                    1ère Section
+                                                </div>
+                                                <div class="text-muted">
+                                                {{ president_s1.role.president }}
+                                                </div>
+                                            </div>
+                                            <div class="col-auto">
+                                                {{ T_affaires_s1 }} Affaires
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-4">
+                                <div class="card card-sm">
+                                    <div class="card-body">
+                                        <div class="row align-items-center">
+                                            <div class="col-auto">
+                                                <span class="avatar">
+                                                <!-- Download SVG icon from http://tabler-icons.io/i/box-multiple-2 -->
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><rect x="7" y="3" width="14" height="14" rx="2" /><path d="M17 17v2a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-10a2 2 0 0 1 2 -2h2" /><path d="M12 8a2 2 0 1 1 4 0c0 .591 -.417 1.318 -.816 1.858l-3.184 4.143l4 0" /></svg>
+                                                </span>
+                                            </div>
+                                            <div class="col">
+                                                <div class="font-weight-medium">
+                                                2ème Section
+                                                </div>
+                                                <div class="text-muted">
+                                                {{ president_s2.role.president }}
+                                                </div>
+                                            </div>
+                                            <div class="col-auto">
+                                                {{ T_affaires_s2 }} Affaires
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-4">
+                            <div class="col-4">
+                                <div class="card card-sm">
+                                    <div class="card-body">
+                                        <div class="row align-items-center">
+                                            <div class="col-auto">
+                                                <span class="avatar">
+                                                <!-- Download SVG icon from http://tabler-icons.io/i/box-multiple-3 -->
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><rect x="7" y="3" width="14" height="14" rx="2" /><path d="M17 17v2a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-10a2 2 0 0 1 2 -2h2" /><path d="M14 10a2 2 0 1 0 -2 -2" /><path d="M12 12a2 2 0 1 0 2 -2" /></svg>
+                                                </span>
+                                            </div>
+                                            <div class="col">
+                                                <div class="font-weight-medium">
+                                                3ème Section
+                                                </div>
+                                                <div class="text-muted">
+                                                {{ president_s3.role.president }}
+                                                </div>
+                                            </div>
+                                            <div class="col-auto">
+                                                {{ T_affaires_s3 }} Affaires
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-4">
+                                <div class="card card-sm">
+                                    <div class="card-body">
+                                        <div class="row align-items-center">
+                                            <div class="col-auto">
+                                                <span class="avatar">
+                                                <!-- Download SVG icon from http://tabler-icons.io/i/box-multiple-4 -->
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><rect x="7" y="3" width="14" height="14" rx="2" /><path d="M17 17v2a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-10a2 2 0 0 1 2 -2h2" /><path d="M15 14v-8l-4 6h5" /></svg>
+                                                </span>
+                                            </div>
+                                            <div class="col">
+                                                <div class="font-weight-medium">
+                                                4ème Section
+                                                </div>
+                                                <div class="text-muted">
+                                                {{ president_s4.role.president }}
+                                                </div>
+                                            </div>
+                                            <div class="col-auto">
+                                                {{ T_affaires_s4 }} Affaires
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-4">
+                                <div class="card card-sm">
+                                    <div class="card-body">
+                                        <div class="row align-items-center">
+                                            <div class="col-auto">
+                                                <span class="avatar">
+                                                <!-- Download SVG icon from http://tabler-icons.io/i/box-multiple-5 -->
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><rect x="7" y="3" width="14" height="14" rx="2" /><path d="M12 14h2a2 2 0 1 0 0 -4h-2v-4h4" /><path d="M17 17v2a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-10a2 2 0 0 1 2 -2h2" /></svg>
+                                                </span>
+                                            </div>
+                                            <div class="col">
+                                                <div class="font-weight-medium">
+                                                5ème Section
+                                                </div>
+                                                <div class="text-muted">
+                                                {{ president_s5.role.president }}
+                                                </div>
+                                            </div>
+                                            <div class="col-auto">
+                                                {{ T_affaires_s5 }} Affaires
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Fullscreen TV -->
+                    {% include 'role/fullscreen.html' %}
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+
+$(document).ready(function () {
+    $('#nav-accueil').addClass('bg-primary text-white');
+    $('#txt-accueil').addClass('text-white');
+});
+
+</script>
+
+
+<script src="{% static 'start/assets/dist/js/virtual-select.min.js'%}"></script>
+<script>
+    VirtualSelect.init({
+        ele: '#multipleSelect1',
+        multiple: true,
+        selectAllText: 'Tout selectionner',
+        allOptionsSelectedText: 'Cours d\'appels',
+
+    });
+</script>
+<script>
+    VirtualSelect.init({
+        ele: '#multipleSelect2',
+        multiple: true,
+        selectAllText: 'Tout selectionner',
+        allOptionsSelectedText: 'juridictions Spécialisées',
+
+    });
+</script>
+<script>
+    VirtualSelect.init({
+        ele: '#multipleSelect3',
+        multiple: true,
+        selectAllText: 'Tout selectionner',
+        allOptionsSelectedText: 'Tribunaux de première instance',
+
+    });
+</script>
+<script>
+    VirtualSelect.init({
+        ele: '#multipleSelect4',
+        multiple: true,
+        selectAllText: 'Tout selectionner',
+        allOptionsSelectedText: 'Justice de paix',
+
+    });
+</script>
+
+<script>
+
+    const chartLabels = {{ chart_labels|safe }};
+    const chartData = {{ chart_data|safe }};
+    // @formatter:off
+    document.addEventListener("DOMContentLoaded", function () {
+        window.ApexCharts && (new ApexCharts(document.getElementById('chart-completion-tasks-3'), {
+            chart: {
+                type: "area",
+                fontFamily: 'inherit',
+                height: 240,
+                parentHeightOffset: 0,
+                toolbar: {
+                    show: false,
+                },
+                animations: {
+                    enabled: false
+                },
+            },
+            dataLabels: {
+                enabled: false,
+            },
+            fill: {
+                opacity: .16,
+                type: 'solid'
+            },
+            stroke: {
+                width: 2,
+                lineCap: "round",
+                curve: "smooth",
+            },
+            series: [{
+                name: "Affaires Enregistrées",
+                data: chartData
+            }],
+            grid: {
+                padding: {
+                    top: -20,
+                    right: 0,
+                    left: -4,
+                    bottom: -4
+                },
+                strokeDashArray: 4,
+            },
+            xaxis: {
+                labels: {
+                    padding: 0,
+                },
+                tooltip: {
+                    enabled: false
+                },
+                axisBorder: {
+                    show: false,
+                },
+                type: 'datetime',
+            },
+            yaxis: {
+                labels: {
+                    padding: 4
+                },
+            },
+            labels: chartLabels ,
+            colors: ["#206bc4"],
+            legend: {
+                show: false,
+            },
+        })).render();
+    });
+    // @formatter:on
+</script>
+
+
+<script>
+
+  const decisionLabels = {{ decision_labels|safe }};
+  const decisionData = {{ decision_counts|safe }};
+    // @formatter:off
+    document.addEventListener("DOMContentLoaded", function () {
+        window.ApexCharts && (new ApexCharts(document.getElementById('chart-demo-pie'), {
+            chart: {
+                type: "donut",
+                fontFamily: 'inherit',
+                height: 240,
+                sparkline: {
+                    enabled: true
+                },
+                animations: {
+                    enabled: false
+                },
+            },
+            fill: {
+                opacity: 1,
+            },
+            series: decisionData,
+            labels: decisionLabels,
+            grid: {
+                strokeDashArray: 4,
+            },
+            colors: ["#0e7490", "#14b8a6", "#22c55e", "#a3e635"],
+
+            legend: {
+                show: true,
+                position: 'bottom',
+                offsetY: 12,
+                markers: {
+                    width: 10,
+                    height: 10,
+                    radius: 100,
+                },
+                itemMargin: {
+                    horizontal: 8,
+                    vertical: 8
+                },
+            },
+            tooltip: {
+                fillSeriesColor: false
+            },
+        })).render();
+    });
+    // @formatter:on
+  </script>
+
+{% endblock %}

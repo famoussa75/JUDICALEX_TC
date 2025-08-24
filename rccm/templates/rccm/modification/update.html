@@ -1,0 +1,967 @@
+{% extends 'rccm/layout.html' %}
+
+
+{% block title %}Modification{% endblock title %}
+
+{% block content %}
+{% load static %}
+
+<style>
+   .label-required::after {
+      content: " *";
+      color: red;
+      font-weight: bold;
+   }
+</style>
+
+<section id="content" class="content">
+   <div class="content__header content__boxed rounded-0">
+      <div class="content__wrap mb-3">
+         <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+               <li class="breadcrumb-item fs-4"><a href="#" class="nav-toggler" aria-label="Nav Toggler">Menu</a></li>
+               <li class="breadcrumb-item fs-4"><a href="{% url 'rccm.modification' %}">Déclaration modificative</a>
+               </li>
+               <li class="breadcrumb-item active fs-4" aria-current="page">Formalité</li>
+            </ol>
+         </nav>
+
+      </div>
+
+   </div>
+
+
+   <div class="content__boxed">
+      <div class="content__wrap">
+         <div class="col-md-12">
+            <h2 class="mt-5 mb-3 text-center bg-warning cl-primary p-2"><i class="demo-pli-pen-5"></i> Modification de la formalité</h2>
+            {% include 'rccm/tools/form-wizard.html' %}
+
+            <!-- Form wizard with validation -->
+            <div class="card">
+               <div class="card-header">
+
+
+                  <!-- Step progress -->
+                  <ul id="_dm-validWizardSteps" class="step-progress my-4">
+                     <li class="{% if section  %} {% else %} active {% endif %}" data-step="rccm">
+                        <span class="step-label">Rccm</span>
+                     </li>
+                     <li data-step="personne_physique">
+                        <span class="step-label">Renseignements relatifs <br> à la personne physique</span>
+                     </li>
+                     <li data-step="etablissement">
+                        <span class="step-label">Modifications relatives <br> à l'établissement</span>
+                     </li>
+                     <li data-step="personne_engager"
+                        title="Modifications relatives aux personnes pouvant engager la personne physique">
+                        <span class="step-label">Modifications relatives aux <br> personnes pouvant engager...</span>
+                     </li>
+                    
+                  </ul>
+                  <!-- END : Step progress -->
+
+
+               </div>
+               <div class="card-body">
+
+                  <!-- Form sections -->
+                  <form id="_dm-validWizardForm" method="post" action="{% url 'formalite.update' formalite_id %}" class="p-xl-3" >
+                     {% csrf_token %}
+
+                     <div id="feedbackMessage"></div>
+
+                     <!-- rccm section -->
+                     <section data-step="rccm">
+                        <legend class="w-auto fs-3">RCCM</legend>
+                        <div class="row g-3">
+                           <!-- Section Rccm -->
+                           <fieldset class="border p-3 mb-4 row">
+                              <div class="col-md-4 mb-3">
+                                 <label for="" class="form-label label-required">Type Rccm</label>
+                                 {{ formaliteForm.typeRccm }}
+                              </div>
+                              <div class="col-md-4 mb-3">
+                                 <label for="" class="form-label label-required">Numéro RCCM</label>
+                                 {{ rccmForm.numeroRccm }}
+                              </div>
+                              <div class="col-md-4 mb-3">
+                                 <label for="" class="form-label label-required">Date de création</label>
+                                 {{ rccmForm.dateEnreg }}
+                              </div>
+                              <div class="col-md-6 mb-3">
+                                 <label for="" class="form-label label-required">Dénomination</label>
+                                 {{ formaliteForm.denomination }}
+                              </div>
+                              <div class="col-md-6 mb-3">
+                                 <label for="" class="form-label label-required">Nom commercial</label>
+                                 {{ formaliteForm.nomCommercial }}
+                              </div>
+                              <div class="col-md-6 mb-3">
+                                 <label for="" class="form-label">Sigle</label>
+                                 {{ formaliteForm.sigle }}
+                              </div>
+                              <div class="col-md-6 mb-3">
+                                 <label for="" class="form-label label-required">Siège Social</label>
+                                 {{ formaliteForm.siegeSocial }}
+                              </div>
+                           </fieldset>
+
+                           <legend class="w-auto fs-3">FORMALITE</legend>
+                           <fieldset class="border p-3 mb-4 row">
+                              <div class="col-md-4 mb-3">
+                                 <label for="" class="form-label label-required">Type de formalité</label>
+                                 {{ formaliteForm.typeFormalite }}
+                              </div>
+                              <div class="col-md-4 mb-3">
+                                 <label for="" class="form-label label-required">Déclaration modificative</label>
+                                 {{ formaliteForm.declarationModificative }}
+                              </div>
+                              <div class="col-md-4 mb-3">
+                                 <label for="" class="form-label label-required">Option</label><br>
+                                 {{ formaliteForm.optionDeclaration }}
+                              </div>
+                              <div class="col-md-6 mb-3">
+                                 <label for="" class="form-label label-required">Numéro de formalité</label>
+                                 {{ formaliteForm.numeroFormalite }}
+                              </div>
+                              <div class="col-md-6 mb-3">
+                                 <label for="" class="form-label label-required">Date de modification</label>
+                                 {{ formaliteForm.dateModification }}
+                              </div>
+                           </fieldset>
+
+                        </div>
+
+
+                        <div class="pt-3 d-flex justify-content-end gap-2">
+                           <button data-next class="btn btn-primary">Suivant</button>
+                        </div>
+                     </section>
+
+                     <!-- personne_physique section -->
+                     <section data-step="personne_physique">
+
+                        <legend class="w-auto fs-3">RENSEIGNEMENTS RELATIFS A LA PERSONNE PHYSIQUE</legend>
+
+                        <div class="row g-3">
+                           <fieldset class="border p-3 mb-4 row">
+                              <div class="col-md-12 mb-3" id="champsRectifierDiv" hidden>
+                                 <label for="" class="form-label label-required">Saisissez le nom des champs à rectifier</label>
+                                 {{ personnePhysiqueForm.champsRectifier }}
+                              </div>
+                              <div class="col-md-3 mb-3">
+                                 <label for="" class="form-label label-required">Titre</label>
+                                 {{ personnePhysiqueForm.titreCivil }}
+                              </div>
+                              <div class="col-md-5 mb-3">
+                                 <label for="" class="form-label label-required">Prenom</label>
+                                 {{ personnePhysiqueForm.prenom }}
+                              </div>
+                              <div class="col-md-4 mb-3">
+                                 <label for="" class="form-label label-required">Nom</label>
+                                 {{ personnePhysiqueForm.nom }}
+                              </div>
+                              <div class="col-md-4 mb-3">
+                                 <label for="" class="form-label label-required">Situation matrimoniale</label>
+                                 {{ personnePhysiqueForm.situationMatrimoniale }}
+                              </div>
+                              <div class="col-md-4 mb-3">
+                                 <label for="" class="form-label label-required">Date de naissance</label>
+                                 {{ personnePhysiqueForm.dateNaissance }}
+                              </div>
+                              <div class="col-md-4 mb-3">
+                                 <label for="" class="form-label label-required">Lieu de naissance</label>
+                                 {{ personnePhysiqueForm.lieuNaissance }}
+                              </div>
+                              <div class="col-md-4 mb-3">
+                                 <label for="" class="form-label label-required">Nationnalité</label>
+                                 {{ personnePhysiqueForm.nationnalite }}
+                              </div>
+                              <div class="col-md-4 mb-3">
+                                 <label for="" class="form-label">Adresse postale</label>
+                                 {{ personnePhysiqueForm.adressePostale }}
+                              </div>
+                              <div class="col-md-4 mb-3">
+                                 <label for="" class="form-label label-required">Telephone</label>
+                                 {{ personnePhysiqueForm.telephone }}
+                              </div>
+                              <div class="col-md-4 mb-3">
+                                 <label for="" class="form-label label-required">Domicile personnel</label>
+                                 {{ personnePhysiqueForm.domicile }}
+                              </div>
+                              <div class="col-md-4 mb-3">
+                                 <label for="" class="form-label label-required">Ville</label>
+                                 {{ personnePhysiqueForm.ville }}
+                              </div>
+                              <div class="col-md-4 mb-3">
+                                 <label for="" class="form-label label-required">Quartier</label>
+                                 {{ personnePhysiqueForm.quartier }}
+                              </div>
+                              <div class="col-md-6 mb-3">
+                                 <label for="" class="form-label">Autres precisions</label>
+                                 {{ personnePhysiqueForm.autrePrecision }}
+                              </div>
+                              <div class="col-md-6 mb-3">
+                                 <label for="" class="form-label">Coordonnées électronique</label>
+                                 {{ personnePhysiqueForm.coordonneesElectro }}
+                              </div>
+                           </fieldset>
+                        </div>
+
+                        <legend class="w-auto fs-3">MENDATAIRE</legend>
+
+                        <div class="row g-3">
+                           <fieldset class="border p-3 mb-4 row">
+                              <div class="col-md-6 mb-3">
+                                 <label for="" class="form-label">Mandataire (préciser si mandataire)</label>
+                                 {{ formaliteForm.mandataire }}
+                              </div>
+                           </fieldset>
+                        </div>
+
+                        <div class="pt-3 d-flex justify-content-end gap-2">
+                           <button data-prev class="btn btn-light">Précédent</button>
+                           <button data-next class="btn btn-primary">Suivant</button>
+                        </div>
+                     </section>
+
+                     <!-- etablissement section -->
+                     <section data-step="etablissement">
+                        <legend class="w-auto fs-3">MODIFICATIONS RELATIVES A L'ETABLISSEMENT</legend>
+
+                        <div class="row g-3">
+                           <fieldset class="border p-3 mb-4 row">
+                             
+                              <div class="col-md-4 mb-3">
+                                 <label for="" class="form-label">Ancienne Dénomination</label>
+                                 {{ formaliteForm.ancienDenomination }}
+                              </div>
+                              <div class="col-md-4 mb-3">
+                                 <label for="" class="form-label">Nouvelle Dénomination (Changer si nouveau)</label>
+                                 {{ formaliteForm.denomination }}
+                              </div>
+                              <div class="col-md-4 mb-3">
+                                 <label for="" class="form-label">Nom commercial (Si nouveau)</label>
+                                 {{ formaliteForm.nomCommercial }}
+                              </div>
+                              <div class="col-md-2 mb-3">
+                                 <label for="" class="form-label">Sigle (Si nouveau)</label>
+                                 {{ formaliteForm.sigle }}
+                              </div>
+                              <div class="col-md-5 mb-3">
+                                 <label for="" class="form-label label-required">Activité(s)</label>
+                                 {{ etablissementForm.activites }}
+                              </div>
+                              <div class="col-md-5 mb-3">
+                                 <label for="" class="form-label">Activité(s) supprimée(s)</label>
+                                 {{ etablissementForm.activitesSupprimer }}
+                                 <datalist id="activites-list">
+                                    <!-- Les options seront ajoutées dynamiquement en JS -->
+                                  </datalist>
+                              </div>
+                              <div class="col-md-6 mb-3">
+                                 <label for="" class="form-label">Activité(s) ajoutée(s)</label>
+                                 {{ etablissementForm.activitesAjouter }}
+                              </div>
+                            
+                              <div class="col-md-6 mb-3">
+                                 <label for="" class="form-label">Activité(s) actualisée(s)</label>
+                                 {{ etablissementForm.activitesActualiser }}
+                              </div>
+                              <div class="col-md-4 mb-3">
+                                 <label for="" class="form-label">Adresse de l'établissement</label>
+                                 {{ etablissementForm.adresseEtablissement }}
+                              </div>
+                              <!-- <div class="col-md-4 mb-3">
+                                 <label for="" class="form-label">Ancienne adresse</label>
+                                 {{ etablissementForm.ancienneAdresse }}
+                              </div> -->
+                              <div class="col-md-4 mb-3">
+                                 <label for="" class="form-label">Nouvelle adresse</label>
+                                 {{ etablissementForm.nouvelleAdresse }}
+                              </div>
+                             
+                           </fieldset>
+                        </div>
+
+                        <div class="pt-3 d-flex justify-content-end gap-2">
+                           <button data-prev class="btn btn-light">Précédent</button>
+                           <button data-next class="btn btn-primary">Suivant</button>
+                        </div>
+                     </section>
+
+
+                     <!-- etablissement_secondaire section -->
+                     <section data-step="personne_engager">
+                        <legend class="w-auto fs-3">MODIFICATIONS RELATIVES AUX PERSONNES POUVANT ENGAGER LA PERSONNE PHYSIQUE</legend>
+
+                        <div id="formset-container">
+                           {{ personne_engager_formset.management_form }}
+                         
+                           {% for form in personne_engager_formset %}
+                              {{ form.id }} {# Champ caché obligatoire #}
+                             <fieldset class="border p-3 mb-4 row formset-item">
+                               <div class="col-md-12 mb-3">
+                                 <label class="form-label">Statut</label>
+                                 {{ form.statut }}
+                               </div>
+                               <div class="col-md-6 mb-3">
+                                 <label class="form-label">Prénom</label>
+                                 {{ form.prenom }}
+                               </div>
+                               <div class="col-md-6 mb-3">
+                                 <label class="form-label">Nom</label>
+                                 {{ form.nom }}
+                               </div>
+                               <div class="col-md-6 mb-3">
+                                 <label class="form-label">Date de naissance</label>
+                                 {{ form.dateNaissance }}
+                               </div>
+                               <div class="col-md-6 mb-3">
+                                 <label class="form-label">Lieu de naissance</label>
+                                 {{ form.lieuNaissance }}
+                               </div>
+                               <div class="col-md-4 mb-3">
+                                 <label class="form-label">Nationalité</label>
+                                 {{ form.nationnalite }}
+                               </div>
+                               <div class="col-md-4 mb-3">
+                                 <label class="form-label">Domicile personnel</label>
+                                 {{ form.domicile }}
+                               </div>
+                               <div class="col-md-4 mb-3">
+                                 <label class="form-label">Précision</label>
+                                 {{ form.modeDomicilier }}
+                               </div>
+                               <div class="col-md-6 mb-3">
+                                 <label class="form-label">Objet modification</label>
+                                 {{ form.objetModification }}
+                               </div>
+                               <div class="col-md-6 mb-3">
+                                 <label class="form-label">Date modification</label>
+                                 {{ form.dateModification2 }}
+                               </div>
+                               <div class="col-md-12 text-end">
+                                 <button type="button" class="btn btn-danger btn-sm remove-form">Supprimer</button>
+                               </div>
+                             </fieldset>
+                           {% endfor %}
+                         </div>
+                         
+                         <button type="button" class="btn btn-primary my-3" id="add-form">+ Ajouter une personne</button>
+
+                         <div id="empty-form" class="d-none">
+                           <fieldset class="border p-3 mb-4 row formset-item">
+                             <!-- les champs seront injectés par JS -->
+                           </fieldset>
+                         </div>
+                         
+                         
+
+                        <div class="pt-3 d-flex justify-content-end gap-2">
+                           <div id="btnAction">
+                              <button data-prev class="btn btn-light">Précédent</button>
+                              <button class="btn btn-success" type="submit" id="submitButton">Enregistrer</button>
+                          </div>
+                           <button class="btn btn-info"  data-next  id="nextDownload" hidden>Suivant</button>
+                        </div>
+                     </section>
+
+                    
+
+                  </form>
+                  <!-- END : Form sections -->
+
+
+               </div>
+            </div>
+            <!-- END : Form wizard with validation -->
+
+
+         </div>
+      </div>
+   </div>
+
+
+   {% include 'rccm/tools/footer.html' %}
+
+</section>
+
+<!-- Inclure Select2 -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<!-- Suggestion des activites dans le champ activites supprimer -->
+<script>
+   document.addEventListener("DOMContentLoaded", function () {
+
+      $('#nav-modification').addClass('bg-primary text-white');
+      $('#txt-modification').addClass('text-white');
+
+     const activitesField = document.getElementById("activites");
+
+     const activitesSupprimerField = document.getElementById("activitesSupprimer");
+     activitesSupprimerField.setAttribute("list", "activites-list");
+ 
+     const datalist = document.getElementById("activites-list");
+ 
+     function updateDatalist() {
+       // Nettoyer la datalist
+       datalist.innerHTML = "";
+ 
+       // Séparer les activités (supposées séparées par des virgules)
+       const activites = activitesField.value.split(",").map(a => a.trim()).filter(a => a);
+ 
+       // Ajouter les options
+       activites.forEach(activite => {
+         const option = document.createElement("option");
+         option.value = activite;
+         datalist.appendChild(option);
+       });
+     }
+ 
+     // Mettre à jour la datalist au chargement + quand le champ activites change
+     updateDatalist();
+     activitesField.addEventListener("input", updateDatalist);
+   });
+ </script>
+
+
+<!-- Activite ajouter -->
+<script>
+   document.addEventListener("DOMContentLoaded", function () {
+     const activitesField = document.getElementById("activites");
+     const activitesAjouterField = document.getElementById("activitesAjouter");
+     const activitesActualiserField = document.getElementById("activitesActualiser");
+ 
+     function updateActualiser() {
+       const base = activitesField.value.trim();
+       const ajout = activitesAjouterField.value.trim();
+       let resultat = base;
+       if (base && ajout) {
+         resultat = base + ", " + ajout;
+       } else if (ajout) {
+         resultat = ajout;
+       }
+       activitesActualiserField.value = resultat;
+     }
+ 
+     activitesField.addEventListener("input", updateActualiser);
+     activitesAjouterField.addEventListener("input", updateActualiser);
+ 
+     // Initialisation au chargement
+    // updateActualiser();
+   });
+ </script>
+
+<script>
+   document.addEventListener("DOMContentLoaded", function () {
+     const activitesField = document.getElementById("activites");
+     const activitesSupprimerField = document.getElementById("activitesSupprimer");
+     const activitesAjouterField = document.getElementById("activitesAjouter");
+     const activitesActualiserField = document.getElementById("activitesActualiser");
+ 
+     function updateActualiser() {
+       // Transformer une chaîne en liste propre (trim + filtre)
+       const toList = str =>
+         str.split(",").map(s => s.trim()).filter(s => s.length > 0);
+ 
+       // Récupérer les listes
+       const activites = toList(activitesField.value);
+       const aSupprimer = toList(activitesSupprimerField.value);
+       const aAjouter = toList(activitesAjouterField.value);
+ 
+       // Supprimer les éléments
+       let resultat = activites.filter(act => !aSupprimer.includes(act));
+ 
+       // Ajouter les nouveaux (éviter les doublons)
+       aAjouter.forEach(act => {
+         if (!resultat.includes(act)) {
+           resultat.push(act);
+         }
+       });
+ 
+       // Mettre à jour le champ "activitesActualiser"
+       activitesActualiserField.value = resultat.join(", ");
+     }
+ 
+     // Lier les événements
+     activitesField.addEventListener("input", updateActualiser);
+     activitesSupprimerField.addEventListener("input", updateActualiser);
+     activitesAjouterField.addEventListener("input", updateActualiser);
+ 
+     // Initialiser au chargement
+     //updateActualiser();
+   });
+ </script>
+ 
+ 
+
+<script>
+  $(document).ready(function() {
+    $('#declarationModificative').select2({
+      placeholder: "Choisir des déclarations"
+    });
+    $('#optionDeclaration').select2({
+      placeholder: "Choisir les options"
+    });
+  });
+</script>
+
+<script>
+   $(document).ready(function() {
+
+       $('#declarationModificative').change(function() {
+           var selectedDeclarations = $(this).val(); // tableau d'IDs
+           console.log(selectedDeclarations);
+   
+           $.ajax({
+               url: "{% url 'get_options_by_declaration' %}",
+               data: {
+                   'ids': selectedDeclarations
+               },
+               traditional: true,
+               success: function(data) {
+                  console.log(data);
+                   var $optionSelect = $('#optionDeclaration');
+                   //$optionSelect.empty(); // vider les options existantes
+   
+                   // Ajouter les nouvelles options
+                   $.each(data, function(index, option) {
+                       $optionSelect.append(
+                           $('<option>', {
+                               value: option.id,
+                               text: option.label
+                           })
+                       );
+                   });
+               }
+           });
+       });
+
+       $('#optionDeclaration').change(function() {
+
+           $('#activitesAjouter').val('');
+           $('#activitesSupprimer').val('');
+           $('#activitesActualiser').val('');
+
+           var selectedoptionDeclaration = $(this).val();
+
+            // Exemples de valeurs à tester (tu peux les adapter selon tes données)
+            var rajout_activite = ['1'];  
+            var supp_activite = ['2'];  
+            var changement = ['3']; 
+            var transfert = ['4']; 
+            var rectification = ['9']; 
+
+          
+            if (selectedoptionDeclaration.some(val => rajout_activite.includes(val))) {
+               $('#activitesAjouter').prop('readonly', false);
+               $('#activitesAjouter').prop('required', true);
+              
+               
+            } else {
+               $('#activitesAjouter').prop('readonly', true);
+               $('#activitesAjouter').prop('required', false);
+            
+            }
+
+            if (selectedoptionDeclaration.some(val => supp_activite.includes(val))) {
+               $('#activitesSupprimer').prop('readonly', false);
+               $('#activitesSupprimer').prop('required', true);
+              
+            } else {
+               $('#activitesSupprimer').prop('readonly', true);
+               $('#activitesSupprimer').prop('required', false);
+               
+            }
+
+            if (selectedoptionDeclaration.some(val => changement.includes(val))) {
+               $('#sigleNew').prop('readonly', false);
+               $('#sigleNew').prop('required', true);
+               $('#nomCommercialNew').prop('readonly', false);
+               $('#nomCommercialNew').prop('required', true);
+              
+            } else {
+               $('#sigleNew').prop('readonly', true);
+               $('#sigleNew').prop('required', false);
+               $('#nomCommercialNew').prop('readonly', true);
+               $('#nomCommercialNew').prop('required', false);
+               
+            }
+
+            if (selectedoptionDeclaration.some(val => transfert.includes(val))) {
+               $('#adresseEtablissement').prop('readonly', false);
+               $('#adresseEtablissement').prop('required', true);
+               $('#nouvelleAdresse').prop('readonly', false);
+               $('#nouvelleAdresse').prop('required', true);
+              
+            } else {
+               $('#adresseEtablissement').prop('readonly', true);
+               $('#adresseEtablissement').prop('required', false);
+               $('#nouvelleAdresse').prop('readonly', true);
+               $('#nouvelleAdresse').prop('required', false);
+               
+            }
+
+            if (selectedoptionDeclaration.some(val => rectification.includes(val))) {
+               $('#champsRectifierDiv').removeAttr('hidden', true);
+               $('#champsRectifier').prop('required', true);
+               
+              
+            } else {
+               $('#champsRectifierDiv').attr('hidden', 'hidden');
+               $('#champsRectifier').prop('required', false);
+               
+            }
+            
+          
+       });
+
+   });
+   </script>
+   
+
+<script>
+
+
+
+$(function() {
+    const champs = [
+        '#typeRccm', '#denomination', '#siegeSocial', '#numeroRccm', '#declarationModificative', 
+        '#optionActivite', '#activitesAjouter', '#dateModification', '#titreCivil',
+        '#nom', '#prenom', '#dateNaissance', '#lieuNaissance',
+        '#nationnalite', '#adressePostale', '#telephone', '#domicile', '#quartier', 
+        '#ville', '#autrePrecision', '#coordonneesElectro', '#sigle', 
+        '#nomCommercial', '#nomCommercialNew', '#situationMatrimoniale', 
+        '#activites', '#activiteSupprimer', '#activitesAjouter', '#activitesActualiser', 
+        '#mandataire', '#numeroFormalite', '#dateEnreg'
+    ];
+
+    champs.forEach(selector => {
+        let $el = $(selector);
+        if ($el.length) {
+            try {
+                console.log(`✅ Trigger sur ${selector} avec valeur:`, $el.val());
+                $el.trigger('change');
+            } catch (error) {
+                console.error(`❌ Erreur sur ${selector}:`, error);
+            }
+        } else {
+            console.warn(`⚠️ ${selector} introuvable`);
+        }
+    });
+});
+
+
+
+
+
+
+
+
+
+
+   // Page 2
+   $('#titreCivil').on('change', function () {
+      var titre = this.value;
+      if (titre === 'M') {
+         $('#_dm-m').prop('checked', true);
+         $('#m').css({
+               'font-weight': 'bold',
+               'text-decoration': 'underline'
+         });
+
+         $('#_dm-mme').prop('checked', false);
+         $('#mme').css({
+            'font-weight': 'normal',          // Enlever le gras
+            'text-decoration': 'none'        // Enlever le soulignement
+         });
+
+         $('#_dm-mlle').prop('checked', false);
+         $('#mlle').css({
+               'font-weight': 'normal',
+               'text-decoration': 'none'
+         });
+
+
+      } else if (titre === 'Mme') {
+         $('#_dm-mme').prop('checked', true);
+         $('#mme').css({
+               'font-weight': 'bold',
+               'text-decoration': 'underline'
+         });
+
+         $('#_dm-m').prop('checked', false);
+         $('#m').css({
+               'font-weight': 'normal',
+               'text-decoration': 'none'
+         });
+
+         $('#_dm-mlle').prop('checked', false);
+         $('#mlle').css({
+               'font-weight': 'normal',
+               'text-decoration': 'none'
+         });
+
+
+      } else if (titre === 'Mlle') {
+         $('#_dm-mlle').prop('checked', true);
+         $('#mlle').css({
+               'font-weight': 'bold',
+               'text-decoration': 'underline'
+         });
+
+         $('#_dm-mme').prop('checked', false);
+         $('#mme').css({
+               'font-weight': 'normal',
+               'text-decoration': 'none'
+         });
+
+         $('#_dm-m').prop('checked', false);
+         $('#m').css({
+               'font-weight': 'normal',
+               'text-decoration': 'none'
+         });
+      }
+   });
+
+   $('#nom').on('change', function () { $('#nom_value').html(this.value); });
+   $('#prenom').on('change', function () { $('#prenom_value').html(this.value); });
+
+   var dateNaissance = '';
+   var lieuNaissance = '';
+   var formattedDateNaissance = '';
+   $('#dateNaissance').on('change', function () {
+
+      dateNaissance = new Date(this.value);
+      var day = String(dateNaissance.getDate()).padStart(2, '0'); // Ajoute un zéro si nécessaire
+      var month = String(dateNaissance.getMonth() + 1).padStart(2, '0'); // Les mois commencent à 0
+      var year = dateNaissance.getFullYear();
+
+      formattedDateNaissance = `${day}/${month}/${year}`; // Assemblez le format
+      $('#dateEtLieu').html(`Né(e) le ${formattedDateNaissance} à ${lieuNaissance}`);
+   });
+
+   $('#lieuNaissance').on('change', function () {
+      lieuNaissance = this.value;
+      $('#dateEtLieu').html(`Né(e) le ${formattedDateNaissance} à ${lieuNaissance}`);
+   });
+
+   $('#nationnalite').on('change', function () { $('#nationnalite_value').html(this.value); });
+   $('#adressePostale').on('change', function () { $('#adressePostale_value').html(this.value); });
+   $('#telephone').on('change', function () { $('#telephone_value').html(this.value); });
+   $('#domicile').on('change', function () { $('#domicile_value').html(this.value); });
+   $('#quartier').on('change', function () { $('#quartier_value').html(this.value); });
+   $('#ville').on('change', function () { $('#ville_value').html(this.value); });
+   $('#autrePrecision').on('change', function () { $('#autrePrecision_value').html(this.value); });
+   $('#coordonneesElectro').on('change', function () { $('#coordonneesElectro_value').html(this.value); });
+   $('#sigle').on('change', function () { 
+      $('#sigle_value').html(this.value); 
+      $('#nouveauSigle_value').html(this.value); 
+   });
+   $('#nomCommercial').on('change', function () { 
+      $('#nomCommercial_value').html(this.value);
+   });
+
+   $('#nomCommercialNew').on('change', function () { 
+      $('#nouvelleDenomination_value').html(this.value); 
+      $('#nouveauNomcommercial_value').html(this.value); 
+   });
+
+   $('#situationMatrimoniale').on('change', function () {
+      var situationMatrimoniale = this.value;
+
+      if (situationMatrimoniale === 'Celibataire') {
+
+         $('#_dm-celib').prop('checked', true);
+         $('#celib').css({
+               'font-weight': 'bold',
+               'text-decoration': 'underline'
+         });
+
+         $('#_dm-marier').prop('checked', false);
+         $('#marier').css({
+               'font-weight': 'normal',
+               'text-decoration': 'none'
+         });
+
+         $('#_dm-veuf').prop('checked', false);
+         $('#veuf').css({
+               'font-weight': 'normal',
+               'text-decoration': 'none'
+         });
+
+         $('#_dm-divorce').prop('checked', false);
+         $('#divorce').css({
+               'font-weight': 'normal',
+               'text-decoration': 'none'
+         });   
+
+      } else if (situationMatrimoniale === 'Marie(e)') {
+
+         $('#_dm-celib').prop('checked', false);
+         $('#celib').css({
+               'font-weight': 'normal',
+               'text-decoration': 'none'
+         });
+
+         $('#_dm-marier').prop('checked', true);
+         $('#marier').css({
+               'font-weight': 'bold',
+               'text-decoration': 'underline'
+         });
+
+         $('#_dm-veuf').prop('checked', false);
+         $('#veuf').css({
+               'font-weight': 'normal',
+               'text-decoration': 'none'
+         });
+
+         $('#_dm-divorce').prop('checked', false);
+         $('#divorce').css({
+               'font-weight': 'normal',
+               'text-decoration': 'none'
+         });
+
+
+      } else if (situationMatrimoniale === 'Veuf(e)') {
+
+         $('#_dm-celib').prop('checked', false);
+         $('#celib').css({
+               'font-weight': 'normal',
+               'text-decoration': 'none'
+         });
+
+         $('#_dm-marier').prop('checked', false);
+         $('#marier').css({
+               'font-weight': 'normal',
+               'text-decoration': 'none'
+         });
+
+         $('#_dm-veuf').prop('checked', true);
+         $('#veuf').css({
+               'font-weight': 'bold',
+               'text-decoration': 'underline'
+         });
+
+         $('#_dm-divorce').prop('checked', false);
+         $('#divorce').css({
+               'font-weight': 'normal',
+               'text-decoration': 'none'
+         });
+
+      } else if (situationMatrimoniale === 'Divorce(e)') {
+         $('#_dm-celib').prop('checked', false);
+         $('#celib').css({
+               'font-weight': 'normal',
+               'text-decoration': 'none'
+         });
+
+         $('#_dm-marier').prop('checked', false);
+         $('#marier').css({
+               'font-weight': 'normal',
+               'text-decoration': 'none'
+         });
+
+         $('#_dm-veuf').prop('checked', false);
+         $('#veuf').css({
+               'font-weight': 'normal',
+               'text-decoration': 'none'
+         });
+
+         $('#_dm-divorce').prop('checked', true);
+         $('#divorce').css({
+               'font-weight': 'bold',
+               'text-decoration': 'underline'
+         });
+      }
+   });
+
+   $('#activites').on('change', function () {
+      $('#activites_value').html(this.value);
+      $('#activites_value2').html(this.value);
+      $('#activites_value3').html(this.value);
+   });
+
+   $('#activiteSupprimer').on('change', function () {
+      $('#activiteSupprimer_value').html(this.value);
+      $('#activiteSupprimer_value2').html(this.value);
+   });
+
+   $('#activitesAjouter').on('change', function () {
+      $('#activitesAjouter_value').html(this.value);
+      $('#activitesAjouter_value2').html(this.value);
+      $('#activitesAjouter_value3').html(this.value);
+   });
+
+   $('#activitesActualiser').on('change', function () {
+      $('#activitesActualiser_value').html(this.value);
+      $('#activitesActualiser_value2').html(this.value);
+   });
+
+   $('#mandataire').on('change', function () { $('#mandataire_value').html(this.value); });
+
+
+</script>
+
+<script>
+   document.addEventListener("DOMContentLoaded", function () {
+     const formContainer = document.getElementById("formset-container");
+     const addButton = document.getElementById("add-form");
+     const totalForms = document.getElementById("id_engager-TOTAL_FORMS");
+ 
+     function updateRemoveButtonsVisibility() {
+       const formItems = formContainer.querySelectorAll(".formset-item");
+       const showRemove = formItems.length > 1;
+ 
+       formItems.forEach(item => {
+         const removeBtn = item.querySelector(".remove-form");
+         if (removeBtn) {
+           removeBtn.style.display = showRemove ? "inline-block" : "none";
+         }
+       });
+     }
+ 
+     addButton.addEventListener("click", function () {
+       const formCount = parseInt(totalForms.value);
+       const templateForm = formContainer.querySelector(".formset-item");
+ 
+       if (!templateForm) return;
+ 
+       let newFormHtml = templateForm.outerHTML.replace(/engager-(\d+)-/g, `engager-${formCount}-`);
+       const tempDiv = document.createElement("div");
+       tempDiv.innerHTML = newFormHtml;
+ 
+       // Réinitialiser les valeurs du nouveau formulaire
+       tempDiv.querySelectorAll("input, select, textarea").forEach(el => el.value = "");
+ 
+       formContainer.appendChild(tempDiv.firstElementChild);
+       totalForms.value = formCount + 1;
+ 
+       updateRemoveButtonsVisibility();
+     });
+ 
+     formContainer.addEventListener("click", function (e) {
+       if (e.target.classList.contains("remove-form")) {
+         const formItem = e.target.closest(".formset-item");
+         formItem.remove();
+ 
+         // Met à jour le total et réaffiche ou non les boutons
+         totalForms.value = formContainer.querySelectorAll(".formset-item").length;
+         updateRemoveButtonsVisibility();
+       }
+     });
+ 
+     // Appel initial au chargement
+     updateRemoveButtonsVisibility();
+   });
+ </script>
+ 
+   
+
+
+
+
+{% endblock %}

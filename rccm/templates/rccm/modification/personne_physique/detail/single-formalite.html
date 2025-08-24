@@ -1,0 +1,172 @@
+{% extends 'rccm/layout.html' %}
+
+
+{% block title %}Modification{% endblock title %}
+
+{% block content %}
+{% load static %}
+
+<style>
+   .label-required::after {
+      content: " *";
+      color: red;
+      font-weight: bold;
+   }
+
+</style>
+
+<section id="content" class="content">
+   <div class="content__header content__boxed rounded-0">
+      <div class="content__wrap mb-3">
+         <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+               <li class="breadcrumb-item fs-4"><a href="#" class="nav-toggler" aria-label="Nav Toggler">Menu</a></li>
+               <li class="breadcrumb-item fs-4"><a href="{% url 'rccm.modification' %}">Déclaration modificative</a>
+               </li>
+               <li class="breadcrumb-item active fs-4" aria-current="page">Formalité</li>
+            </ol>
+         </nav>
+
+      </div>
+
+   </div>
+
+
+   <div class="content__boxed bg-light">
+      <div class="content__wrap">
+         <div class="col-md-12">
+           
+              {% if messages %}
+                  {% for message in messages %}
+                     {% if message.tags == 'success' %}
+                     <div class="alert alert-success alert-dismissible fade show fs-5" role="alert">
+                           <i class="pli-thumb fs-1 text-success"></i>&nbsp; {{ message }}
+                           <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+                     </div>
+                     {% else %}
+                     <div class="alert alert-danger alert-dismissible fade show fs-5" role="alert">
+                           <i class="demo-pli-exclamation fs-1 text-danger"></i>&nbsp; {{ message }}
+                           <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+                     </div>
+                     {% endif %}
+
+                  {% endfor %}
+               {% endif %}
+
+
+            <div class="d-flex justify-content-center align-items-center gap-5 mb-4">
+
+                  <div class="card">
+                     <div class="card-body">
+                        <h5 class="card-title"><i class="demo-pli-layout-grid fs-3"></i>&nbsp;&nbsp;Barre d'outils <span style="float: right;color: gray; font-style: italic;font-size: 14px;">Créée par : <b style="text-decoration: underline;">{{ formalite.created_by }}</b></span></h5>
+
+
+                        <!-- Outline buttons -->
+                        <div class="mt-4 d-flex flex-wrap justify-content-center gap-2">
+                           <button type="button" class="btn btn-outline-primary" id="downloadPdf"> <i class="demo-pli-download-from-cloud fs-1"></i> Télécharger une copie</button>
+                          
+                           <a href="#">
+                              <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#signModal" {% if formalite.statut == 'SIGNER' or user.groups.all.0.name == 'Greffier' %} disabled {% endif %}>
+                                 <span class="position-relative d-inline-block">
+                                    <i class="demo-pli-file fs-1"></i>
+                                    <i class="demo-pli-pen-5 fs-4 position-absolute bottom-0 end-0"></i>
+                                 </span> Appliquer la signature
+                              </button>
+                           </a>
+                             <!-- Modal Signature -->
+                           <div class="modal fade" id="signModal" tabindex="-1" aria-labelledby="signModalLabel" aria-hidden="true">
+                              <div class="modal-dialog modal-dialog-centered">
+                                 <div class="modal-content">
+                                    <div class="modal-header bg-primary">
+                                       <h1 class="modal-title fs-4 text-white" id="signModalLabel"><i class="pli-pen-5 "></i> Signature</h1>
+                                       <button type="button" class="btn-close text-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <form action="{% url 'formalite.sign' %}" method="POST">
+                                       {% csrf_token %}
+                                       <div class="modal-body">
+                                          Veuillez saisir votre mot de passe pour appliquer la signature.
+                                          <div class="col-12 mt-2">
+                                             <label for="_dm-inputPassword" class="visually-hidden">Mot de passe</label>
+                                             <input type="password" class="form-control" id="_dm-inputPassword" placeholder="Mot de passe" name="password">
+                                             <input type="hidden" name="formalite" value="{{ formalite.id }}">
+                                          </div>
+                                       </div>
+                                       <div class="modal-footer">
+                                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                                          <button type="submit" class="btn btn-success">Appliquer</button>
+                                       </div>
+                                    </form>
+                                 </div>
+                              </div>
+                           </div>
+                           <!-- END  -->
+
+                           <a  {% if formalite.statut == 'SIGNER' %} href="#" {% else %} href="{% url 'formalite.update' formalite.id %}" {% endif %}>
+                              <button type="button" class="btn btn-outline-primary" {% if formalite.statut == 'SIGNER' %} disabled {% endif %} >
+                                 <i class="demo-pli-pencil fs-1"></i> Modifier la formalite
+                              </button>
+                           </a>
+                           
+                           <a href="#">
+                              <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" {% if formalite.statut == 'SIGNER' or user.groups.all.0.name == 'Greffier' %} disabled {% endif %}>
+                                 <i class="demo-pli-trash fs-1"></i> Supprimer
+                              </button>
+                           </a>
+                            <!-- Modal Suppression -->
+                            <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                              <div class="modal-dialog modal-dialog-centered">
+                                 <div class="modal-content">
+                                    <div class="modal-header bg-danger">
+                                       <h1 class="modal-title fs-4 text-white" id="deleteModalLabel"><i class="demo-pli-trash"></i> Suppression</h1>
+                                       <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <form action="{% url 'formalite.delete' %}" method="POST">
+                                       {% csrf_token %}
+                                       <div class="modal-body">
+                                          <p><b>Attention :</b><br> Toutes les informations concernant la formalité seront definitivement perdues.</p>
+                                          <p>Voulez-vous vraiment supprimer cette formalité ?</p>
+                                          <input type="hidden" name="formalite" value="{{ formalite.id }}">
+                                       </div>
+                                       <div class="modal-footer">
+                                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Non</button>
+                                          <button type="submit" class="btn btn-primary">Oui</button>
+                                       </div>
+                                    </form>
+                                 </div>
+                              </div>
+                           </div>
+                           <!-- END -->
+
+                          
+                        </div>
+                        <!-- END : Outline buttons -->
+
+                     </div>
+                  </div>
+                              
+            </div>
+
+         
+            <div  class="d-flex justify-content-center align-items-center div2" id="divId">
+               {% include 'rccm/modification/personne_physique/detail/detail-formalite.html' %}
+            </div> 
+
+
+         </div>
+      </div>
+   </div>
+
+
+   {% include '_base/tools/footer.html' %}
+
+</section>
+
+<script>
+   $(document).ready(function() {
+       $('#nav-modification').addClass('bg-primary text-white');
+       $('#txt-modification').addClass('text-white');
+   });
+</script>
+
+
+{% endblock %}

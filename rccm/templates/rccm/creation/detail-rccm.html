@@ -1,0 +1,93 @@
+{% extends 'rccm/layout.html' %}
+
+
+{% block title %}Rccms{% endblock title %}
+
+{% block content %}
+{% load static %}
+
+<style>
+   .rccm {
+      color: orange;
+   }
+
+   .formalite {
+      color: skyblue;
+   }
+</style>
+
+
+<section id="content" class="content">
+   <div class="content__header content__boxed rounded-0">
+      <div class="content__wrap mb-3">
+         <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+               <li class="breadcrumb-item fs-4"><a href="#" class="nav-toggler" aria-label="Nav Toggler">Menu</a></li>
+               <li class="breadcrumb-item active fs-4" aria-current="page">Formalités du Rccm</li>
+            </ol>
+         </nav>
+
+      </div>
+
+   </div>
+
+
+   <div class="content__boxed">
+    <div class="content__wrap">
+
+       <!-- Table with toolbar -->
+       <div class="card">
+          <div class="card-header">
+             <h4 class="card-title mb-0">Formalités du Rccm</h4>
+             <p class="text-body-secondary mb-0"> 
+               <span>{{ rccm.numeroRccm }} du {{ rccm.dateEnreg }}</span><br>
+               <span><b>Dénomination à Jour :</b> {{ last_formalite.denomination }}</span>
+            <p>
+          </div>
+
+          <div class="card-body">
+            <div class="row p-3">
+                
+                {% for r in formalites %}
+                
+                    <div class="col-md-3 d-flex gap-1 align-items-center mb-5 hv-grow ">
+                        {% if r.typeFormalite == 'Création' %}
+                        <a href="{{ r.rccm.rccm_file.url }}" target="_blank" class="text-decoration-none" style="margin-right: 4px;"> <i class="demo-pli-folder-with-document rccm " style="font-size: 5em;"></i></a>
+                        {% else %} 
+                        <a href="{% url 'rccm.formalite.detail' r.slug %}" class="text-decoration-none" style="margin-right: 4px;"> <i class="demo-pli-folder-with-document formalite" style="font-size: 5em;"></i></a>
+                        {% endif %}
+                        <b>
+                        {{ r.typeFormalite }} <br>
+                        N°Formalite : {{ r.numeroFormalite }} <br>
+                        Ajouté le : {{ r.dateModification }}
+                        </b>
+                        
+                    </div>
+               
+                {% endfor %}
+
+             </div>
+            
+          </div>
+       </div>
+       <!-- END : Table with toolbar -->
+
+    </div>
+ </div>
+
+
+   {% include 'rccm/tools/footer.html' %}
+
+</section>
+
+<script>
+    $(document).ready(function() {
+        $('#nav-rccm').addClass('bg-primary text-white');
+        $('#txt-rccm').addClass('text-white');
+    });
+</script>
+
+
+
+
+{% endblock %}

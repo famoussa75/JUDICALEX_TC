@@ -1,0 +1,770 @@
+{% extends 'role/layout.html' %}
+
+
+{% block title %}Formalite{% endblock title %}
+
+{% block content %}
+{% load static %}
+
+<section class="content text-primary">
+
+    <div class="content__header rounded-0">
+        <div class="content__wrap">
+          <h1 class="text-center my-2"><i class="pli-folder-archive fs-1"></i> Décisions de justice</h1>
+          <p class="text-center mb-4">Gerez les rôles d'audiences du tribunal</p>
+          <nav aria-label="breadcrumb" style="font-size: 18px;">
+            <ol class="breadcrumb">
+               <li class="breadcrumb-item"><a href="{% url 'role.index' %}">Accueil</a></li>
+               <li class="breadcrumb-item"><a href="{% url 'role.affaires' %}">Plumitifs</a></li>
+               <li class="breadcrumb-item active" aria-current="page">Décisions</li>
+            </ol>
+         </nav>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+    
+        <div class="page-body mt-4">
+            <div class="container-fluid">
+                <div class="row g-3">
+                    <!-- <div class="col-2">
+                        <div class="card" style="padding: 8px;">
+                            <img src="" width="110" height="130" style="margin-left:17% ;" alt="Tabler" class="mb-3">
+                            <a href="" download="" class="btn btn-success btn-pill w-100"
+                                title="Telecharger le document original">
+                            
+                                <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
+                                    viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                    <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" />
+                                    <polyline points="7 11 12 16 17 11" />
+                                    <line x1="12" y1="4" x2="12" y2="16" />
+                                </svg> Telecharger
+                            </a>
+                        </div>
+                    </div> -->
+                    <div class="col-12 animate-bottom">
+                        <div class="card card-body">
+                            <div class="row">
+                                <div class="col-4">
+                                    <p class="h3">{{ affaire.role.juridiction }}</p>
+                                    <p class="h4 text-muted" >NUA : {{ affaire.numAffaire }}</p>
+                                    <p class="h4" >AFFAIRE N° : {{ affaire.numRg }}</p>
+                                    <p class="h4">{{ affaire.role.section }}</p>
+                                    <p class="h4">{{ affaire.role.get_typeAudience_display }}</p>
+
+                                    {% if is_suivi %}
+                                        <span class="badge bg-success text-light" style="font-size: 14px;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path fill="white" d="M23 10a2 2 0 0 0-2-2h-6.32l.96-4.57c.02-.1.03-.21.03-.32c0-.41-.17-.79-.44-1.06L14.17 1L7.59 7.58C7.22 7.95 7 8.45 7 9v10a2 2 0 0 0 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73zM1 21h4V9H1z"/></svg>
+                                            &nbsp;Vous suivez cette affaire
+                                        </span>
+                                    {% endif %}
+                                        
+                                </div>
+                                <div class="col-md-4">
+                                    <p class="h3 text-center text-primary" style="text-decoration: underline;">Ministère de la Justice et du droit de l'Homme</p>
+                                </div>
+                                <div class="col-4 text-center">
+                                    <p class="h4">REPUBLIQUE DE GUINEE</p>
+                                    <address>
+                                        Travail - Justice - Solidarite<br>
+                                    </address>
+                                </div>
+                                <hr>
+                                <p class="h2" style="margin-bottom:-20px ;text-decoration-line:underline;text-align:center ;">DÉCISIONS RENDUES</p><br><br>
+
+                                <div class="row col-12 my-5">
+                                    <div class="col-6">
+                                        {% if affaire.role.president %}
+                                            <p class="h4" style="text-decoration-line:underline">PRESIDENT(E) : {{ affaire.role.president }}</p>
+                                        {% endif %}
+
+                                        {% if affaire.role.greffier %}
+                                            <p class="h4" style="text-decoration-line:underline">GREFFIER(E) : {{ affaire.role.greffier }}</p>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="col-6">
+                                        {% if affaire.demandeurs %}
+                                            <p class="h4" style="text-decoration-line:underline">PARTIES : {{ affaire.demandeurs }} <mark>C/</mark> {{ affaire.defendeurs }}</p>
+                                        {% endif %}
+
+                                        {% if affaire.objet %}
+                                            <p class="h4" style="margin-bottom:-20px ; text-decoration-line:underline">OBJET : {{ affaire.objet }}</p><br>
+                                        {% endif %}
+                                    </div>
+
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-4">
+                                <div class="col-md-2">
+                                    <a href="#" class="btn btn-primary d-none d-sm-inline-block" data-bs-toggle="modal"
+                                        data-bs-target="#modal-decision">
+                                        <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
+                                            viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                            <line x1="12" y1="5" x2="12" y2="19" />
+                                            <line x1="5" y1="12" x2="19" y2="12" />
+                                        </svg>
+                                        Nouvelle décision
+                                    </a>
+                                </div>
+                            </div>
+                       
+                            <table class="table table-transparent table-responsive mb-5">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center" style="width: 1%;font-size: small;">N°</th>
+                                        <th class="text-center" style="font-size:small;text-align: center;">Type de décision</th>
+                                        <th class="text-center" style="font-size:small;">Décision du</th>
+                                        <th style="font-size:small;">Décision</th>
+                                        <th style="font-size:small;">Prochaine Audience</th>
+                                        <th style="width: 10%;"></th>
+
+                                    </tr>
+                                </thead>
+                                    
+                                
+                                {% for decision in decisions  %}
+                                                                    
+                                <tr>
+                                    <td scope="col">
+                                        {% if decision.statut == 'Modifier' %}<a type="button" href="{% url 'historique_modifications_decisions' decision.id %}" class="btn btn-light btn-xs" >Modifiée</a>{% endif %} {{forloop.counter}} 
+                                    </td>
+
+                                    <td class="text-center">
+                                        <p class="strong mb-1">{{decision.typeDecision}}</p>
+                                    </td>
+
+                                    <td class="text-center">{{ decision.dateDecision|default:"Non défini" }}</td>
+                                
+                                    <td>
+                                        <p class="strong mb-1" style="white-space: pre-wrap;">{{decision.decision}}</p>
+                                    </td>
+                                    <td>
+                                        <span class="strong mb-1 bg-secondary p-2" style="color: white;">{{decision.prochaineAudience|default:"Non défini"}}</span>
+                                    </td>
+                                    <td>
+                                     
+                                      
+                                        <button type="button" class="btn btn-icon btn-info rounded-circle"
+                                        onclick='openEditModal({
+                                            id: "{{ decision.id }}",
+                                            typeDecision: "{{ decision.typeDecision|escapejs }}",
+                                            dateDecision: "{{ decision.dateDecision|date:"Y-m-d" }}",
+                                            president: "{{ decision.president|escapejs }}",
+                                            greffier: "{{ decision.greffier|escapejs }}",
+                                            decision: `{{ decision.decision|escapejs }}`,
+                                            prochaineAudience: "{{ decision.prochaineAudience|date:"Y-m-d" }}"
+                                        })'>
+                                            <i class="demo-psi-pencil fs-5"></i>
+                                        </button>
+                                        &nbsp;
+                                        <button type="button" class="btn btn-icon btn-danger rounded-circle"
+                                        onclick="var id=this.id ; recuperationIDAffaire(id)" class="text-danger" data-bs-toggle="modal" id="{{decision.id}}" data-bs-target="#modal-danger" aria-label="">
+                                            <i class="demo-psi-trash fs-5"></i>
+                                        </button>
+                                    
+                                        
+                                    </td>
+                            
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="7" class="text-center"><h3>Aucune décision disponible</h3></td>
+                                </tr>
+                                {% endfor %}
+
+                            </table>
+                            <!-- <div class="row">
+                                <div class="col-6">
+
+                                </div>
+                                <div class="col-6 text-end">
+                                    <p class="h5">Conakry, {{role.created_at}}</p>
+                                    <address style="font-size:12px ;">
+                                        La Greffiere
+                                    </address>
+                                </div>
+                            </div> -->
+                            
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- Creation -->
+    <div class="modal modal-blur fade" id="modal-decision" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
+                            viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                            <line x1="12" y1="5" x2="12" y2="19" />
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                        </svg>
+                        </svg> Nouvelle décision
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form class="card card-md" method="POST" action="">
+                    <input type="hidden" name="juridiction" value="{{ affaire.role.juridiction_id }}">
+                    <input type="hidden" name="typeAudience" value="{{ affaire.role.typeAudience }}">
+                {% csrf_token %}
+                    <div class="modal-body" style="padding-left: 70px; padding-right: 70px;">
+
+                        <div class="mb-3">
+                            <label class="form-label">Type de décision</label>
+                            {{ form.typeDecision }}
+
+                        </div>
+                      
+                        <!-- Zone où les champs vont s'ajouter -->
+                        <div id="dynamic-fields"></div>
+
+                        <!-- <div class="mb-3">
+                            <label class="form-label">Décision rendu le</label>
+                            {{ form.dateDecision }}
+                        </div> -->
+                        <!-- <div class="mb-3">
+                            <div class="form-group row align-items-center">
+                                <label class="col-sm-7 col-form-label">Prochaine audience</label>
+                                <div class="col-sm-5">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" id="nonApplicable" onchange="isProchaineAudience()">
+                                        <label class="form-check-label" for="nonApplicable">Non applicable</label>
+                                    </div>
+                                </div>
+                            </div>
+                            {{ form.prochaineAudience }}
+                        </div> -->
+                        <!-- <div class="mb-3">
+                            <label class="form-label">Président(e)</label>
+                            {{ form.president }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Greffier(e)</label>
+                            {{ form.greffier }}
+                        </div> -->
+                        <div class="mb-3">
+                            <label class="form-label">La décision</label>
+                            {{ form.decision }}                    
+                        </div>
+                    
+                    </div>
+                    <input id="privilege" type="hidden" class="form-control" name="privilege" value="admin">
+                    <div class="modal-footer" style="padding-left: 100px; padding-right: 100px;">
+                        <a href="#" type="button" class="btn btn-link link-secondary" data-bs-dismiss="modal">
+                            Annuler
+                        </a>
+                        <button type="submit" class="btn btn-primary w-30">
+                            <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
+                            <i class="pli-data-save"></i> Enregistrer
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Modification -->
+<div class="modal modal-blur fade" id="modal-edit-decision" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
+                        viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                        <line x1="12" y1="5" x2="12" y2="19" />
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>
+                    Modifier la décision
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+
+            <form class="card card-md" method="POST" action="{% url 'decision.update' %}">
+                {% csrf_token %}
+                <input type="hidden" name="decision_id" id="editDecisionId">
+                <input type="hidden" name="juridiction" value="{{ affaire.role.juridiction_id }}">
+                <input type="hidden" name="typeAudience" value="{{ affaire.role.typeAudience }}">
+                <input type="hidden" name="dateDecision" value="{{ affaire.role.dateEnreg|date:'Y-m-d' }}">
+
+                <div class="modal-body" style="padding-left: 70px; padding-right: 70px;">
+                    <div class="mb-3">
+                        <label class="form-label">Type de décision</label>
+                        <select name="typeDecision" class="form-control" id="editTypeDecision" required>
+                            <option value="">-- Sélectionner --</option>
+                            {% for value, label in type_decisions %}
+                            <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Zone pour champs dynamiques si besoin -->
+                    <div id="edit-dynamic-fields"></div>
+                   
+                    <div class="mb-3">
+                        <label class="form-label">La décision</label>
+                        <textarea name="decision" class="form-control" id="editDecisionText" rows="3"></textarea>
+                    </div>
+                  
+                </div>
+
+                <input id="editPrivilege" type="hidden" class="form-control" name="privilege" value="admin">
+
+                <div class="modal-footer" style="padding-left: 100px; padding-right: 100px;">
+                    <a href="#" type="button" class="btn btn-link link-secondary" data-bs-dismiss="modal">
+                        Annuler
+                    </a>
+                    <button type="submit" class="btn btn-primary w-30">
+                        <i class="pli-data-save"></i> Enregistrer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+    
+
+    <!-- Modal alerte suppression -->
+    <div class="modal modal-blur fade" id="modal-danger"  tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+        <form class="card card-md" method="POST" action="{% url 'decision.delete' %}" id="updateForm">
+            {% csrf_token %}
+            <div class="modal-content">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="modal-status bg-danger"></div>
+                <div class="modal-body text-center py-4">
+                <!-- Download SVG icon from http://tabler-icons.io/i/alert-triangle -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon mb-2 text-danger icon-lg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M12 9v2m0 4v.01"></path><path d="M5 19h14a2 2 0 0 0 1.84 -2.75l-7.1 -12.25a2 2 0 0 0 -3.5 0l-7.1 12.25a2 2 0 0 0 1.75 2.75"></path></svg>
+                <h3>Êtes-vous sûre?</h3>
+                <div class="text-muted">Cette action supprimera definitivement cette décision.</div>
+                <input  type="hidden" class="form-control" name="idDecision" id="idDecision">
+                <input  type="hidden" class="form-control" name="idAffaire" value="{{ affaire.idAffaire }}">
+
+                </div>
+                <div class="modal-footer">
+                <div class="w-100">
+                    <div class="row">
+                    <div class="col"><a href="#" class="btn w-100" data-bs-dismiss="modal">
+                        Annuler
+                        </a></div>
+                    <div class="col">
+                        <button  type="submit" class="btn btn-danger w-100" data-bs-dismiss="modal">
+                        Supprimer
+                        </button>
+                    </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </form>
+        </div>
+    </div>
+
+</section>
+
+<!-- Creation Scripts -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const typeDecisionSelect = document.getElementById("typeDecision");
+        const dynamicFields = document.getElementById("dynamic-fields");
+        const decisionInput = document.getElementById("id_decision"); // Champ decision de ton form
+    
+        function updateDecision() {
+            const type = typeDecisionSelect.value;
+            let text = "";
+    
+            if (type === "Renvoi") {
+                const date = document.getElementById("prochaineAudience")?.value || "";
+                const raison = document.getElementById("raisonRenvoi")?.value || "";
+
+                let dateFormatee = date;
+                if (date) {
+                    const dateObj = new Date(date);
+                    const jour = String(dateObj.getDate()).padStart(2, '0');
+                    const mois = String(dateObj.getMonth() + 1).padStart(2, '0');
+                    const annee = dateObj.getFullYear();
+                    dateFormatee = `${jour}/${mois}/${annee}`;
+                }
+                text = `Renvoi au ${dateFormatee} pour ${raison}`;
+            }
+            else if (type === "Mise-en-delibere") {
+                const date = document.getElementById("prochaineAudience")?.value || "";
+
+                let dateFormatee = date;
+                if (date) {
+                    const dateObj = new Date(date);
+                    const jour = String(dateObj.getDate()).padStart(2, '0');
+                    const mois = String(dateObj.getMonth() + 1).padStart(2, '0');
+                    const annee = dateObj.getFullYear();
+                    dateFormatee = `${jour}/${mois}/${annee}`;
+                }
+
+                text = `Mise en délibéré pour décision être rendu le ${dateFormatee}`;
+            }
+            else if (type === "Vide-du-delibere") {
+                const gagnant = document.getElementById("gagnant")?.value || "";
+                const dispositif = document.getElementById("id_dispositif")?.value || "";
+                text = `Vidé du délibéré en faveur de ${gagnant} - Dispositif : ${dispositif}`;
+            }
+            else if (type === "Affectation") {
+                const section = document.getElementById("selectSection")?.value || "";
+                text = `Affectation à la ${section}`;
+            }
+            else if (type === "Delibere-proroge") {
+                const date = document.getElementById("prochaineAudience")?.value || "";
+
+                let dateFormatee = date;
+                if (date) {
+                    const dateObj = new Date(date);
+                    const jour = String(dateObj.getDate()).padStart(2, '0');
+                    const mois = String(dateObj.getMonth() + 1).padStart(2, '0');
+                    const annee = dateObj.getFullYear();
+                    dateFormatee = `${jour}/${mois}/${annee}`;
+                }
+
+                text = `Délibéré prorogé au ${dateFormatee}`;
+            }
+            else if (type === "Radiation") {
+                const raison = document.getElementById("radiation")?.value || "";
+                text = `Radiation pour ${raison}`;
+            }
+            else if (type === "Renvoi-sine-die") {
+                const raison = document.getElementById("renvoiSinedie")?.value || "";
+                text = `Renvoi sine die pour ${raison}`;
+            }
+            else if (type === "Autre") {
+                const autre = document.getElementById("autre")?.value || "";
+                text = autre;
+            }
+            else {
+                text = "";
+            }
+    
+            decisionInput.value = text;
+        }
+    
+        typeDecisionSelect.addEventListener("change", function () {
+            const selectedValue = this.value;
+            dynamicFields.innerHTML = "";
+    
+            if (selectedValue === "Renvoi") {
+                dynamicFields.innerHTML = `
+                    <div class="row field-block mb-3" id="fields-Renvoi">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Renvoyé au :</label>
+                            {{ form.prochaineAudience }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Pour :</label>
+                            <input type="text" name="raison" class="form-control" id="raisonRenvoi">
+                        </div>
+                    </div>
+                `;
+            }
+            else if (selectedValue === "Mise-en-delibere") {
+                dynamicFields.innerHTML = `
+                    <div id="fields-Mise-en-delibere" class="mb-3 field-block">
+                        <label class="form-label">Mise en délibéré pour décision être rendue le :</label>
+                        {{ form.prochaineAudience }}
+                    </div>
+                `;
+            }
+            else if (selectedValue === "Vide-du-delibere") {
+                dynamicFields.innerHTML = `
+                    <div class="mb-3">
+                        <label class="form-label">Vidé du délibéré en faveur de :</label>
+                        <input type="text" name="gagnant" class="form-control" id="gagnant">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Dispositif</label>
+                        {{ form.dispositif }}
+                    </div>
+                `;
+            }
+            else if (selectedValue === "Affectation") {
+                dynamicFields.innerHTML = `
+                    <div class="mb-3">
+                        <label class="form-label">Section</label>
+                        <select name="section" class="form-control" id="selectSection">
+                            <option value="" selected disabled>-- Sélectionner une section --</option>
+                            {% for value, label in type_section %}
+                                <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                `;
+            }
+            else if (selectedValue === "Delibere-proroge") {
+                dynamicFields.innerHTML = `
+                    <div class="mb-3">
+                        <label class="form-label">Délibéré prorogé au :</label>
+                        {{ form.prochaineAudience }}
+                    </div>
+                `;
+            }
+            else if (selectedValue === "Radiation") {
+                dynamicFields.innerHTML = `
+                    <div class="mb-3" id="fields-Radiation">
+                        <label class="form-label">Radiation pour :</label>
+                        <input type="text" name="radiation" class="form-control" id="radiation">
+                    </div>
+                `;
+            }
+            else if (selectedValue === "Renvoi-sine-die") {
+                dynamicFields.innerHTML = `
+                    <div class="mb-3">
+                        <label class="form-label">Renvoi sine die pour :</label>
+                        <input type="text" name="renvoiSinedie" class="form-control" id="renvoiSinedie">
+                    </div>
+                `;
+            }
+            else if (selectedValue === "Autre") {
+                dynamicFields.innerHTML = `
+                    <div class="mb-3">
+                        <label class="form-label">Autre décision :</label>
+                        <textarea name="autre" cols="30" rows="3" class="form-control" id="autre"></textarea>
+                    </div>
+                `;
+            }
+    
+            updateDecision();
+    
+            // Dès qu'un champ dynamique change → on met à jour la décision
+            dynamicFields.querySelectorAll("input, textarea, select").forEach(el => {
+                el.addEventListener("input", updateDecision);
+                el.addEventListener("change", updateDecision);
+            });
+        });
+    });
+</script>
+ 
+<!-- Modifications Scripts -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const typeDecisionSelectEdit = document.getElementById("editTypeDecision");
+        const dynamicFieldsEdit = document.getElementById("edit-dynamic-fields");
+        const decisionInputEdit = document.getElementById("editDecisionText");
+    
+        function updateDecisionEdit() {
+            const type = typeDecisionSelectEdit.value;
+            let text = "";
+    
+            function formatDate(date) {
+                if (!date) return "";
+                const dateObj = new Date(date);
+                const jour = String(dateObj.getDate()).padStart(2, '0');
+                const mois = String(dateObj.getMonth() + 1).padStart(2, '0');
+                const annee = dateObj.getFullYear();
+                return `${jour}/${mois}/${annee}`;
+            }
+    
+            if (type === "Renvoi") {
+                const date = document.getElementById("editProchaineAudience")?.value || "";
+                const raison = document.getElementById("editRaisonRenvoi")?.value || "";
+                text = `Renvoi au ${formatDate(date)} pour ${raison}`;
+            }
+            else if (type === "Mise-en-delibere") {
+                const date = document.getElementById("editProchaineAudience")?.value || "";
+                text = `Mise en délibéré pour décision être rendue le ${formatDate(date)}`;
+            }
+            else if (type === "Vide-du-delibere") {
+                const gagnant = document.getElementById("editGagnant")?.value || "";
+                const dispositif = document.getElementById("editDispositif")?.value || "";
+                text = `Vidé du délibéré en faveur de ${gagnant} - Dispositif : ${dispositif}`;
+            }
+            else if (type === "Affectation") {
+                const section = document.getElementById("editSelectSection")?.value || "";
+                text = `Affectation à la ${section}`;
+            }
+            else if (type === "Delibere-proroge") {
+                const date = document.getElementById("editProchaineAudience")?.value || "";
+                text = `Délibéré prorogé au ${formatDate(date)}`;
+            }
+            else if (type === "Radiation") {
+                const raison = document.getElementById("editRadiation")?.value || "";
+                text = `Radiation pour ${raison}`;
+            }
+            else if (type === "Renvoi-sine-die") {
+                const raison = document.getElementById("editRenvoiSinedie")?.value || "";
+                text = `Renvoi sine die pour ${raison}`;
+            }
+            else if (type === "Autre") {
+                const autre = document.getElementById("editAutre")?.value || "";
+                text = autre;
+            }
+    
+            decisionInputEdit.value = text;
+        }
+    
+        typeDecisionSelectEdit.addEventListener("change", function () {
+            const selectedValue = this.value;
+            dynamicFieldsEdit.innerHTML = "";
+    
+            if (selectedValue === "Renvoi") {
+                dynamicFieldsEdit.innerHTML = `
+                    <div class="row field-block mb-3">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Renvoyé au :</label>
+                            <input type="date" name="prochaineAudience" class="form-control" id="editProchaineAudience">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Pour :</label>
+                            <input type="text" name="raison" class="form-control" id="editRaisonRenvoi">
+                        </div>
+                    </div>
+                `;
+            }
+            else if (selectedValue === "Mise-en-delibere") {
+                dynamicFieldsEdit.innerHTML = `
+                    <div class="mb-3">
+                        <label class="form-label">Mise en délibéré pour décision être rendue le :</label>
+                        <input type="date" name="prochaineAudience" class="form-control" id="editProchaineAudience">
+                    </div>
+                `;
+            }
+            else if (selectedValue === "Vide-du-delibere") {
+                dynamicFieldsEdit.innerHTML = `
+                    <div class="mb-3">
+                        <label class="form-label">Vidé du délibéré en faveur de :</label>
+                        <input type="text" name="gagnant" class="form-control" id="editGagnant">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Dispositif</label>
+                        <textarea name="dispositif" class="form-control" id="editDispositif"></textarea>
+                    </div>
+                `;
+            }
+            else if (selectedValue === "Affectation") {
+                dynamicFieldsEdit.innerHTML = `
+                    <div class="mb-3">
+                        <label class="form-label">Section</label>
+                        <select name="section" class="form-control" id="editSelectSection">
+                            <option value="" selected disabled>-- Sélectionner une section --</option>
+                            {% for value, label in type_section %}
+                                <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                `;
+            }
+            else if (selectedValue === "Delibere-proroge") {
+                dynamicFieldsEdit.innerHTML = `
+                    <div class="mb-3">
+                        <label class="form-label">Délibéré prorogé au :</label>
+                        <input type="date" name="prochaineAudience" class="form-control" id="editProchaineAudience">
+                    </div>
+                `;
+            }
+            else if (selectedValue === "Radiation") {
+                dynamicFieldsEdit.innerHTML = `
+                    <div class="mb-3">
+                        <label class="form-label">Radiation pour :</label>
+                        <input type="text" name="radiation" class="form-control" id="editRadiation">
+                    </div>
+                `;
+            }
+            else if (selectedValue === "Renvoi-sine-die") {
+                dynamicFieldsEdit.innerHTML = `
+                    <div class="mb-3">
+                        <label class="form-label">Renvoi sine die pour :</label>
+                        <input type="text" name="renvoiSinedie" class="form-control" id="editRenvoiSinedie">
+                    </div>
+                `;
+            }
+            else if (selectedValue === "Autre") {
+                dynamicFieldsEdit.innerHTML = `
+                    <div class="mb-3">
+                        <label class="form-label">Autre décision :</label>
+                        <textarea name="autre" cols="30" rows="3" class="form-control" id="editAutre"></textarea>
+                    </div>
+                `;
+            }
+    
+            updateDecisionEdit();
+    
+            dynamicFieldsEdit.querySelectorAll("input, textarea, select").forEach(el => {
+                el.addEventListener("input", updateDecisionEdit);
+                el.addEventListener("change", updateDecisionEdit);
+            });
+        });
+    
+        // Pré-remplir les champs quand on ouvre le modal (ex : avec un bouton)
+        document.querySelectorAll("[data-bs-target='#modal-edit-decision']").forEach(btn => {
+            btn.addEventListener("click", function () {
+                const typeValue = this.getAttribute("data-type-decision");
+                typeDecisionSelectEdit.value = typeValue;
+                typeDecisionSelectEdit.dispatchEvent(new Event("change"));
+            });
+        });
+    });
+</script>
+    
+    
+
+<script>
+
+    $(document).ready(function () {
+        $('#nav-affaire').addClass('bg-primary text-white');
+        $('#txt-affaire').addClass('text-white');
+    });
+    
+</script>
+
+    
+
+<script>
+    // function isProchaineAudience() {
+    //     var checkbox = document.getElementById("nonApplicable");
+    //     if (checkbox.checked) {
+    //         document.getElementById("prochaineAudience").disabled = true;
+    //         document.getElementById("prochaineAudience").required = false;
+    //     }else{
+    //         document.getElementById("prochaineAudience").disabled = false;
+    //         document.getElementById("prochaineAudience").required = true;
+    //     }
+        
+    // }
+
+    function recuperationIDAffaire(id) {
+
+        $("#idDecision").val(id);
+        
+    }
+
+function openEditModal(decision) {
+  document.getElementById('editDecisionId').value = decision.id;
+  document.getElementById('editTypeDecision').value = decision.typeDecision;
+
+  document.getElementById('editDecisionText').value = decision.decision;
+
+  // Affiche le modal
+  var modal = new bootstrap.Modal(document.getElementById('modal-edit-decision'));
+  modal.show();
+}
+
+</script>
+
+
+
+
+{% endblock %}

@@ -1,0 +1,336 @@
+<style>
+	.responsive-container {
+	max-width: 100%;
+	overflow-x: auto;
+	word-wrap: break-word;
+	overflow-wrap: break-word;
+	word-break: break-word;
+	font-size: clamp(0.9rem, 2vw, 1.2rem); /* texte responsive */
+	line-height: 1.5;
+	}
+
+	@media (max-width: 480px) {
+		.responsive-container {
+			font-size: 0.9rem;
+		}
+	}
+
+.text-container {
+  padding: 1rem;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  max-width: 100%;
+  overflow: hidden;
+  font-size: clamp(10px, 2vw, 30px); /* taille min, responsive, taille max */
+}
+
+.underline {
+  border-bottom: 2px solid black;
+  padding-bottom: 0.5px;
+}
+
+
+
+
+.police-40 { font-size: clamp(18px, 3.5vw, 36px); }
+.police-37 { font-size: clamp(16px, 3.2vw, 33px); }
+.police-34 { font-size: clamp(14px, 3vw, 30px); }
+.police-30 { font-size: clamp(13px, 2.6vw, 26px); }
+.police-28 { font-size: clamp(12px, 2.4vw, 24px); }
+.police-25 { font-size: clamp(11px, 2.1vw, 21px); }
+.police-18 { font-size: clamp(9px, 1.5vw, 16px); }
+
+
+</style>
+
+<div id="p1" class="first_div text-center ">
+
+	<div class="row mb-0 mt-4">
+		<div class="col-md-2" >
+
+		</div>
+		<div class="col-md-8">
+		
+		</div>
+		<div class="col-md-2">
+			<div class="" >
+				<div id="qrcode1" style=" margin-left: 30px; "></div>
+			</div>
+		</div>
+	</div>
+
+	<div class="text-container" style="margin-top: -130px;">
+		<p class="police-25 mb-0 mt-5"><b>REPUBLIQUE DE GUINEE</b></p>
+		<p class="police-18 mb-0">TRAVAIL-JUSTICE –SOLIDARITE </p>
+		<p class="mb-0 police-18">----------------- </p>
+		<p class="police-40 mb-0">MINISTERE DE LA JUSTICE </p>
+		<p class="police-18 mb-0">---------------- </p>
+		<p class="police-34 mb-0">COUR D’APPEL DE CONAKRY </p>
+		<p class="police-18 mb-0">---------------- </p>
+		<p class="police-34 mb-0">TRIBUNAL DE COMMERCE DE CONAKRY </p>
+		<p class="police-18 mb-0">---------------- </p>
+		<p class="police-25 mb-0">REGISTRE DE COMMERCE ET DU CREDIT MOBILIER </p>
+		<p class="police-28 mb-0" >( R &nbsp; C &nbsp; C &nbsp; M ) </p>
+		<p class="police-30 mb-0" id="typeRccm_value">{{ formalite.typeRccm }}</p>
+		<p class="police-30 mb-0" id="denomination_value">{{ etablissement.denomination }} </p>
+		<p class="police-25 mb-0" id="sigle_value">{% if etablissement.sigle %} « {{ etablissement.sigle }} » {% endif %} </p>
+		<p class="police-18 mb-0">Siège : <span id="siege_value">{{ etablissement.siegeSocial }}</span> </p>
+		<p class="police-18 mb-0">( <span id="numRccm_value">RCCM/{{ formalite.rccm.numeroRccm }} du <span id="dateCreationRccm">{{ formalite.rccm.dateEnreg }}</span></span>) </p>
+		<p class="police-37 mb-0" ><span class="underline">DECLARATION MODIFICATIVE</span> </p>
+		<p class="police-37 mb-5" style=""><span class="underline">RELATIVE:</span> </p>
+
+		
+		{% for f in formalite.declarationModificative.all %}
+			<p class="police-37 mb-0" >
+				
+				
+
+					{% if f.id == 1 %}
+						<span style="text-align: center;" class="police-30 underline">AUX ACTIVITES 
+							(
+								{% for option in formalite.optionDeclaration.all %}
+									{% if option.declaration.id == f.id %}
+										{% if not forloop.first %}{% if forloop.last %}  {% else %}, {% endif %}{% endif %}
+										{{ option }}
+									{% endif %}
+								{% endfor %}
+							)
+						</span> 
+					{% elif  f.id == 2 %}
+						<span style="text-align: center;" class="police-30 underline">A LA DENOMINATION
+							(
+								{% for option in formalite.optionDeclaration.all %}
+									{% if option.declaration.id == f.id %}
+										{% if not forloop.first %}{% if forloop.last %} {% else %}, {% endif %}{% endif %}
+										{{ option }}
+									{% endif %}
+								{% endfor %}
+							)
+						</span>
+					{% elif f.id == 3 %}
+						<span style="text-align: center;" class="police-30 underline">AU SIEGE
+							(
+								{% for option in formalite.optionDeclaration.all %}
+									{% if option.declaration.id == f.id %}
+										{% if not forloop.first %}{% if forloop.last %}  {% else %}, {% endif %}{% endif %}
+										{{ option }}
+									{% endif %}
+								{% endfor %}
+							)
+						</span>
+					{% elif f.id == 4 %}
+						<span style="text-align: center;" class="police-30 underline">A LA PERSONNE POUVANT ENGAGER L'ASSUJETTIE
+							(
+								{% for option in formalite.optionDeclaration.all %}
+									{% if not forloop.first %}{% if forloop.last %}  {% else %}, {% endif %}{% endif %}
+									
+									{% if option.id == 9 %}
+										{{ option }} de {{ personne_physique.champsRectifier }}
+									{% else %}
+										{{ option }}
+									{% endif %}
+										
+								{% endfor %}
+							)
+						</span>
+					{% endif %}
+
+					{% for option in formalite.optionDeclaration.all %}
+					<div id="div-activite">
+						{% if option.id == 1 and f.id == option.declaration_id %}
+
+						
+							<p class="mb-0 p-0" style="text-align: center; ">
+								<span style="" class="police-25 underline">ACTIVITE(S) AJOUTÉE(S) :</span>
+								<span class="police-18">
+									{{ etablissement.activitesAjouter }}
+								</span>
+							</p>
+							
+						{% endif %}
+
+						{% if option.id == 2 and f.id == option.declaration_id %}
+							<p class="mb-0 p-2" style="text-align: center; ">
+								<span style="" class="police-25 underline">ACTIVITE(S) SUPPRIMEE(S) :</span>
+								<span class="police-18">
+									{{ etablissement.activitesSupprimer }}
+								</span>
+							</p>
+						
+						{% endif %}
+
+						{% if option.id == 3 and f.id == option.declaration_id %}
+							<p class="mb-0 p-0" style="text-align: center; ">
+								<span style="" class="police-25 underline">NOUVELLE DENOMINATION :</span>
+								<span class="police-25">
+									{{ etablissement.denomination }}
+								</span>
+							</p>
+							<p class="mb-0 p-0" style="text-align: center; ">
+								<span style="" class="police-25 underline">ANCIENNE DENOMINATION :</span>
+								<span class="police-25">
+									{{ etablissement.ancienDenomination }}
+								</span>
+							</p>
+						
+							
+						{% endif %}
+
+						{% if option.id == 4 and f.id == option.declaration_id %}
+							<p class="mb-0 p-2" style="text-align: center;">
+								<span style="" class="police-25 underline">NOUVEAU SIEGE :</span>
+								<span class="police-25">
+									{{ etablissement.nouvelleAdresse }}
+								</span>
+							</p>
+							<p class="mb-0 p-2" style="text-align: center;">
+								<span style="" class="police-25 underline">ANCIEN SIEGE :</span>
+								<span class="police-25">
+									{{ etablissement.ancienneAdresse }}
+								</span>
+							</p>
+						
+							
+						{% endif %}
+
+						{% for personne in personne_physique_engager %}
+							{% if option.id == 5 and personne.statut == '1' %}
+								<p class="mb-0 p-2" style="line-height: 1.0;text-align: center;">
+
+									<span style="" class="police-25 underline">LA PERSONNE NOMMÉE :</span>
+
+									<span class="police-25">
+										{{ personne.prenom }} {{ personne.nom }},
+										né(e) le <span>{{ personne.dateNaissance|date:"j F Y" }}</span>
+										à {{ personne.lieuNaissance }},
+										de nationalité {{ personne.nationnalite }},
+										domicilié(e) au quartier {{ personne.domicile }}.
+									</span>
+								</p>
+							{% endif %}
+
+							{% if option.id == 7 and personne.statut == '1' %}
+								<p class="mb-0 p-2" style="line-height: 1.0;text-align: center;">
+
+									<span style="" class="police-25 underline">LA PERSONNE NOMMÉE :</span>
+
+									<span class="police-25">
+										{{ personne.prenom }} {{ personne.nom }},
+										né(e) le <span>{{ personne.dateNaissance|date:"j F Y" }}</span>
+										à {{ personne.lieuNaissance }},
+										de nationalité {{ personne.nationnalite }},
+										domicilié(e) au quartier {{ personne.domicile }}.
+									</span>
+								</p>
+							{% endif %}
+
+							{% if option.id == 8 and personne.statut == '1' %}
+								<p class="mb-0 p-2" style="line-height: 1.0;text-align: center;">
+
+									<span style="" class="police-25 underline">LA PERSONNE NOMMÉE :</span>
+
+									<span class="police-25">
+										{{ personne.prenom }} {{ personne.nom }},
+										né(e) le <span>{{ personne.dateNaissance|date:"j F Y" }}</span>
+										à {{ personne.lieuNaissance }},
+										de nationalité {{ personne.nationnalite }},
+										domicilié(e) au quartier {{ personne.domicile }}.
+									</span>
+								</p>
+							{% endif %}
+
+							{% if option.id == 6 and personne.statut == '2' %}
+								<p class="mb-0 p-2" style="line-height: 1.0;text-align: center;">
+									<span style="" class="police-25 underline">LA PERSONNE RÉVOQUÉE :</span>
+
+									<span class="police-25">
+										{{ personne.prenom }} {{ personne.nom }},
+										né(e) le <span>{{ personne.dateNaissance|date:"j F Y" }}</span>
+										à {{ personne.lieuNaissance }},
+										de nationalité {{ personne.nationnalite }},
+										domicilié(e) au quartier {{ personne.domicile }}.
+									</span>
+								</p>
+							{% endif %}
+
+							{% if option.id == 7  and personne.statut == '3' %}
+								<p class="mb-0 p-2" style="line-height: 1.0;text-align: center;">
+									<span style="" class="police-25 underline">NOUVELLE PERSONNE PHYSIQUE ASSUJETTIE :</span>
+
+									<span class="police-25">
+										{{ personne.prenom }} {{ personne.nom }},
+										né(e) le <span>{{ personne.dateNaissance|date:"j F Y" }}</span>
+										à {{ personne.lieuNaissance }},
+										de nationalité {{ personne.nationnalite }},
+										domicilié(e) au quartier {{ personne.domicile }}.
+									</span>
+								</p>
+							{% endif %}
+
+							{% if option.id == 8 and personne.statut == '3' %}
+								<p class="mb-0 p-2" style="line-height: 1.0;text-align: center;">
+									<span style="" class="police-25 underline">NOUVELLE PERSONNE PHYSIQUE ASSUJETTIE :</span>
+
+									<span class="police-25">
+										{{ personne.prenom }} {{ personne.nom }},
+										né(e) le <span>{{ personne.dateNaissance|date:"j F Y" }}</span>
+										à {{ personne.lieuNaissance }},
+										de nationalité {{ personne.nationnalite }},
+										domicilié(e) au quartier {{ personne.domicile }}.
+									</span>
+								</p>
+							{% endif %}
+
+
+							{% if option.id == 7 and personne.statut == '1' %}
+								<p class="mb-0 p-2" style="line-height: 1.0;text-align: center;">
+									<span style="" class="police-25 underline">NOUVELLE PERSONNE PHYSIQUE ASSUJETTIE :</span>
+
+									<span class="police-25">
+										{{ personne.prenom }} {{ personne.nom }},
+										né(e) le <span>{{ personne.dateNaissance|date:"j F Y" }}</span>
+										à {{ personne.lieuNaissance }},
+										de nationalité {{ personne.nationnalite }},
+										domicilié(e) au quartier {{ personne.domicile }}.
+									</span>
+								</p>
+							{% endif %}
+
+							{% if option.id == 9 %}
+								<p class="mb-0 p-2" style="line-height: 1.0;text-align: center;">
+									<span style="" class="police-25 underline">Lire et écrire :</span>
+
+									<span class="police-25">
+										{{ personne_physique.prenom }} {{ personne_physique.nom }},
+										né(e) le <span>{{ personne_physique.dateNaissance|date:"j F Y" }}</span>
+										à {{ personne_physique.lieuNaissance }},
+										de nationalité {{ personne_physique.nationnalite }},
+										domicilié(e) au quartier {{ personne_physique.domicile }}.
+									</span>
+								</p>
+							{% endif %}
+
+
+						{% endfor %}
+
+
+					</div>
+						
+				{% endfor %}
+				
+			</p>
+
+			
+		{% endfor %}
+
+			
+		
+				
+		<p class="police-34 mb-5">N°FORMALITE/RCCM/<span id="numeroFormalite_value" style="text-transform: uppercase;">{{ formalite.numeroFormalite }}</span></p>
+		<p class="police-37">DATE : <span id="dateModification_value">{{ formalite.dateModification }}</span> </p>
+	</div>
+
+</div>
+
+
+

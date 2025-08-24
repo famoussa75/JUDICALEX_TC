@@ -1,0 +1,189 @@
+{% load static %}
+
+<header class="header">
+    <div class="header__inner">
+
+       <!-- Brand -->
+       <div class="header__brand">
+          <div class="brand-wrap">
+
+             <!-- Brand logo -->
+             <a href="{% url '_base.dashboard' %}" class="">
+                <img src="{% static '_base/assets/img/logo-judicalex.png' %}" alt="Logo" class="" height="40">
+             </a>
+
+
+
+             <!-- You can also use IMG or SVG instead of a text element. -->
+             <!--
+       <div class="brand-title">
+          <img src="{% static '_base/assets/img/brand-title.svg' %}" alt="Brand Title">
+       </div>
+       -->
+
+          </div>
+       </div>
+       <!-- End - Brand -->
+
+
+       <div class="header__content">
+
+          <!-- Content Header - Left Side: -->
+          <div class="header__content-start">
+
+
+             <!-- Navigation Toggler
+             <button type="button" class="nav-toggler header__btn btn btn-icon btn-sm" aria-label="Nav Toggler">
+                <i class="demo-psi-list-view"></i>
+             </button>  -->
+
+             <div class="vr mx-1 d-none d-md-block"></div>
+
+             <div class="brand-title"><img src="{% static '_base/assets/icons/clarity--balance-line.svg' %}" alt="" style="color: white;"> Tribunal de Commerce de Conakry</div>
+             
+            
+          </div>
+          <!-- End - Content Header - Left Side -->
+
+          
+          
+          <div class="flex-shrink-0 me-3">
+            {% if request.user.is_authenticated %}
+               {% if request.user.photo %}
+                  <img class="img-xs rounded-circle" src="{{ request.user.photo.url }}" alt="Profile Picture" loading="lazy">
+               {% else %}
+                  <img class="img-xs rounded-circle" src="{% static '_base/assets/img/profile-photos/1.png' %}" alt="Profile Picture" loading="lazy">
+               {% endif %}
+            {% endif %}
+
+          </div>
+          {% if request.user.is_authenticated %}
+            <span class="fs-5">👋 Bienvenue, <b>{{ request.user.first_name }} {{ request.user.last_name }}</b> !</span>
+         {% endif %}
+
+         <div class="dropdown">
+
+            <!-- Toggler -->
+            <button class="header__btn btn btn-icon btn-sm" type="button" data-bs-toggle="dropdown" aria-label="Notification dropdown" aria-expanded="true">
+               <span class="d-block position-relative">
+                  <i class="demo-psi-bell"></i>
+
+                  <span class="badge badge-super rounded-pill bg-danger p-1">
+                     <span class="visually-hidden">unread messages</span>
+                  </span>
+
+                  <!-- Set custom notification count -->
+                  <!--
+                  <span class="badge badge-super rounded-pill bg-danger p-1">
+                     19<span class="visually-hidden">unread messages</span>
+                  </span>
+                  -->
+
+               </span>
+            </button>
+
+
+            <!-- Notification dropdown menu -->
+            <div class="dropdown-menu dropdown-menu-end w-md-300px" style="position: absolute; inset: 0px 0px auto auto; margin: 0px; transform: translate3d(-0.5px, 37.5px, 0px);" data-popper-placement="bottom-end">
+               <div class="border-bottom px-3 py-2 mb-3">
+                  <h5>Notifications</h5>
+               </div>
+
+
+               <div class="list-group list-group-borderless">
+
+
+                  <!-- List item -->
+                  <div class="list-group-item list-group-item-action d-flex align-items-center mb-3">
+                     <div class="flex-shrink-0 me-3">
+                        <i class="demo-psi-data-settings text-danger fs-2"></i>
+                     </div>
+                     <div class="flex-grow-1">
+                        <a href="#" class="h6 fw-normal d-block mb-0 stretched-link text-decoration-none">Your storage is full</a>
+                        <small class="text-body-secondary">Local storage is nearly full.</small>
+                     </div>
+                  </div>
+
+
+                  <!-- List item -->
+                  <div class="list-group-item list-group-item-action d-flex align-items-center mb-3">
+                     <div class="flex-shrink-0 me-3">
+                        <i class="demo-psi-pen-5 text-info fs-2"></i>
+                     </div>
+                     <div class="flex-grow-1">
+                        <a href="#" class="h6 fw-normal d-block mb-0 stretched-link text-decoration-none">Writing a New Article</a>
+                        <small class="text-body-secondary">Wrote a news article for the John Mike</small>
+                     </div>
+                  </div>
+
+
+                  <!-- List item -->
+                  <div class="list-group-item list-group-item-action d-flex align-items-start mb-3">
+                     <div class="flex-shrink-0 me-3">
+                        <i class="demo-psi-speech-bubble-3 text-success fs-2"></i>
+                     </div>
+                     <div class="flex-grow-1">
+                        <div class="d-flex justify-content-between align-items-start">
+                           <a href="#" class="h6 fw-normal mb-0 stretched-link text-decoration-none">Comment sorting</a>
+                           <span class="badge bg-info rounded ms-auto">NEW</span>
+                        </div>
+                        <small class="text-body-secondary">You have 1,256 unsorted comments.</small>
+                     </div>
+                  </div>
+
+
+                  <!-- List item -->
+                  <div class="list-group-item list-group-item-action d-flex align-items-start mb-3">
+                     <div class="flex-shrink-0 me-3">
+                        <img class="img-xs rounded-circle" src="./assets/img/profile-photos/7.png" alt="Profile Picture" loading="lazy">
+                     </div>
+                     <div class="flex-grow-1">
+                        <a href="#" class="h6 fw-normal d-block mb-0 stretched-link text-decoration-none">Lucy Sent you a message</a>
+                        <small class="text-body-secondary">30 minutes ago</small>
+                     </div>
+                  </div>
+
+
+                  <!-- List item -->
+                  <div class="list-group-item list-group-item-action d-flex align-items-start mb-3">
+                     <div class="flex-shrink-0 me-3">
+                        <img class="img-xs rounded-circle" src="./assets/img/profile-photos/3.png" alt="Profile Picture" loading="lazy">
+                     </div>
+                     <div class="flex-grow-1">
+                        <a href="#" class="h6 fw-normal d-block mb-0 stretched-link text-decoration-none">Jackson Sent you a message</a>
+                        <small class="text-body-secondary">1 hours ago</small>
+                     </div>
+                  </div>
+
+                  <div class="text-center mb-2">
+                     <a href="#" class="btn-link text-primary icon-link icon-link-hover">
+                        Show all Notifications
+                        <i class="bi demo-psi-arrow-out-right"></i>
+                     </a>
+                  </div>
+
+               </div>
+            </div>
+         </div>
+
+          <!-- Content Header - Right Side: -->
+          <div class="header__content-end">
+
+             <div class="vr mx-1 d-none d-md-block"></div>
+
+             <div class="form-check form-check-alt form-switch mx-md-2">
+                <input id="headerThemeToggler" class="form-check-input mode-switcher" type="checkbox" role="switch">
+                <label class="form-check-label ps-1 fw-bold d-none d-md-flex align-items-center " for="headerThemeToggler">
+                   <i class="mode-switcher-icon icon-light demo-psi-sun fs-5"></i>
+                   <i class="mode-switcher-icon icon-dark d-none demo-psi-half-moon"></i>
+                </label>
+             </div>
+
+             <div class="vr mx-1 d-none d-md-block"></div>
+
+             <span><i class="demo-pli-information"></i>&nbsp;&nbsp;Support</span>
+
+          </div>
+       </div>
+    </div>
+ </header>

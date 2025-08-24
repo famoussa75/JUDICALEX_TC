@@ -1,0 +1,291 @@
+  
+{% extends 'rccm/layout.html' %}
+
+{% load static %}
+{% block pageStyle %}
+
+    
+{% endblock pageStyle %}
+    
+
+
+{% block title %}Signature{% endblock title %}
+
+{% block content %}
+{% load static %}
+ 
+<style>
+  .disabled {
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+</style>
+ 
+
+  <section id="content" class="content">
+    <div class="content__header content__boxed rounded-0">
+       <div class="content__wrap mb-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+               <li class="breadcrumb-item fs-4"><a href="#" class="nav-toggler" aria-label="Nav Toggler">Menu</a></li>
+               <li class="breadcrumb-item fs-4"><a href="{% url 'rccm.list' %}" class="nav-toggler" aria-label="Nav Toggler">Déclaration modificative</a></li>
+               <li class="breadcrumb-item active fs-4" aria-current="page">Signature</li>
+            </ol>
+         </nav>
+ 
+       </div>
+ 
+    </div>
+   
+ 
+    <div class="content__boxed">
+       <div class="content__wrap">
+          <div class="col-md-12">
+            <div class="ds-dwt-content ds-dwt-center">
+              <form method="post" enctype="multipart/form-data"  id="upload-form" class="row"> 
+                {% csrf_token %}
+               <div class="col-md-12">
+                  <!-- Colonne 2 : PDF Upload -->
+                  <div class="col-md-12">
+                     <label for="upload_input" class="form-label fs-4">Importez le document scanné ici.</label>
+                     <div class="row">
+                      <div class="col-md-6">
+                        {{ formalite_signer.formaliteSignee }}
+                        <input type="hidden" name="slugFormalite" value="{{ formalite_slug }}">
+                      </div>
+                      <div class="col-md-4">
+                          <button type="submit" class="btn btn-primary" id="saveButton" >Enregistrer</button>
+                       </div>
+
+                     </div>
+                  </div>
+               </div>
+             
+            
+              </form>
+                <div id="DWTcontainerTop">
+                  <div id="divEdit">
+                    <ul class="operateGrp">
+                      <li>
+                        <div class="menuIcon RemoveSelectedImages" style="margin-left: 5px;" title="Remove current page"
+                          alt="Remove current page" id="DW_btnRemoveCurrentImage" onclick="btnRemoveCurrentImage_onclick();"></div>
+                      </li>
+                      <li>
+                        <div class="menuIcon RemoveAllImages" title="Remove all pages" alt="Remove all pages"
+                          id="DW_btnRemoveAllImages" onclick="btnRemoveAllImages_onclick();"></div>
+                      </li>
+                      <li style="width:90px;"></li>
+                      <li class="lblShowCurrentImage"><input type="text" size="2" id="DW_CurrentImage" readonly="readonly">/<input
+                          type="text" size="2" id="DW_TotalImage" readonly="readonly"></li>
+                      <li class="lblZoom">
+                        <ul>
+                          <li style="width:25%">
+                            <div class="menuIcon ZoomOut" title="Zoom out" alt="Zoom out" id="btnZoomOut"
+                              onclick="btnZoomOut_onclick();"></div>
+                          </li>
+                          <li style="width:50%"><input type="text" id="DW_spanZoom" readonly="readonly"></li>
+                          <li style="width:25%">
+                            <div class="menuIcon ZoomIn" title="Zoom in" alt="Zoom in" id="btnZoomIn"
+                              onclick="btnZoomIn_onclick();"></div>
+                          </li>
+                        </ul>
+                      </li>
+                      <li>
+                        <div style="margin-left: 10px;" class="menuIcon OrigSize" title="1:1" alt="1:1" id="btnOrigSize"
+                          onclick="btnOrigSize_onclick();"></div>
+                        <div class="menuIcon FitWindow" title="Fit To Window" alt="Fit To Window" id="btnFitWindow"
+                          style="display:none" onclick="btnFitWindow_onclick()"></div>
+                      </li>
+                      <li style="width:50px;"></li>
+                      <li>
+                        <div class="menuIcon RotateLeft" title="Rotate left" alt="Rotate left" id="btnRotateL"
+                          onclick="btnRotateLeft_onclick()"></div>
+                      </li>
+                      <li>
+                        <div class="menuIcon grayimg Crop" title="Please select an area to crop."
+                          alt="Please select an area to crop." id="btnCropGray"></div>
+                        <div class="menuIcon Crop" title="Crop" alt="Crop" id="btnCrop" style="display:none"
+                          onclick="btnCrop_onclick();"></div>
+                      </li>
+                      <li>
+                        <div class="menuIcon ShowEditor" title="Show image editor" alt="Show image editor" id="btnShowImageEditor"
+                          onclick="btnShowImageEditor_onclick();"></div>
+                      </li>
+                      <li style="margin-top:0">
+                        <div class="menuIcon SelectSelected" title="Select" alt="Select" id="btnSelect_selected"></div>
+                        <div class="menuIcon Select" style="display:none;" title="Select" alt="Select" id="btnSelect"
+                          onclick="btnSelect_onclick();"></div>
+                      </li>
+                      <li style="margin-top:0">
+                        <div class="menuIcon HandSelected" style="display:none;" title="Hand" alt="Hand" id="btnHand_selected">
+                        </div>
+                        <div class="menuIcon Hand" title="Hand" alt="Hand" id="btnHand" onclick="btnHand_onclick();"></div>
+                      </li>
+                    </ul>
+                  </div>
+                  <div id="dwtcontrolContainer"></div>
+                </div>
+                <div id="ScanWrapper">
+                  <div id="divScanner" class="divinput">
+                    <ul>
+                      <li>
+                        <div class="divType">
+                          <i class="demo-psi-printer fs-2"></i>&nbsp;&nbsp;Paramètre du scanner
+                        </div>
+                        <div id="div_ScanImage" class="divTableStyle">
+                          <ul id="ulScaneImageHIDE">
+                            <li>
+                              <label for="source">
+                                <p>Selectionner une source:</p>
+                              </label>
+                              <select size="1" id="source" style="position:relative;" onchange="source_onchange()">
+                                <option value=""></option>
+                              </select>
+                            </li>
+                            <li id="divProductDetail">
+                              <ul id="divTwainType">
+                                <li>
+                                  <label style="width: 165px;" id="lblShowUI" for="ShowUI"><input type="checkbox" id="ShowUI" />Show
+                                    Scanner UI&nbsp;</label>
+                                  <label for="ADF"><input type="checkbox" id="ADF" />ADF&nbsp;</label></li>
+                                <li><label style="width: 165px;" for="DiscardBlankPage"><input type="checkbox"
+                                      id="DiscardBlankPage" />Suprimer page vierge</label>
+                                  <label for="Duplex"><input type="checkbox" id="Duplex" />Recto Verso</label></li>
+                                <li>
+                                  <span>Type Pixel:</span>
+                                  <label for="BW" style="margin-left:5px;" class="lblPixelType"><input type="radio" id="BW"
+                                      name="PixelType" />B&amp;W </label>
+                                  <label for="Gray" class="lblPixelType"><input type="radio" id="Gray"
+                                      name="PixelType" />Gris</label>
+                                  <label for="RGB" class="lblPixelType"><input type="radio" id="RGB"
+                                      name="PixelType" />Couleur</label></li>
+                                <li>
+                                  <span>Resolution:</span><select size="1" id="Resolution">
+                                    <option value="100">100</option>
+                                    <option value="150">150</option>
+                                    <option value="200" selected>200</option>
+                                    <option value="300">300</option>
+                                  </select></li>
+                              </ul>
+                            </li>
+                            <li>
+                              <input id="btnScan" class="btnScanGray" disabled="disabled" type="button" value="Numériser"
+                                onclick="acquireImage();" />
+                              <a id="btnLoad" class="btnLoadAndSave" onclick="return btnLoadImagesOrPDFs_onclick()">Importer un document ></a>
+                            </li>
+                          </ul>
+                          <div id="divNoScanners" style="visibility:hidden;">
+                            <a href="javascript: void(0)" class="ClosetblLoadImage"><img class="imgClose" src="{% static 'rccm/assets/scanner/Images/Close.png' %}"
+                                alt="Close" /></a>
+                            <img src="{% static 'rccm/assets/scanner/Images/Warning.png' %}" />
+                            <span class="spanContent">
+                              <p class="contentTitle">No TWAIN compatible drivers detected</p>
+                              <p class="contentDetail">You can Install a Virtual Scanner:</p>
+                              <p class="contentDetail"><a id="samplesource32bit"
+                                  href="https://download.dynamsoft.com/tool/twainds.win32.installer.2.1.3.msi">32-bit Sample
+                                  Source</a> <a id="samplesource64bit" style="display:none;"
+                                  href="https://download.dynamsoft.com/tool/twainds.win64.installer.2.1.3.msi">64-bit Sample
+                                  Source</a> from <a target="_blank" href="http://www.twain.org">TWG</a></p>
+                            </span>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
+            
+                  <div id="divUpload" class="divinput mt30">
+                    <ul>
+                      <li>
+                        <div class="divType"><i class="demo-pli-data-storage fs-2"></i>&nbsp;&nbsp; Sauvegarde</div>
+                      </li>
+                    </ul>
+                  </div>
+                  <div id="tabCon" class="divinput mt30">
+                    <div id="divSaveDetail">
+                      <ul>
+                        <li>
+                          <p>Nom du fichier:</p>
+                          <input type="text" size="20" id="txt_fileName" /><span> . </span>
+                          <select size="1" id="fileType" style="position:relative;width: 25%;" onchange="fileType_onchange();">
+                            <option value="pdf" selected>pdf</option>
+                            <option value="tif">tif</option>
+                            <option value="jpg">jpg</option>
+                            <option value="png">png</option>
+                            <option value="bmp">bmp</option>
+                          </select>
+                        </li>
+                        <li>
+                          Pages:
+                          <label for="CurrentPage" style="margin-left:5px;"><input type="radio" id="CurrentPage"
+                              name="Pages" />Page Actuelle </label>
+                          <label for="AllPages"><input type="radio" id="AllPages" name="Pages" checked />Toutes les pages</label>
+                        </li>
+                        <li style="margin-top: 15px;" class="mb-2">
+                          <span><b style="color: brown;">INFO : </b>Assurez-vous de bien enregistrer le document scanné avant de passer à l'étape suivante.</span>
+                        </li>
+                        <li>
+                          <a type="button" class="btn btn-primary rounded-pill" id="btnSave" style=""  onclick="saveUploadImage('local')"><i class="demo-pli-file"></i>&nbsp;Enregistrer sur le disque local</a>
+                        </li>
+                       
+                      </ul>
+                    </div>
+                    <div id="divUploadedFiles" style="display:none;">
+                      <div id="resultWrap"></div>
+                    </div>
+                  </div>
+            
+                  <div id="DWTdivMsg" class="clearfix">
+                    <span class="lblMessage">Message:</span><br />
+                    <div id="DWTemessage"></div>
+                  </div>
+                </div>
+              </div>
+            
+          </div>
+       </div>
+    </div>
+ 
+ 
+    {% include 'rccm/tools/footer.html' %}
+ 
+ </section>
+ 
+ <script>
+   $(document).ready(function() {
+        $('#nav-rccm').addClass('bg-primary text-white');
+        $('#txt-rccm').addClass('text-white');
+
+    });
+ </script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    document.getElementById("btnSave").addEventListener("click", function () {
+      document.getElementById("saveButton").disabled = false
+    });
+  });
+</script>
+
+
+<script src="{% static 'rccm/assets/scanner/Resources/dynamsoft.webtwain.config.js' %}?t=170607"></script>
+<script src="{% static 'rccm/assets/scanner/Resources/dynamsoft.webtwain.initiate.js' %}?t=170607"></script>
+<script src="{% static 'rccm/assets/scanner/Resources/addon/dynamsoft.webtwain.addon.pdf.js' %}?t=170607"></script>
+
+<script src="{% static 'rccm/assets/scanner/Scripts/common.js' %}?t=170607"></script>
+<script src="{% static 'rccm/assets/scanner/Scripts/jquery.js' %}?t=170607"></script>
+<script>
+  var strUploadFileActionPage = "https://demo.dynamsoft.com/sample-uploads/";
+</script>
+<script src="{% static 'rccm/assets/scanner/Scripts/online_demo_operation.js' %}?t=170607"></script>
+<script src="{% static 'rccm/assets/scanner/Scripts/online_demo_initpage.js' %}?t=170607"></script>
+<script>
+  
+  $(function () {
+    pageonload();
+  });
+</script>
+
+
+
+{% endblock %}

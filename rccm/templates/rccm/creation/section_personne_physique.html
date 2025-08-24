@@ -1,0 +1,116 @@
+                      <!-- personne_physique section -->
+                      <section data-step="personne_physique">
+
+                        <legend class="w-auto fs-4">RENSEIGNEMENTS RELATIFS A LA PERSONNE PHYSIQUE</legend>
+                        <hr>
+                        <div class="row g-3">
+                           <fieldset class=" p-3 mb-4 row">
+                              <div class="col-md-3 mb-3">
+                                 <label for="" class="form-label label-required">Titre</label>
+                                 {{ personnePhysiqueForm.titreCivil }}
+                              </div>
+                              <div class="col-md-5 mb-3">
+                                 <label for="" class="form-label label-required">Prenom</label>
+                                 {{ personnePhysiqueForm.prenom }}
+                              </div>
+                              <div class="col-md-4 mb-3">
+                                 <label for="" class="form-label label-required">Nom</label>
+                                 {{ personnePhysiqueForm.nom }}
+                              </div>
+                              <div class="col-md-4 mb-3">
+                                 <label for="" class="form-label label-required">Situation matrimoniale</label>
+                                 {{ personnePhysiqueForm.situationMatrimoniale }}
+                              </div>
+                              <div class="col-md-4 mb-3">
+                                 <label for="" class="form-label label-required">Date de naissance</label>
+                                 {{ personnePhysiqueForm.dateNaissance }}
+                              </div>
+                              <div class="col-md-4 mb-3">
+                                 <label for="" class="form-label label-required">Lieu de naissance</label>
+                                 {{ personnePhysiqueForm.lieuNaissance }}
+                              </div>
+                              <div class="col-md-4 mb-3">
+                                 <label for="" class="form-label label-required">Nationnalité</label>
+                                 {{ personnePhysiqueForm.nationnalite }}
+                              </div>
+                              <div class="col-md-4 mb-3">
+                                 <label for="" class="form-label">Adresse postale</label>
+                                 {{ personnePhysiqueForm.adressePostale }}
+                              </div>
+                              <div class="col-md-4 mb-3">
+                                 <label for="" class="form-label label-required">Telephone</label>
+                                 {{ personnePhysiqueForm.telephone }}
+                              </div>
+                              <div class="col-md-4 mb-3">
+                                 <label for="" class="form-label label-required">Domicile personnel</label>
+                                 {{ personnePhysiqueForm.domicile }}
+                              </div>
+                              <div class="col-md-4 mb-3">
+                                 <label for="" class="form-label label-required">Ville</label>
+                                 {{ personnePhysiqueForm.ville }}
+                              </div>
+                              <div class="col-md-4 mb-3">
+                                 <label for="" class="form-label label-required">Quartier</label>
+                                 {{ personnePhysiqueForm.quartier }}
+                              </div>
+                              <div class="col-md-6 mb-3">
+                                 <label for="" class="form-label">Autres precisions</label>
+                                 {{ personnePhysiqueForm.autrePrecision }}
+                              </div>
+                              <div class="col-md-6 mb-3">
+                                 <label for="" class="form-label">Coordonnées électronique</label>
+                                 {{ personnePhysiqueForm.coordonneesElectro }}
+                              </div>
+                           </fieldset>
+                        </div>
+
+                     </section>
+
+                     <section data-step="etablissement">
+                        <legend class="w-auto fs-4">RENSEIGNEMENTS RELATIFS AUX ACTIVITES ANTERIEURES ( Facultatifs )</legend>
+                        <hr>
+                        <div class="row g-3">
+                           <fieldset class=" p-3 mb-4 row">
+                              <div class="col-md-12 mb-3">
+                                 <label for="" class="form-label">Exercice d'une précédente activité</label>
+                                 {{ activiteAnterieureForm.activite_precedente }}
+                              </div>
+                              <div class="col-md-6 mb-3">
+                                 <label for="" class="form-label">Nature de l'activité</label>
+                                 {{ activiteAnterieureForm.type_activite }}
+                              </div>
+                              <div class="col-md-6 mb-3">
+                                 <label for="" class="form-label label-required">Détails sur l'autre activité</label>
+                                 {{ activiteAnterieureForm.details_autre_activite }}
+                              </div>
+                              <div class="col-md-6 mb-3">
+                                 <label for="" class="form-label">Période fin (mois et année)</label>
+                                 {{ activiteAnterieureForm.periode_fin }}
+                              </div>
+                              <div class="col-md-6 mb-3">
+                                 <label for="" class="form-label">Précédent RCCM (s'il y a lieu)</label>
+                                 {{ activiteAnterieureForm.rccm_precedent }}
+                              </div>
+                              <div class="col-md-6 mb-3">
+                                <label for="" class="form-label">RCCM principal (s'il y a lieu)</label>
+                                {{ activiteAnterieureForm.rccm_principal }}
+                             </div>
+                            
+                              <div class="col-md-6 mb-3">
+                                 <label for="" class="form-label">Établissement principal</label>
+                                 {{ activiteAnterieureForm.etablissement_principal }}
+                              </div>
+                              <div class="col-md-6 mb-3">
+                                 <label for="" class="form-label">Établissements secondaires</label>
+                                 {{ activiteAnterieureForm.etablissements_secondaires }}
+                              </div>
+                             
+                              <div class="col-md-6 mb-3">
+                                 <label for="" class="form-label">Adresse géographique et postale</label>
+                                 {{ activiteAnterieureForm.adresse }}
+                              </div>
+                             
+                           </fieldset>
+                        </div>
+
+                     </section>

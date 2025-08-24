@@ -1,0 +1,160 @@
+
+{% load static %}
+ <!-- Bouton pour importer un fichier Excel -->
+ <div class="alert alert-warning alert-dismissible fade show" role="alert">
+    <b><i class="fa fa-info-circle"></i> IMPORTANT !</b>
+    <p>Si vous préferez importer les affaires à partir d'une base <b>Excel</b>, Veuillez télécharger le modèle de base <a href="{% static '_base/assets_role/modeles_enrollements/Canevas-enrollement-tc.xlsx' %}">ici</a>.</p>
+    <p>Suivez les instructions élaborées dans le modèle pour remplir le fichier, Ensuite importez-le dans le champ ci-dessous pour remplir automatiquement le tableau .</p>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+ <div class="mb-3">
+    <label for="excelFile" class="form-label">Importer votre base Excel</label>
+    <input type="file" id="excelFile" class="form-control" accept=".xlsx, .xls">
+</div>
+
+<!-- Tableau dynamique pour afficher les formulaires du formset -->
+<table class="table table-bordered" >
+    <button type="button" name="add" id="dynamic-ar"
+        class="btn btn-outline-primary mb-2" title="Ajouter une ligne">
+        <i class="fa fa-plus"></i>&nbsp;Ajouter
+    </button>
+    <thead>
+        <tr>
+            <th>N° Ordre</th>
+            <th>RG</th>
+            <th>Date d'enrollement</th>
+            <th>Demandeurs</th>
+            <th>Défendeurs</th>
+            <th>Objet</th>
+            <th>Date d'audience</th>
+        </tr>
+    </thead>
+    <tbody id="formset-body" >
+        <!-- Formset Django -->
+        {% for form_data in formset %}
+        <tr>
+            <td>{{ form_data.numOrdre }}</td>
+            <td>{{ form_data.numRg }}</td>
+            <td>{{ form_data.dateEnrollement }}</td>
+            <td>{{ form_data.demandeurs }}</td>
+            <td>{{ form_data.defendeurs }}</td>
+            <td>{{ form_data.objet }}</td>
+            <td>{{ form_data.dateAudience }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Gestion du formset -->
+{{ formset.management_form }}
+
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+
+<script>
+    
+let formIndex = 0; // Compteur global
+
+document.getElementById('excelFile').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    
+    reader.onload = function(e) {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+        let rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+
+        // Filtrer les lignes vides
+        rows = rows.filter(row => row.some(cell => cell !== null && cell !== undefined && cell !== ''));
+
+        // Effacer anciennes lignes
+        document.getElementById('formset-body').innerHTML = '';
+        formIndex = 0;
+
+        rows.slice(1).forEach(row => {
+            if (row.every(cell => cell === null || cell === '')) return;
+
+            const numOrdre = row[0] || '';
+            const numRg = row[1] || '';
+            const dateEnrollement = convertExcelDate(row[2]);
+            const demandeurs = row[3] || '';
+            const defendeurs = row[4] || '';
+            const objet = row[5] || '';
+            const dateAudience = convertExcelDate(row[6]);
+
+            // Fonction de conversion
+            function convertExcelDate(excelDate) {
+                    if (!excelDate) return ''; // Vide ou null
+
+                    let date;
+                    if (typeof excelDate === 'number') {
+                        // Date stockée au format Excel (nombre de jours depuis 1899-12-30)
+                        date = new Date((excelDate - 25569) * 86400 * 1000);
+                    } else {
+                        // Tente conversion à partir d'une chaîne
+                        date = new Date(excelDate);
+                    }
+
+                    // Vérifier si la date est valide
+                    if (isNaN(date.getTime())) return '';
+
+                    return date.toISOString().split('T')[0];
+                }
+
+            const newRow = `
+                <tr>
+                    <td><input type="number" name="form-${formIndex}-numOrdre" value="${numOrdre}" class="form-control" required></td>
+                    <td><input type="text" name="form-${formIndex}-numRg" value="${numRg}" class="form-control" required></td>
+                    <td><input type="date" name="form-${formIndex}-dateEnrollement" value="${dateEnrollement}" class="form-control" required></td>
+                    <td><textarea rows="2" name="form-${formIndex}-demandeurs" class="form-control" required>${demandeurs}</textarea></td>
+                    <td><textarea rows="2" name="form-${formIndex}-defendeurs" class="form-control" required>${defendeurs}</textarea></td>
+                    <td><textarea rows="2" name="form-${formIndex}-objet" class="form-control" required>${objet}</textarea></td>
+                    <td><input type="date" name="form-${formIndex}-dateAudience" value="${dateAudience}" class="form-control" required></td>
+                    <td><button type="button" class="btn btn-outline-danger remove-input-field"><i class="fa fa-trash"></i></button></td>
+                </tr>`;
+
+            document.getElementById('formset-body').insertAdjacentHTML('beforeend', newRow);
+            formIndex++;
+        });
+
+        console.log(formIndex);
+        // Mettre à jour le total
+        $('#id_form-TOTAL_FORMS').val(formIndex);
+    };
+
+    reader.readAsArrayBuffer(file);
+});
+
+</script>
+
+
+    
+
+<script type="text/javascript">
+    $(document).ready(function() {
+
+        $("#dynamic-ar").click(function() {
+            const newRow = `
+                <tr>
+                    <td><input type="number" name="form-${formIndex}-numOrdre" value="${formIndex+1}" class="form-control" required></td>
+                    <td><input type="text" name="form-${formIndex}-numRg" class="form-control" required></td>
+                    <td><input type="date" name="form-${formIndex}-dateEnrollement" class="form-control" required></td>
+                    <td><textarea rows="2" name="form-${formIndex}-demandeurs" class="form-control" required></textarea></td>
+                    <td><textarea rows="2" name="form-${formIndex}-defendeurs" class="form-control" required></textarea></td>
+                    <td><textarea rows="2" name="form-${formIndex}-objet" class="form-control" required></textarea></td>
+                    <td><input type="date" name="form-${formIndex}-dateAudience" class="form-control" required></td>
+                    <td><button type="button" class="btn btn-outline-danger remove-input-field"><i class="fa fa-trash"></i></button></td>
+                </tr>`;
+            $("#formset-body").append(newRow);
+
+            formIndex++;
+            $("#id_form-TOTAL_FORMS").val(formIndex);
+        });
+
+
+    });
+</script>
+
+

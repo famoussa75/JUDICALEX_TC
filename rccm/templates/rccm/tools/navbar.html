@@ -1,0 +1,171 @@
+{% load static %}
+
+<nav id="mainnav-container" class="mainnav">
+    <div class="mainnav__inner">
+
+       <!-- Navigation menu -->
+       <div class="mainnav__top-content scrollable-content pb-5">
+
+
+          <!-- Profile Widget -->
+          <div id="_dm-mainnavProfile" class="mainnav__widget my-3 hv-outline-parent">
+
+             <!-- Profile picture  -->
+             <div class="mininav-toggle text-center py-2">
+               {% if request.user.is_authenticated %}
+                  {% if request.user.photo %}
+                     <img class="mainnav__avatar img-md rounded-circle hv-oc" src="{{ request.user.photo.url }}" alt="Profile Picture">
+                  {% else %}
+                     <img class="mainnav__avatar img-md rounded-circle hv-oc" src="{% static '_base/assets/img/profile-photos/1.png' %}" alt="Default Profile Picture">
+                  {% endif %}
+               {% endif %}
+             </div>
+
+
+             <div class="mininav-content collapse d-mn-max">
+                <span data-popper-arrow class="arrow"></span>
+                <div class="d-grid">
+
+                  {% if request.user.is_authenticated %}               
+                   <!-- User name and position -->
+                   <button class="mainnav-widget-toggle d-block btn border-0 p-2" data-bs-toggle="collapse" data-bs-target="#usernav" aria-expanded="false" aria-controls="usernav">
+                      <span class="dropdown-toggle d-flex justify-content-center align-items-center">
+                         <h5 class="mb-0 me-3">{{ request.user.first_name }}</h5>
+                      </span>
+                      <small class="text-body-secondary">{{ request.user.poste }}</small>
+                   </button>
+
+                   {% endif %}
+
+
+                   <!-- Collapsed user menu -->
+                   <div id="usernav" class="nav flex-column collapse">
+               
+                      <a href="{% url 'profile' %}" class="nav-link">
+                         <i class="demo-pli-male fs-5 me-2"></i>
+                         <span class="ms-1">Mon compte</span>
+                      </a>
+                      <!-- <a href="#" class="nav-link">
+                         <i class="demo-pli-gear fs-5 me-2"></i>
+                         <span class="ms-1">Paramètre</span>
+                      </a> -->
+               
+                      <a href="{% url 'logout' %}" class="nav-link">
+                         <i class="demo-pli-unlock fs-5 me-2"></i>
+                         <span class="ms-1">Se déconnecter</span>
+                      </a>
+                   </div>
+
+
+                </div>
+             </div>
+
+          </div>
+          <!-- End - Profile widget -->
+
+          <hr class="mt-0 mb-0">
+
+          <!-- Navigation Category -->
+          <div class="mainnav__categoriy py-3">
+
+               <!-- List Group -->
+               <div class="list-group list-group-borderless">
+                  <div class="list-group-item list-group-item-action d-flex align-items-start mb-4" id="nav-accueil">
+                     <div class="flex-shrink-0 me-3">
+                        <i class="demo-pli-home fs-1"></i>
+                     </div>
+                     <div class="flex-grow-1">
+                        <div class="d-flex justify-content-between align-items-start">
+                           <a href="{% url 'rccm.dashboard' %}" class="h5 d-block mb-0 stretched-link text-decoration-none" id="txt-accueil">Accueil</a>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="list-group-item list-group-item-action d-flex align-items-start mb-3" id="nav-modification">
+                     <div class="flex-shrink-0 me-3">
+                        <i class="demo-pli-pen-5 fs-1"></i>
+                     </div>
+                     <div class="flex-grow-1">
+                        <div class="d-flex justify-content-between align-items-start">
+                           <a href="{% url 'rccm.modification' %}" class="h5 d-block mb-0 stretched-link text-decoration-none" id="txt-modification">Modification</a>
+                        </div>
+                        <small class="text-body-secondary">Pour modifier les informations d'un rccm.</small>
+                     </div>
+                  </div>
+
+                  <div class="list-group-item list-group-item-action d-flex align-items-start mb-3">
+                     <div class="flex-shrink-0 me-3">
+                        <i class="demo-pli-close fs-1"></i>
+                     </div>
+                     <div class="flex-grow-1">
+                        <a href="#" class="h5 d-block mb-0 stretched-link text-decoration-none text-body-secondary">Radiation</a>
+                        <small class="text-body-secondary">Pour radier une entreprise.</small>
+                     </div>
+                  </div>
+
+                  <div class="list-group-item list-group-item-action d-flex align-items-start mb-3">
+                     <div class="flex-shrink-0 me-3">
+                        <i class="demo-pli-download-from-cloud fs-1"></i>
+                     </div>
+                     <div class="flex-grow-1">
+                        <a href="#" class="h5 d-block mb-0 stretched-link text-decoration-none text-body-secondary">Dissolution</a>
+                        <small class="text-body-secondary">Pour dissoudre une entreprise.</small>
+                     </div>
+                  </div>
+
+                  <div class="list-group-item list-group-item-action d-flex align-items-start mb-3">
+                     <div class="flex-shrink-0 me-3">
+                        <i class="demo-pli-trash fs-1"></i>
+                     </div>
+                     <div class="flex-grow-1">
+                        <a href="#" class="h5 d-block mb-0 stretched-link text-decoration-none text-body-secondary">Liquidation</a>
+                        <small class="text-body-secondary">Procedure de Liquidation d'une entreprise.</small>
+                     </div>
+                  </div>
+
+
+                  <div class="list-group-item list-group-item-action d-flex align-items-start" id="nav-rccm">
+                     <div class="flex-shrink-0 me-3">
+                        <i class="demo-pli-receipt-4 fs-1"></i>
+                     </div>
+                     <div class="flex-grow-1">
+                        <a href="{% url 'rccm.list' %}" class="h5 d-block mb-0 stretched-link text-decoration-none" id="txt-rccm">RCCMs</a>
+                        <small class="text-body-secondary">Liste à jour de tous les Rccms.</small>
+                     </div>
+                  </div>
+
+                  <div class="list-group-item list-group-item-action d-flex align-items-start" id="nav-rccm">
+                     <div class="flex-shrink-0 me-3">
+                        <i class="pli-arrow-back-3 fs-1"></i>
+                     </div>
+                     <div class="flex-grow-1">
+                        <a href="{% url '_base.dashboard' %}" class="h5 d-block mb-0 stretched-link text-decoration-none" id="txt-rccm">Menu principal</a>
+                        <small class="text-body-secondary">Retour au menu d'applications.</small>
+                     </div>
+                  </div>
+                  
+               </div>
+
+          </div>
+          <!-- END : Navigation Category -->
+
+
+       </div>
+       <!-- End - Navigation menu -->
+
+
+       <!-- Bottom navigation menu -->
+       <div class="mainnav__bottom-content border-top pb-3 pt-3">
+          <ul id="mainnav" class="mainnav__menu nav flex-column">
+             <li class="nav-item">
+                <a href="{% url 'logout' %}" class="h5 d-block mb-0 stretched-link text-decoration-none" aria-expanded="false">
+                   <i class="demo-pli-unlock fs-5 me-2"></i>
+                   <span class="nav-label ms-1">Se déconnecter</span>
+                </a>
+             </li>
+          </ul>
+       </div>
+       <!-- End - Bottom navigation menu -->
+
+
+    </div>
+ </nav>

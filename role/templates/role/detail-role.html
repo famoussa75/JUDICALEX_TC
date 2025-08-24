@@ -1,0 +1,161 @@
+{% extends 'role/layout.html' %}
+
+
+{% block title %}Détail rôle{% endblock title %}
+
+{% block content %}
+{% load static %}
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="page-body mt-4">
+            <div class="container-xl">
+                <div class="row g-3">
+                    <!-- <div class="col-2">
+                        <div class="card" style="padding: 8px;">
+                            <img src="" width="110" height="130" style="margin-left:17% ;" alt="Tabler" class="mb-3">
+                            <a href="" download="" class="btn btn-success btn-pill w-100"
+                                title="Telecharger le document original">
+                              
+                                <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
+                                    viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                    <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" />
+                                    <polyline points="7 11 12 16 17 11" />
+                                    <line x1="12" y1="4" x2="12" y2="16" />
+                                </svg> Telecharger
+                            </a>
+                        </div>
+                    </div> -->
+                    <div class="col-12 animate-bottom">
+                        <div class="card card-body">
+                            <div class="row">
+                                <div class="col-6">
+                                    <p class="h3" style="margin-bottom:-25px ;">{{role.juridiction}}</p>
+                                    <hr width="100" style="margin-left:60px ;">
+                                    <p class="h3" style="margin-top:-25px ;">{{role.section}}</p>
+                                </div>
+                                <div class="col-6 text-end">
+                                    <p class="h3">REPUBLIQUE DE GUINEE</p>
+                                    <address>
+                                        Travail - Justice - Solidarite<br>
+                                    </address>
+                                </div>
+                                <div class="col-12 my-5" style="text-align:center ;">
+                                    <p class="h3" style="margin-bottom:-20px ;text-decoration-line:underline">ROLE
+                                        D'AUDIENCE DU {{role.dateEnreg}}</p><br>
+                                    <p class="h3" style="margin-bottom:-20px ;text-decoration-line:underline">COMPOSITION DU
+                                        TRIBUNAL</p><br>
+                                    <p class="h3" style="margin-bottom:-20px ;"><span
+                                            style="text-decoration-line:underline">PRESIDENT(E) :</span>
+                                        <span>{{role.president}}</span>
+                                    </p>
+                                    <br>
+                                    <p class="h3" style="margin-bottom:-20px ;"><span
+                                            style="text-decoration-line:underline">JUGE CONSULAIRE :</span>
+                                        <span>{{role.juge}}</span>
+                                    </p><br>
+                                    <p class="h3" style="margin-bottom:-20px ;"><span
+                                            style="text-decoration-line:underline">GREFFIERE(E) :</span>
+                                        <span>{{role.greffier}}</span>
+                                    </p><br>
+    
+                                </div>
+                            </div>
+                            <table class="table table-transparent table-responsive">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center" style="width: 1%">N°</th>
+                                        <th class="text-center" style="width: 5%">N° RG</th>
+                                        <th>Partie 1</th>
+                                        <th>Partie 2</th>
+                                        <th>Partie 3</th>
+                                        <th>Objet</th>
+                                        <th class="text-center" style="width: 1%">Action</th>
+                                    </tr>
+                                </thead>
+    
+                                
+                                {% for affaire in detailRole  %}
+                                                                    
+                                <tr>
+                                    <td class="text-center">{{affaire.numOrdre}}</td>
+                                    <td class="text-center">{{affaire.numRg}}</td>
+                                    <td>
+                                        <p class="strong mb-1">{{affaire.demandeurs}}</p>
+                                    </td>
+                                    <td>
+                                        <p class="strong mb-1">{{affaire.defendeurs}}</p>
+                                    </td>
+                                    <td>
+                                        <p class="strong mb-1">{{affaire.partie3}}</p>
+                                    </td>
+                                    <td> {{affaire.objet}}</td>
+                                    <td class="text-end">
+                                        <div class="dropdown">
+                                            <a href="#" class="card-dropdown" data-bs-toggle="dropdown"
+                                                aria-expanded="false">
+                                                <!-- Download SVG icon from http://tabler-icons.io/i/dots-vertical -->
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
+                                                    viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                                                    stroke-linecap="round" stroke-linejoin="round">
+                                                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                                    <circle cx="12" cy="12" r="1"></circle>
+                                                    <circle cx="12" cy="19" r="1"></circle>
+                                                    <circle cx="12" cy="5" r="1"></circle>
+                                                </svg>
+                                            </a>
+                                            <div class="dropdown-menu dropdown-menu-end">
+                                                <a href="#" class="dropdown-item">
+                                                    <!-- Download SVG icon from http://tabler-icons.io/i/arrow-forward-up -->
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24"
+                                                        height="24" viewBox="0 0 24 24" stroke-width="2"
+                                                        stroke="currentColor" fill="none" stroke-linecap="round"
+                                                        stroke-linejoin="round">
+                                                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                                        <path d="M15 13l4 -4l-4 -4m4 4h-11a4 4 0 0 0 0 8h1" />
+                                                    </svg>&nbsp;Suivre
+                                                </a>
+                                                <a href="#" class="dropdown-item">
+                                                    <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24"
+                                                        height="24" viewBox="0 0 24 24" stroke-width="2"
+                                                        stroke="currentColor" fill="none" stroke-linecap="round"
+                                                        stroke-linejoin="round">
+                                                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                                        <line x1="12" y1="5" x2="12" y2="19" />
+                                                        <line x1="5" y1="12" x2="19" y2="12" />
+                                                    </svg>&nbsp;Decision
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+    
+                            </table>
+                            <div class="row">
+                                <div class="col-6">
+    
+                                </div>
+                                <div class="col-6 text-end">
+                                    <p class="h5">Conakry, {{role.created_at}}</p>
+                                    <address style="font-size:12px ;">
+                                        La Greffiere
+                                    </address>
+                                </div>
+                            </div>
+                            
+    
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+    </div>
+</section>
+
+
+{% endblock %}

@@ -1,0 +1,568 @@
+
+<!doctype html>
+
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  {% load static %}
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <title>Judicalex - Guinee</title>
+
+
+  <!-- CSS files -->
+ {% include 'role/styles.html' %}
+
+</head>
+<style>
+.modal-back {
+  display: block;
+}
+</style>
+
+
+<body onload="myFunction()">
+  <div class="wrapper">
+      
+    
+    {% if user.is_authenticated %}
+
+       {% include 'role/navbar/admin-navbar.html' %}
+
+    {% else %}
+
+      {% include 'role/navbar/admin-navbar.html' %}
+        
+    {% endif %}
+
+   
+
+    <!-- Flash Messages -->
+    {% if messages %}
+      <div 
+        id="flash-message"
+        class="">
+        {% for message in messages %}
+          {% if message.tags == "error" %}
+          <div class="alert alert-danger alert-dismissible fade show rounded-5" role="alert">
+            <strong style="font-size: 1.3rem;">{{ message }}</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+          
+          {% elif message.tags == "success" %}
+          <div class="alert alert-success alert-dismissible fade show rounded-5" role="alert">
+            <strong style="font-size: 1.3rem;">
+              {{ message }}
+              <i class="fa fa-check-circle"></i>
+            </strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    {% endif %}
+   
+
+
+    {% block content %}{% endblock %}
+
+    {% include 'role/footer.html' %}
+
+
+  </div>
+  <!-- Javascripts -->
+  {% include 'role/scripts.html' %}
+
+  
+
+   <!-- Modal login -->
+  <div id="modal-login" tabindex="-1" role="dialog" aria-hidden="true" {% if request.GET.msg_error_login %} aria-modal="true"  class="modal modal-blur fade modal-back show" {% else %} class="modal modal-blur fade" {% endif %}>
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+      <div class="modal-content" >
+        <div class="modal-header">
+          <a href="#" class="navbar-brand navbar-brand-autodark">
+            <img src="{% static 'start/assets/statics/eJustice_Logo_white.png' %}" width="110" height="32" alt="Logo"
+                class="navbar-brand-image">
+          </a>
+          <button type="button" class="btn-close" id="closeModalBtn" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        
+            
+          <form class="card card-md"  method="POST" action="{% url 'login' %}" >
+            {% csrf_token %}
+              <div class="card-body" style="box-shadow: rgba(0, 0, 0, 0.25) 0px 25px 50px -12px;">
+
+                 
+                  <div class="row">
+                    <div class="col-5" style="text-align: center;">
+                      <img src="{% static 'start/assets/statics/illustrations/login.svg' %}" alt="" height="300px">
+                    </div>
+                    <div class="col-7">
+                      <h1 class="text-center mb-4" >
+                        <!-- Download SVG icon from http://tabler-icons.io/i/user -->
+                          <i class="fa fa-user"></i>
+                           Connectez-Vous
+                      </h1>
+
+                          {% if request.GET.msg_error_login %}
+                         
+                          <div class="" >
+                            <div class="alert alert-danger" role="alert" data-mdb-color="danger">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-circle-letter-x" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="red" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
+                                <path d="M10 8l4 8" />
+                                <path d="M10 16l4 -8" />
+                              </svg>
+                              {{ request.GET.msg_error_login }}
+                            </div>
+                          </div>
+                        {% endif %}
+                      
+                        <div class="mb-4">
+                            <label class="form-label required">
+                                <!-- Download SVG icon from http://tabler-icons.io/i/mail -->
+                              <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><rect x="3" y="5" width="18" height="14" rx="2" /><polyline points="3 7 12 13 21 7" /></svg>
+                                Email
+                            </label>
+                            <input id="email" type="email" class="form-control"
+                                name="email" required autocomplete="email" autofocus>                
+                        </div>
+                        <div class="mb-2">
+                            <label class="col-12 row form-label required">
+                                <span class="col-6">
+                                    <!-- Download SVG icon from http://tabler-icons.io/i/lock -->
+                              <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><rect x="5" y="11" width="14" height="10" rx="2" /><circle cx="12" cy="16" r="1" /><path d="M8 11v-4a4 4 0 0 1 8 0v4" /></svg>
+                                Mot de passe
+                                </span>
+                              
+                                <span class="col-6 form-label-description text-end">
+                                    <a class="btn btn-link" href="{% url 'forgot_password' %}">
+                                      Mot de passe oublié?
+                                    </a>
+                                </span>
+                              
+                            </label>
+                            <div class="input-group input-group-flat">
+                                <input id="password" type="password" class="form-control" name="password" required autocomplete="current-password">
+                                <span class="input-group-text">
+                                    <a href="#" class="link-secondary" id="togglePassword" title="Afficher le mot de passe" data-bs-toggle="tooltip">
+                                        <!-- Icône œil -->
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
+                                            viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                            <circle cx="12" cy="12" r="2" />
+                                            <path d="M22 12c-2.667 4.667 -6 7 -10 7s-7.333 -2.333 -10 -7
+                                                    c2.667 -4.667 6 -7 10 -7s7.333 2.333 10 7" />
+                                        </svg>
+                                    </a>
+                                </span>
+                            </div>
+                          
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-check">
+                                <input class="form-check-input" type="checkbox" name="remember" id="remember" >
+                                <span class="form-check-label">Se rappeler de moi</span>
+                            </label>
+                        </div>
+                        <div class="form-footer">
+                            <button type="submit" class="btn btn-primary w-20">Connexion</button>
+                          
+                        </div>
+                        <div class="text-muted mt-3">
+                            Vous n'avez pas de compte ? <a href="#" tabindex="-1" data-bs-toggle="modal" data-bs-target="#modal-register">S'inscrire</a>
+                        </div>
+                        <div class="d-flex align-items-center text-muted">
+                          <hr class="flex-grow-1">
+                          <span class="px-2">ou</span>
+                          <hr class="flex-grow-1">
+                        </div>
+                        
+                        <div class="text-center">
+                          <a href="#" style="
+                          display: inline-flex;
+                          align-items: center;
+                          padding: 8px 16px;
+                          border-radius: 30px;
+                          background-color: #db4437;
+                          color: white;
+                          text-decoration: none;
+                          font-size: 16px;
+                        ">
+                          <span style="
+                            display: inline-flex;
+                            justify-content: center;
+                            align-items: center;
+                            width: 32px;
+                            height: 32px;
+                            border-radius: 50%;
+                            background-color: white;
+                            color: #db4437;
+                            margin-right: 10px;
+                          ">
+                            <i class="fab fa-google"></i>
+                          </span>
+                          Se connecter avec Google
+                        </a>
+                        
+                        </div>
+                    </div>
+                </div>
+              </div>
+
+
+          </form>
+    
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Register -->
+  <div id="modal-register" tabindex="-1" role="dialog" aria-hidden="true" {% if request.GET.msg_error_register %} aria-modal="true"  class="modal modal-blur fade modal-back show" {% else %} class="modal modal-blur fade" {% endif %}>
+  <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+    <div class="modal-content" >
+      <div class="modal-header">
+        <a href="#" class="navbar-brand navbar-brand-autodark">
+          <img src="{% static 'start/assets/statics/eJustice_Logo_white.png' %}" width="110" height="32" alt="Logo"
+              class="navbar-brand-image">
+        </a>
+        <button type="button" class="btn-close" id="closeModalBtn2" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      
+          
+        <form class="card card-md"  method="POST" action="{% url 'register' %}" >
+          {% csrf_token %}
+            <div class="card-body" style="box-shadow: rgba(0, 0, 0, 0.25) 0px 25px 50px -12px;">       
+                <div class="row">
+                  <div class="col-5" style="text-align: center;">
+                    <img src="{% static 'start/assets/statics/illustrations/register.svg' %}" alt="" height="300px">
+                  </div>
+                  <div class="col-7">
+                    <h1 class="text-center mb-4" >
+                      <!-- Download SVG icon from http://tabler-icons.io/i/user -->
+                        <i class="fa fa-pencil"></i>
+                          Inscrivez-vous
+                    </h1>
+
+                        {% if request.GET.msg_error_register %}
+                        
+                        <div class="" >
+                          <div class="alert alert-danger" role="alert" data-mdb-color="danger">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-circle-letter-x" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="red" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                              <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                              <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
+                              <path d="M10 8l4 8" />
+                              <path d="M10 16l4 -8" />
+                            </svg>
+                            {{ request.GET.msg_error_register }}
+                          </div>
+                        </div>
+                      {% endif %}
+                    
+                      <div class="mb-3">
+                        <label class="form-label required">
+                            Prenom
+                        </label>
+                        <input id="firstname" type="text" class="form-control"
+                            name="first_name" value="" required autocomplete="name" autofocus>
+    
+                     </div>
+                     <div class="mb-3">
+                      <label class="form-label required">
+                          Nom
+                      </label>
+                      <input id="name" type="text" class="form-control"
+                          name="last_name" value="" required autocomplete="name" autofocus>
+  
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label required">
+                          <!-- Download SVG icon from http://tabler-icons.io/i/user -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><circle cx="12" cy="7" r="4" /><path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" /></svg>
+                          Nom d'utilisateur
+                      </label>
+                      <input id="name" type="text" class="form-control"
+                          name="username" value="" required autocomplete="name" autofocus>
+
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label required">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><rect x="3" y="5" width="18" height="14" rx="2" /><polyline points="3 7 12 13 21 7" /></svg>
+                            Email
+                        </label>
+                        <input id="email" type="email" class="form-control"
+                            name="email" value="" required autocomplete="email">
+    
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label required">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><rect x="5" y="11" width="14" height="10" rx="2" /><circle cx="12" cy="16" r="1" /><path d="M8 11v-4a4 4 0 0 1 8 0v4" /></svg>
+                            Mot de passe
+                        </label>
+                        <div class="input-group input-group-flat">
+                            <input id="password1" type="password"
+                                class="form-control" name="password" required
+                                autocomplete="new-password">
+                              
+                           
+                            <span class="input-group-text">
+                                <a href="#" class="link-secondary"  id="togglePassword1" title="Show password" data-bs-toggle="tooltip">
+                                    <!-- Download SVG icon from http://tabler-icons.io/i/eye -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
+                                        viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                                        stroke-linecap="round" stroke-linejoin="round">
+                                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                        <circle cx="12" cy="12" r="2" />
+                                        <path
+                                            d="M22 12c-2.667 4.667 -6 7 -10 7s-7.333 -2.333 -10 -7c2.667 -4.667 6 -7 10 -7s7.333 2.333 10 7" />
+                                    </svg>
+                                </a>
+                            </span>
+                              <small class="form-text text-muted">
+                                  Le mot de passe doit comporter au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.
+                              </small>
+                             
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label required">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><rect x="5" y="11" width="14" height="10" rx="2" /><circle cx="12" cy="16" r="1" /><path d="M8 11v-4a4 4 0 0 1 8 0v4" /></svg>
+                            Confirmer le mot de passe
+                        </label>
+                        <div class="input-group input-group-flat">
+                            <input id="password-confirm" type="password" class="form-control"
+                                name="confirm_password" required autocomplete="new-password">
+    
+    
+                            <span class="input-group-text">
+                                <a href="#" class="link-secondary"  id="togglePassword2" title="Show password" data-bs-toggle="tooltip">
+                                    <!-- Download SVG icon from http://tabler-icons.io/i/eye -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
+                                        viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                                        stroke-linecap="round" stroke-linejoin="round">
+                                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                        <circle cx="12" cy="12" r="2" />
+                                        <path
+                                            d="M22 12c-2.667 4.667 -6 7 -10 7s-7.333 -2.333 -10 -7c2.667 -4.667 6 -7 10 -7s7.333 2.333 10 7" />
+                                    </svg>
+                                </a>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-check">
+                            <input type="checkbox" class="form-check-input" required />
+                            <span class="form-check-label">Acceptez les <a href=""
+                                    tabindex="-1">termes et conditions</a>.</span>
+                        </label>
+                    </div>
+                  
+                    <!-- <div class="text-center text-muted mt-3">
+                        <span style="color:red">Ce compte sera le compte super admin du site</span>
+                    </div> -->
+                  
+                    <!-- <input id="privilege" type="hidden" class="form-control" name="privilege" value="visiteur"> -->
+                   
+                    <input id="juridiction" type="hidden" class="form-control" name="juridiction" value="">
+                      <div class="form-footer">
+                          <button type="submit" class="btn btn-primary w-20">S'inscrire</button>
+                      </div>
+                      <div class="text-muted mt-3">
+                          Avez-vous déjà un compte ? <a href="#" tabindex="-1" data-bs-toggle="modal" data-bs-target="#modal-login">Se connecter</a>
+                      </div>
+                      <div class="d-flex align-items-center text-muted">
+                        <hr class="flex-grow-1">
+                        <span class="px-2">ou</span>
+                        <hr class="flex-grow-1">
+                      </div>
+                      
+                      <div class="text-center">
+                        <a href="#" style="
+                        display: inline-flex;
+                        align-items: center;
+                        padding: 8px 16px;
+                        border-radius: 30px;
+                        background-color: #db4437;
+                        color: white;
+                        text-decoration: none;
+                        font-size: 16px;
+                      ">
+                        <span style="
+                          display: inline-flex;
+                          justify-content: center;
+                          align-items: center;
+                          width: 32px;
+                          height: 32px;
+                          border-radius: 50%;
+                          background-color: white;
+                          color: #db4437;
+                          margin-right: 10px;
+                        ">
+                          <i class="fab fa-google"></i>
+                        </span>
+                        Se connecter avec Google
+                      </a>
+                  </div>
+              </div>
+            </div>
+
+
+        </form>
+  
+    </div>
+  </div>
+  </div>
+
+  <script>
+    document.getElementById('togglePassword').addEventListener('click', function (e) {
+        e.preventDefault();
+        const passwordInput = document.getElementById('password');
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+
+        // Optionnel : changer le tooltip et l'icône (si tu veux aussi switcher vers une icône "œil barré")
+        this.setAttribute('title', type === 'password' ? 'Afficher le mot de passe' : 'Masquer le mot de passe');
+    });
+
+    document.getElementById('togglePassword1').addEventListener('click', function (e) {
+        e.preventDefault();
+        const passwordInput = document.getElementById('password1');
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+
+        // Optionnel : changer le tooltip et l'icône (si tu veux aussi switcher vers une icône "œil barré")
+        this.setAttribute('title', type === 'password' ? 'Afficher le mot de passe' : 'Masquer le mot de passe');
+    });
+
+    document.getElementById('togglePassword2').addEventListener('click', function (e) {
+        e.preventDefault();
+        const passwordInput = document.getElementById('password-confirm');
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+
+        // Optionnel : changer le tooltip et l'icône (si tu veux aussi switcher vers une icône "œil barré")
+        this.setAttribute('title', type === 'password' ? 'Afficher le mot de passe' : 'Masquer le mot de passe');
+    });
+
+</script>
+
+
+
+
+  <script>
+    document.getElementById('closeModalBtn').addEventListener('click', function () {
+
+      document.getElementById('modal-login').classList.remove('show');
+      document.getElementById('modal-login').classList.remove('modal-back');
+
+    });
+
+    document.getElementById('closeModalBtn2').addEventListener('click', function () {
+
+      document.getElementById('modal-register').classList.remove('show');
+      document.getElementById('modal-register').classList.remove('modal-back');
+
+      });
+
+      document.getElementById('select-all').addEventListener('change', function(e) {
+        let checkboxes = document.querySelectorAll('.row-checkbox');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = e.target.checked;
+        });
+    });
+
+  </script>
+
+  <script>
+
+document.getElementById('ne_pas_suivre_affaire').addEventListener('click', function(e) {
+            e.preventDefault();
+            let selected = [];
+            let checkboxes = document.querySelectorAll('.row-checkbox:checked');
+            checkboxes.forEach(checkbox => {
+                selected.push(checkbox.value);
+            });
+
+            if (selected.length > 0) {
+                fetch('/ne-pas-suivre-affaire/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({ selected: selected })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Success:', data);
+                    // handle success response
+                    if (data.status === 'success') {
+                      reloadPage();
+                    } 
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    // handle error response
+                });
+            } else {
+                alert('Aucun élément sélectionné.');
+            }
+        });
+
+        function reloadPage() {
+          // Méthode recommandée : location.reload(true)
+          location.reload(true);
+
+        }
+
+  </script>
+
+  <script>
+
+document.getElementById('suivre_affaire').addEventListener('click', function(e) {
+            e.preventDefault();
+            let selected = [];
+            let checkboxes = document.querySelectorAll('.row-checkbox:checked');
+            checkboxes.forEach(checkbox => {
+                selected.push(checkbox.value);
+            });
+
+            if (selected.length > 0) {
+                fetch('/suivre-affaire/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({ selected: selected })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Success:', data);
+                    // handle success response
+                    if (data.status === 'success') {
+                      reloadPage();
+                    } 
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    // handle error response
+                });
+            } else {
+                alert('Aucun élément sélectionné.');
+            }
+        });
+
+        function reloadPage() {
+          // Méthode recommandée : location.reload(true)
+          location.reload(true);
+
+        }
+  </script>
+    
+</body>
+
+</html>

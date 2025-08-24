@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light" data-scheme="teal">
+   {% load static %}
+
+
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1">
+   <meta name="description" content="Nifty is a responsive admin dashboard template based on Bootstrap 5 framework. There are a lot of useful components.">
+  
+   
+   <title> {% block title %}  {% endblock title %} </title>
+
+
+   <!-- STYLESHEETS -->
+   {% include '_base/tools/css.html' %}
+
+   {% block pageStyle %} {% endblock pageStyle %}
+
+
+
+</head>
+
+<body class="out-quart">
+
+   <!-- PAGE CONTAINER -->
+   <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+   <div id="root" class="root mn--push sb--unite sb--pinned tm--expanded-hd">
+
+      <!-- CONTENTS -->
+      {% block content %} {% endblock content %}
+        
+
+      <!-- HEADER -->
+      {% include '_base/tools/header.html' %}
+     
+
+      <!-- MAIN NAVIGATION -->
+      {% include '_base/tools/navbar.html' %}
+
+
+
+   </div>
+
+
+   <!-- JAVASCRIPTS -->
+   {% include '_base/tools/js.html' %}
+
+
+</body>
+
+</html>

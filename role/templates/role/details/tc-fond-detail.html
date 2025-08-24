@@ -1,0 +1,314 @@
+{% extends 'role/layout.html' %}
+
+
+{% block title %}Details du role{% endblock title %}
+
+{% block content %}
+{% load static %}
+
+<section class="content">
+    <div class="content__header rounded-0">
+        <div class="content__wrap">
+          <h1 class="text-center my-2"><i class="pli-calendar-4 fs-1"></i> Gestion des rôles</h1>
+          <p class="text-center mb-4">Gerez les rôles d'audiences du tribunal</p>
+          <nav aria-label="breadcrumb" style="font-size: 18px;">
+            <ol class="breadcrumb">
+               <li class="breadcrumb-item"><a href="{% url 'role.index' %}">Accueil</a></li>
+               <li class="breadcrumb-item"><a href="{% url 'role.liste' %}">Rôles d'audiences</a></li>
+               <li class="breadcrumb-item active" aria-current="page">Rôle</li>
+            </ol>
+         </nav>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+      
+        <div class="page-body mt-4">
+            <div class="container-fluid">
+                <div class="row g-3">
+                    <!-- <div class="col-2">
+                        <div class="card" style="padding: 8px;">
+                            <img src="" width="110" height="130" style="margin-left:17% ;" alt="Tabler" class="mb-3">
+                            <a href="" download="" class="btn btn-success btn-pill w-100"
+                                title="Telecharger le document original">
+                              
+                                <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
+                                    viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                    <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" />
+                                    <polyline points="7 11 12 16 17 11" />
+                                    <line x1="12" y1="4" x2="12" y2="16" />
+                                </svg> Telecharger
+                            </a>
+                        </div>
+                    </div> -->
+                    <div class="col-12 animate-bottom">
+                        <div class="card card-body">
+                            <div class="row">
+                                <div class="col-3 text-center">
+                                    <p class="h3" style="margin-bottom:-25px ;">COUR D'APPEL DE CONAKRY</p><br>
+                                    <p style="margin-bottom:-10px ;">..............</p><br>
+                                    <p class="h3">Tribunal du Commerce de Conakry</p>
+                                    <p class="h3">{{role.section}}</p><br>
+                                    <div class="mt-4">
+                                        
+                                        {% if role.statut == 'Valider' %}
+                                            <a href="#" class="btn btn-secondary {% if not is_chef %}disabled{% endif %}">
+                                                <!-- Download SVG icon from http://tabler-icons.io/i/x -->
+                                                <i class="fa fa-check"></i>
+                                                Déjà validé
+                                            </a>
+                                        {% else %}
+                                            <a href="{% url 'role.valider' role.id %}" class="btn btn-success {% if not is_chef %}disabled{% endif %}" >
+                                                <!-- Download SVG icon from http://tabler-icons.io/i/x -->
+                                                <i class="fa fa-check"></i>
+                                                Valider ce rôle
+                                            </a>
+                                            
+                                        {% endif %}
+                                            
+                                       
+                                        &nbsp;&nbsp;
+                                        <a href="#" class="btn btn-danger {% if not is_chef %}disabled{% endif %}" data-bs-toggle="modal" id="" data-bs-target="#modal-danger" aria-label="" >
+                                            <!-- Download SVG icon from http://tabler-icons.io/i/x -->
+                                            <i class="fa fa-trash" ></i>
+                                            Supprimer ce rôle
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="col-6"></div>
+                                <div class="col-3 text-center">
+                                    <p class="h3">REPUBLIQUE DE GUINEE</p>
+                                    <address>
+                                        Travail - Justice - Solidarite<br>
+                                    </address>
+                                    {% if role.statut == 'En-attente' %}
+                                        <span class="badge bg-warning rounded fs-6"><i class="fa fa-clock"></i> En attente</span>
+                                    {% else %}
+                                        <span class="badge bg-success rounded fs-6"><i class="fa fa-check"></i> Validé</span>
+                                    {% endif %}
+                                </div>
+                                <div class="col-12 my-5" style="text-align:center ;">
+                                    <p class="h3" style="margin-bottom:-10px ;text-decoration-line:underline">ROLE D'AUDIENCE DU FOND DU {{role.dateEnreg}}</p><br>
+                                    <p class="h3" style="margin-bottom:-10px ;text-decoration-line:underline;">COMPOSITION
+                                        DU
+                                        TRIBUNAL</p><br>
+                                    <p class="h3" style="margin-bottom:-10px;margin-right: 28px;"><span
+                                            style="text-decoration-line:underline;">PRESIDENT(E) :</span>
+                                        <span>{{role.president}}</span>
+                                     
+                                    </p>
+                                   
+                                    <br>
+                                    <p class="h3" style="margin-bottom:-10px ;margin-right: 35px;"><span
+                                            style="text-decoration-line:underline">JUGES CONSULAIRES :</span>
+                                        <span>{{role.juge}}</span>
+                                       
+                                    </p><br>
+    
+                                    <p class="h3" style="margin-bottom:-10px ;margin-right: 45px;"><span
+                                            style="text-decoration-line:underline">GREFFIER(E) :</span>
+                                        <span>{{role.greffier}}</span>
+                                      
+                                    </p><br>
+    
+                                </div>
+                            </div>
+                            <div class="card-header">
+                                <!-- <span class="dropdown">
+                                    <button class="btn dropdown-toggle align-text-top show" data-bs-boundary="viewport" data-bs-toggle="dropdown" aria-expanded="true">Actions</button>
+                                    <div class="dropdown-menu dropdown-menu-end " data-popper-placement="bottom-end" style="position: absolute; inset: 0px 0px auto auto; margin: 0px; transform: translate3d(97px, 38px, 0px);">
+                                        <a href="#" class="dropdown-item" id="suivre_affaire">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24"
+                                                height="24" viewBox="0 0 24 24" stroke-width="2"
+                                                stroke="currentColor" fill="none" stroke-linecap="round"
+                                                stroke-linejoin="round">
+                                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                                <path d="M15 13l4 -4l-4 -4m4 4h-11a4 4 0 0 0 0 8h1" />
+                                            </svg>&nbsp;Suivre
+                                        </a>
+                                        <a href="#" class="dropdown-item" id="ne_pas_suivre_affaire">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                                            &nbsp;Ne plus suivre
+                                         </a>
+                                       
+                                    </div>
+                                </span> -->
+                              
+                                 <!-- Champ de recherche -->
+                                 <form class="d-flex align-items-center ms-auto" method="get" style="max-width: 500px;">
+                                    {% csrf_token %}
+                                    <input type="text" class="form-control me-2" name="search" id="recherche-objet" placeholder="Rechercher un objet..." style="flex: 1;">
+                                    <button class="btn btn-primary" type="submit">
+                                        Rechercher
+                                    </button>
+                                </form>
+                            </div>
+                            <table class="table table-transparent table-responsive">
+                               
+                                <thead>
+                                    <tr>
+                                      
+                                        <th class="text-center" style="width: 5%; font-size:12px;">N° D'ordre</th>
+                                        <th class="text-center" style="width: 5%; font-size:12px;">NUA</th>
+                                        <th class="text-center" style="width: 5%; font-size:12px;">RG</th>
+                                        <th style="font-size:12px;">Demandeurs</th>
+                                        <th style="font-size:12px;">Défendeurs</th>
+                                        <th style="font-size:12px;">Objet</th>
+                                        <th style="font-size:12px;">Décisions</th>
+                                    </tr>
+                                </thead>
+    
+    
+                                {% for affaire in page_obj %}
+    
+                                <tr>
+                                   
+                                    <td class="text-center">{{affaire.numOrdre}}</td>
+                                    <td class="text-center"><b>{{affaire.numAffaire}}</b></td>
+                                    <td class="text-center">{{affaire.numRg}}</td>
+                                    <td>
+                                        <p class="strong mb-1">{{affaire.demandeurs}}</p>
+                                    </td>
+                                    <td>
+                                        <p class="strong mb-1">{{affaire.defendeurs}} </p>
+                                    </td>
+                                    <td>
+                                        <p class="strong mb-1">{{affaire.objet}}</p>
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'affaires.details' affaire.idAffaire %}" title="décisions">
+                                            Voir les décisions
+                                            <!-- Download SVG icon from http://tabler-icons.io/i/arrow-big-right -->
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24"
+                                                height="24" viewBox="0 0 24 24" stroke-width="2"
+                                                stroke="currentColor" fill="none" stroke-linecap="round"
+                                                stroke-linejoin="round">
+                                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                                <path
+                                                    d="M4 9h8v-3.586a1 1 0 0 1 1.707 -.707l6.586 6.586a1 1 0 0 1 0 1.414l-6.586 6.586a1 1 0 0 1 -1.707 -.707v-3.586h-8a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1z" />
+                                            </svg>
+                                        </a>
+                                    </td>
+                                  
+                                </tr>
+                                {% endfor %}
+    
+                            </table>
+                            <div class="pagination mt-3 d-flex justify-content-center">
+                                <nav aria-label="Page navigation">
+                                    <ul class="pagination">
+                                        {% if page_obj.has_previous %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Précédent</a>
+                                            </li>
+                                        {% else %}
+                                            <li class="page-item disabled"><span class="page-link">Précédent</span></li>
+                                        {% endif %}
+                            
+                                        {% for num in page_obj.paginator.page_range %}
+                                            {% if page_obj.number == num %}
+                                                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                                <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                                            {% endif %}
+                                        {% endfor %}
+                            
+                                        {% if page_obj.has_next %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Suivant</a>
+                                            </li>
+                                        {% else %}
+                                            <li class="page-item disabled"><span class="page-link">Suivant</span></li>
+                                        {% endif %}
+                                    </ul>
+                                </nav>
+                            </div>
+                            <div class="row">
+                                <div class="col-6">
+    
+                                </div>
+                                <div class="col-6 text-end">
+                                    <p class="h5">Conakry, {{ role.created_at|date:"j F Y" }}</p>
+                                    <address style="font-size:12px ;">
+                                        Le/La Greffier(e)
+                                    </address>
+                                </div>
+                            </div>
+    
+    
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+    </div>
+</section>
+
+
+<script>
+
+    function updateRole(name,value,type) {
+        $('#field').val('').attr('name', '').attr('type', '');
+        $('#field').val(value).attr('name', name).attr('type', type);
+
+    }
+
+    function updateAffaire(name,value,type,idAffaire) {
+        $('#field').val('').attr('name', '').attr('type', '');
+        $('#idAffaire').val('');
+
+        $('#field').val(value).attr('name', name).attr('type', type);
+        $('#idAffaire').val(idAffaire);
+    }
+    
+</script>
+
+
+<!-- Modal alerte suppression -->
+<div class="modal modal-blur fade" id="modal-danger"  tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+    <form class="card card-md" method="POST" action="{% url 'role.delete' %}" id="updateForm">
+        {% csrf_token %}
+        <div class="modal-content">
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-status bg-danger"></div>
+            <div class="modal-body text-center py-4">
+            <!-- Download SVG icon from http://tabler-icons.io/i/alert-triangle -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon mb-2 text-danger icon-lg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M12 9v2m0 4v.01"></path><path d="M5 19h14a2 2 0 0 0 1.84 -2.75l-7.1 -12.25a2 2 0 0 0 -3.5 0l-7.1 12.25a2 2 0 0 0 1.75 2.75"></path></svg>
+            <h3>Êtes-vous sûre?</h3>
+            <div class="text-muted">Cette action supprimera definitivement ce rôle d'audience.</div>
+            <input  type="hidden" class="form-control" name="idRole" value="{{role.id}}">
+
+            </div>
+            <div class="modal-footer">
+            <div class="w-100">
+                <div class="row">
+                <div class="col"><a href="#" class="btn w-100" data-bs-dismiss="modal">
+                    Annuler
+                    </a></div>
+                <div class="col">
+                    <button  type="submit" class="btn btn-danger w-100" data-bs-dismiss="modal">
+                    Supprimer
+                    </button>
+                </div>
+                </div>
+            </div>
+            </div>
+        </div>
+      </form>
+    </div>
+</div>
+
+<script>
+
+    $(document).ready(function () {
+        $('#nav-role').addClass('bg-primary text-white');
+        $('#txt-role').addClass('text-white');
+    });
+    
+    </script>
+    
+{% endblock %}

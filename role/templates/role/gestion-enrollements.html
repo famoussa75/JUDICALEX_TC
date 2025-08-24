@@ -1,0 +1,404 @@
+{% extends 'role/layout.html' %}
+
+
+{% block title %}Enrollement{% endblock title %}
+    
+{% block content %}
+
+{% load static %}
+
+<style>
+    .bg-danger-light {
+         background-color: #f8d7da; /* Rouge clair */
+    }
+
+</style>
+
+<section class="content">
+    <div class="content__header rounded-0">
+        <div class="content__wrap">
+          <h1 class="text-center my-2"><i class="demo-pli-pen-5 fs-1"></i> Gestion d'enrollements</h1>
+          <p class="text-center mb-4">Gerez les rôles d'audiences du tribunal</p>
+          <nav aria-label="breadcrumb" style="font-size: 18px;">
+            <ol class="breadcrumb">
+               <li class="breadcrumb-item"><a href="{% url 'role.index' %}">Accueil</a></li>
+               <li class="breadcrumb-item active" aria-current="page">Enrollement</li>
+            </ol>
+         </nav>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="p-2">
+
+            <!-- Page title -->
+            <div class="page-header d-print-none mt-4">
+                <div class="row align-items-center mb-2">
+                    <div class="col-md-4">
+                        <!-- Page pre-title -->
+                        <h1 class="" style="color:white">
+                            <span class="text-primary"><i class="fa fa-book"></i> Registre d'enrollement</span>
+                        </h1>
+                    </div>
+                    <!-- Page title actions -->
+                    <div class="col-auto ms-auto d-print-none">
+                        <div class="btn-list">
+
+                            <a href="{% url 'role.createEnrollement' %}" class="btn btn-primary d-none d-sm-inline-block">
+                                <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
+                                <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                    <line x1="12" y1="5" x2="12" y2="19" />
+                                    <line x1="5" y1="12" x2="19" y2="12" />
+                                </svg>
+                                Nouvelle(s) affaire(s)
+                            </a>
+                            <a href="#" class="btn btn-primary d-sm-none btn-icon" data-bs-toggle="modal" data-bs-target="#modal-report" aria-label="Create new report">
+                                <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
+                                <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                    <line x1="12" y1="5" x2="12" y2="19" />
+                                    <line x1="5" y1="12" x2="19" y2="12" />
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- <div class="alert alert-success alert-dismissible mt-3" role="alert">
+                <div class="d-flex">
+                    <div>
+                        
+                    </div>
+                    <div>
+                        <h4 class="alert-title">Felicitation !</h4>
+                        <div class="text-muted"> Message</div>
+                    </div>
+                </div>
+                <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+            </div><br /> -->
+           
+        </div>
+        <div class="page-body">
+            <div class="p-2">
+                <div class="row row-deck row-cards">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                               
+                                <div class="row">
+                                    <div class="col-md-2">
+                                        <h3 class="card-title">
+                                            <!-- Download SVG icon from http://tabler-icons.io/i/menu-2 -->
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                                <line x1="4" y1="6" x2="20" y2="6" />
+                                                <line x1="4" y1="12" x2="20" y2="12" />
+                                                <line x1="4" y1="18" x2="20" y2="18" />
+                                            </svg> Affaires enrollées
+                                        </h3>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <form method="get" action="">
+                                            <div class="input-group">
+                                                <button class="btn btn-primary" type="button">Année</button>
+                                                <select name="year" class="form-select" onchange="this.form.submit()">
+                                                    <option value="" disabled>Années</option>
+                                                    {% for y in available_years %}
+                                                        <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>
+                                                    {% endfor %}
+                                                    </select>
+                                                </div>
+                                        </form>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <form method="get" action="">
+                                            <div class="input-group">
+                                                <input type="text" name="q" class="form-control" placeholder="Rechercher..." value="{{ request.GET.q }}">
+                                                <input type="hidden" name="year" value="{{ selected_year }}">
+                                                <button class="btn btn-primary" type="submit">Rechercher</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div class="col-md-4 text-end">
+                                        <!-- Bouton Excel -->
+                                        <a href="{% url 'export_enrollements_excel' user.juridiction_id %}?year={{ selected_year }}&q={{ request.GET.q }}" class="btn btn-success">
+                                            <i class="fa fa-file-excel"></i> Exporter Excel
+                                        </a>
+                                        <!-- Bouton PDF -->
+                                        <a href="{% url 'export_enrollements_pdf' user.juridiction_id %}?year={{ selected_year }}&q={{ request.GET.q }}" class="btn btn-danger ms-2">
+                                            <i class="fa fa-file-pdf"></i> Exporter PDF
+                                        </a>
+                                    </div>
+                                    
+                                </div>
+                                
+                             
+
+                            </div>
+                            <div class="card-body border-bottom py-3">
+                            
+                                <div class="table-responsive">
+                                    <table class="table table-striped align-middle">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col" style="width:5px ;">No.Ordre</th>
+                                                <th scope="col" style="width:5px ;">NUA</th>
+                                                <th scope="col" style="width:10px ;">RG</th>
+                                                <th scope="col" style="text-align: center;">Type d'audience</th>
+                                                <th scope="col" style="text-align: center;">Date d'Enrollement</th>
+                                                <th scope="col" style="text-align: center;">Date d'audience</th>
+                                                <th scope="col" style="text-align: center;">Demanderesse</th>
+                                                <th scope="col" style="text-align: center;">Defenderesse</th>
+                                                <th scope="col" style="text-align: center;">Objet</th>
+                                                <th scope="col" style="text-align: center;">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        
+                                        {% for e in page_obj %}
+                                                                                
+                                        <tr id="row-{{ e.id }}" class="{% if e.statut == 'Annuler' %}bg-danger-light{% else %}bg-default{% endif %}">
+
+                                               
+                                                <td scope="col">
+                                                    {% if e.statut == 'Modifier' %}<a type="button" href="{% url 'historique_modifications_enrollement' e.id %}" class="btn btn-light btn-xs" >Modifiée</a> {% endif %} 
+                                                    {% if e.statut == 'Annuler' %}<a type="button" href="#" class="btn btn-danger btn-xs" >Annulée</a> {% endif %} 
+                                                    {{e.id}} 
+                                                </td>
+                                                <td scope="col"><b>{{e.numAffaire}}</b></td>
+                                                <td scope="col">{{e.numRg}}</td>
+                                                <td scope="col" style="text-align: center;">({{e.typeAudience}})</td>
+                                                <td scope="col" style="text-align: center;">{{e.dateEnrollement}}</td>
+                                                <td scope="col" style="text-align: center;">{{e.dateAudience}}</td>
+                                                <td scope="col" style="text-align: center;">{{ e.demandeurs }} </td>
+                                                <td scope="col" style="text-align: center;">{{ e.defendeurs }} </td>
+                                                <td scope="col" style="text-align: center;">{{e.objet}}</td>
+                                                <td class="text-center" style="width: 10%;">
+
+                                                    {% if e.statut == 'Annuler' %}
+                                                    
+                                                    <button type="button" class="btn btn-icon btn-warning rounded-circle" data-bs-toggle="modal" data-bs-target="#motifAffaireModal{{ e.id }}">
+                                                        <i class="fa fa-info fs-5"></i>
+                                                    </button>
+                                                    
+                                                    {% else %}
+
+                                                    <button type="button" class="btn btn-icon btn-info rounded-circle" data-bs-toggle="modal" data-bs-target="#editAffaireModal{{ e.id }}">
+                                                        <i class="demo-psi-pencil fs-5"></i>
+                                                    </button>
+                                                    &nbsp;
+                                                    <button type="button" class="btn btn-icon btn-danger rounded-circle" data-bs-toggle="modal" data-bs-target="#cancelAffaireModal{{ e.id }}">
+                                                        <i class="demo-pli-close fs-5"></i>
+                                                    </button>
+                                                  
+                                                    {% endif %}
+
+                                                    <button type="button" class="btn btn-icon btn-primary rounded-circle" onclick="printRow('{{ e.id }}')">
+                                                        <i class="demo-pli-printer fs-5"></i>
+                                                    </button>
+                                                    
+                                                     
+                                                </td>
+                                            </tr>
+
+                                             <!-- Modal motif annulation-->
+                                             <div class="modal fade" id="motifAffaireModal{{ e.id }}" tabindex="-1" aria-labelledby="motifAffaireModalLabel{{ e.id }}" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered">
+                                                    <div class="modal-content border-warning">
+                                                        <div class="modal-header bg-warning text-white">
+                                                            <h5 class="modal-title text-white" id="cancelAffaireModalLabel{{ e.id }}">
+                                                            Annulation de l'affaire : <span class="text-primary">NUA : {{ e.numAffaire }}</span>
+                                                            </h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            
+                                                            <div class="mb-3">
+                                                                <label class="form-label">Motif d'annulation</label>
+                                                                <textarea name="motifAnnulation" class="form-control" id="" rows="3" disabled>{{ e.motifAnnulation }}</textarea>
+                                                            </div>
+                                                        </div>
+                                                    
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- Modal de modification -->
+                                            <div class="modal fade" id="editAffaireModal{{ e.id }}" tabindex="-1" aria-labelledby="editAffaireModalLabel{{ e.id }}" aria-hidden="true">
+                                                <div class="modal-dialog modal-lg">
+                                                <div class="modal-content">
+                                                    <form method="POST" action="{% url 'affaires.edit' e.id %}">
+                                                    {% csrf_token %}
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="editAffaireModalLabel{{ e.id }}">Modifier l'affaire <span class="text-muted" >RG {{ e.numRg }}</span></h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                                                    </div>
+                                                    <div class="modal-body row">
+                                                        <div class="col-md-4 mb-3">
+                                                        <label class="form-label">RG</label>
+                                                        <input type="text" name="numRg" class="form-control bg-secondary" value="{{ e.numRg }}" readonly>
+                                                        </div>
+                                                        <div class="col-md-4 mb-3">
+                                                        <label class="form-label">Type d'audience</label>
+                                                        <input type="text" name="typeAudience" class="form-control bg-secondary" value="{{ e.typeAudience }}" readonly>
+                                                        </div>
+                                                        <div class="col-md-4 mb-3">
+                                                            <label class="form-label">Section</label>
+                                                            <select name="section" class="form-select" id="select_box_section bg-secondary" disabled>
+                                                                <option value="">Sélectionner une section</option>
+                                                                {% for option, label in sections %}
+                                                                    <option value="{{ option }}" {% if option == e.section %}selected{% endif %}>{{ label }}</option>
+                                                                {% endfor %}
+                                                            </select>
+                                                        </div>
+                                                        
+                                                        <div class="col-md-6 mb-3">
+                                                        <label class="form-label">Date d'enrôlement</label>
+                                                        <input type="date" name="dateEnrollement" class="form-control bg-secondary" value="{{ e.dateEnrollement|date:'Y-m-d' }}" readonly>
+                                                        </div>
+                                                        <div class="col-md-6 mb-3">
+                                                        <label class="form-label">Date d'audience</label>
+                                                        <input type="date" name="dateAudience" class="form-control" value="{{ e.dateAudience|date:'Y-m-d' }}">
+                                                        </div>
+                                                        <div class="col-md-6 mb-3">
+                                                        <label class="form-label">Demanderesse</label>
+                                                        <input type="text" name="demandeurs" class="form-control" value="{{ e.demandeurs }}">
+                                                        </div>
+                                                        <div class="col-md-6 mb-3">
+                                                        <label class="form-label">Défenderesse</label>
+                                                        <input type="text" name="defendeurs" class="form-control" value="{{ e.defendeurs }}">
+                                                        </div>
+                                                        <div class="col-md-12 mb-3">
+                                                        <label class="form-label">Objet</label>
+                                                        <textarea name="objet" class="form-control">{{ e.objet }}</textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                                                    </div>
+                                                    </form>
+                                                </div>
+                                                </div>
+                                            </div>
+                                            <!-- Modal de confirmation d'annuler -->
+                                            <div class="modal fade" id="cancelAffaireModal{{ e.id }}" tabindex="-1" aria-labelledby="cancelAffaireModalLabel{{ e.id }}" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered">
+                                                <div class="modal-content border-danger">
+                                                    <form method="POST" action="{% url 'affaires.cancel' e.id %}">
+                                                    {% csrf_token %}
+                                                    <div class="modal-header bg-danger text-white">
+                                                        <h5 class="modal-title text-white" id="cancelAffaireModalLabel{{ e.id }}">
+                                                        Annuler l'affaire : <span class="text-primary">NUA : {{ e.numAffaire }}</span>
+                                                        </h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <p>Êtes-vous sûr de vouloir annuler cette affaire ? Cette action est irréversible.</p>
+                                                        <ul>
+                                                        <li><strong>Demanderesse :</strong> {{ e.demandeurs }}</li>
+                                                        <li><strong>Défenderesse :</strong> {{ e.defendeurs }}</li>
+                                                        </ul>
+
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Précisez le motif d'annulation</label>
+                                                            <textarea name="motifAnnulation" class="form-control" id="" rows="3" required></textarea>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                                        <button type="submit" class="btn btn-danger">Annuler définitivement</button>
+                                                    </div>
+                                                    </form>
+                                                </div>
+                                                </div>
+                                            </div>
+  
+                                            {% endfor %}
+                                        
+                                        </tbody>
+                                    </table>
+                                    <div class="pagination mt-3 d-flex justify-content-center">
+                                        <nav aria-label="Page navigation">
+                                            <ul class="pagination">
+                                                {% if page_obj.has_previous %}
+                                                    <li class="page-item">
+                                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Précédent</a>
+                                                    </li>
+                                                {% else %}
+                                                    <li class="page-item disabled"><span class="page-link">Précédent</span></li>
+                                                {% endif %}
+                                    
+                                                {% for num in page_obj.paginator.page_range %}
+                                                    {% if page_obj.number == num %}
+                                                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                                        <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                                                    {% endif %}
+                                                {% endfor %}
+                                    
+                                                {% if page_obj.has_next %}
+                                                    <li class="page-item">
+                                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Suivant</a>
+                                                    </li>
+                                                {% else %}
+                                                    <li class="page-item disabled"><span class="page-link">Suivant</span></li>
+                                                {% endif %}
+                                            </ul>
+                                        </nav>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+  
+
+<script>
+
+    $(document).ready(function () {
+        $('#nav-enrollement').addClass('bg-primary text-white');
+        $('#txt-enrollement').addClass('text-white');
+    });
+    
+    </script>
+
+<script>
+    function printRow(id) {
+        // Récupère la ligne à imprimer
+        let row = document.getElementById("row-" + id);
+        
+        if (row) {
+            // Clone la ligne et crée une table temporaire pour l'impression
+            let printContent = "<table border='1' style='border-collapse:collapse; width:100%;'>" + row.outerHTML + "</table>";
+    
+            // Ouvre une nouvelle fenêtre pour imprimer
+            let printWindow = window.open('', '', 'height=600,width=800');
+            printWindow.document.write('<html><head><title>Impression</title>');
+            printWindow.document.write('<style>table{font-family: Arial, sans-serif; font-size: 14px;} th, td{padding: 8px; text-align: center;}</style>');
+            printWindow.document.write('</head><body>');
+            printWindow.document.write(printContent);
+            printWindow.document.write('</body></html>');
+    
+            printWindow.document.close();
+            printWindow.print();
+        }
+    }
+    </script>
+    
+
+{% endblock %}
+
+
+
+    

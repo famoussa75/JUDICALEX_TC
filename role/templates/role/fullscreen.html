@@ -1,0 +1,498 @@
+{% load static %}
+
+
+
+
+
+<div class="page-wrapper roles" id="fullscreenDiv" >
+    <div class="container-fluid mt-2">
+      <!-- Page title -->
+      <div class="page-header d-print-none">
+        <div class="row align-items-center">
+          <div class="col row mb-2">
+            <div class="col-md-4">
+              <div class="row align-items-center text-center text-md-start">
+                <!-- Armoiries -->
+                <div class="col-12 col-md-2 mb-2 mb-md-0 d-flex justify-content-center justify-content-md-start">
+                  <img src="{% static '_base/assets_role/statics/armoirie.png' %}" alt="Armoiries" style="height: 75px;">
+                </div>
+              
+                <!-- Texte République -->
+                <div class="col-12 col-md-6">
+                  <h3 class="mb-1 text-white">République de Guinée</h3>
+                  <p class="mb-1 text-white" style="font-size: 0.9rem;">Travail - Justice - Solidarité</p>
+                  <img src="{% static '_base/assets_role/statics/flag-guinee.png' %}" alt="Drapeau Guinée" style="height: 13px; width: 200px;">
+                </div>
+              </div>
+              
+              <!-- Texte Ministère -->
+              <h3 class="mt-2 text-white text-center text-md-start">
+                Ministère de la Justice et des Droits de l'Homme
+              </h3>
+              
+
+                <div class="card p-0 col-md-7" style="margin-left: 10px;">
+                  <div class="row row-0">
+                    <div class="col">
+                      <div class="card-body p-0">
+                        <div class="text-muted text-center">
+                          <img src="{% static '_base/assets_role/statics/branding.png' %}" alt="Image 1" style="height: 50px;">
+                          <img src="{% static '_base/assets_role/statics/simandou.png' %}" alt="Image 2" style="height: 50px;">
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+            </div>
+            <div class="text-center col-md-4">
+              <h2 class="text-white" style="font-size: 30px;"> <i class="fa fa-balance-scale"></i></h2>
+              <h2 class="text-white" style="text-decoration: underline;">COUR D'APPEL DE CONAKRY</h2>
+              <h2 class="text-white">Tribunal de Commerce de Conakry</h2>
+              <h2 class="text-white">  Rôle(s) du {{ today }}</h2>
+            </div>
+          
+            <div class="col-md-3">
+              <div class="card p-0">
+                <div class="row row-0">
+                  <div class="col">
+                    <div class="card-body p-0">
+                      <div class="text-center mt-2" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: justify;">
+                        <h5>Conception & Réalisation</h5>
+                        <img src="{% static '_base/assets_role/statics/ejustice_logo_white.png' %}" alt="e-Justice Logo" style="height: 50px; margin-bottom: 10px;">
+                        <p class="mb-0 p-2" ><b>Judicalex SARL</b> . Adresse :📍 Cité Plaza Platinium, Immeuble 1, 3ème étage, Kipé (Centre Emetteur), Commune de Ratoma, Conakry (République de Guinée). Email: contact@judicalex-gn.org . Tel: 613 87 08 92</p>
+                      </div>
+                      
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+            </div>
+
+            <div class="col-md-1">
+              <a style="color:black; text-decoration:none" href="#" class="btn btn-vk btn-icon" aria-label="VK" style="float: right;" id="fullscreenBtn">
+                <span class="text-white">
+                  <!-- Download SVG icon from http://tabler-icons.io/i/screen-share -->
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="22" height="22" viewBox="0 0 22 22" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M21 12v3a1 1 0 0 1 -1 1h-16a1 1 0 0 1 -1 -1v-10a1 1 0 0 1 1 -1h9" /><line x1="7" y1="20" x2="17" y2="20" /><line x1="9" y1="16" x2="9" y2="20" /><line x1="15" y1="16" x2="15" y2="20" /><path d="M17 4h4v4" /><path d="M16 9l5 -5" /></svg>
+                </span>
+              </a>
+            </div>
+        
+          </div>
+        </div>
+      </div>
+    
+    </div>
+    <div class="page-body">
+      <div class="container-fluid">
+        
+        <div class="col-12">
+            <div class="table-responsive">
+              <table class="table table-bordered" style="background-color: transparent;">
+                <thead style="background-color: white;">
+                  <tr>
+                    <th style="width: 50%; padding: 6px 0;">
+                      <h6 class="text-center mb-0" style="font-size: 1rem;">FOND ({{ today_roles_fond.count }})</h6>
+                    </th>
+                    <th style="width: 50%; padding: 6px 0;">
+                      <h6 class="text-center mb-0" style="font-size: 1rem;">RÉFÉRÉ ({{ today_roles_refere.count }})</h6>
+                    </th>
+                  </tr>
+                </thead>
+                
+                <tbody style="background-color: transparent;">
+                  <tr>
+
+                    <!-- FOND -->
+                    <td style="width: 50%;">
+                      <div id="roles-carousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="15000">
+                        <div class="carousel-inner">
+                          {% for t in today_roles_fond %}
+
+                                  <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                  
+                                    <h3 class="mb-3 text-white text-center"><span style="text-decoration: underline;" >{{ t.get_section_display }} </span></h3>
+                                    <h4 class="mb-3 text-white text-center"><span style="text-decoration: underline;">Président(e) :</span>  {{ t.president }} | <span style="text-decoration: underline;">Juge Consulaire :</span>  {{ t.juge }} | <span style="text-decoration: underline;">Greffier(e) :</span>  {{ t.greffier }}</h4>
+    
+                                    <div class="row">
+                                      <div class="col-md-12">
+                                        <table style="color: white; border-top: 1px solid white; width: 100%;">
+                                          <th style="width: 5%; text-align: center;">N°</th>
+                                          <th style="width: 35%; text-align: center; ">OBJET</th>
+                                          <th style="width: 60%; text-align: center; ">PARTIES</th>
+                                        </table>
+                                          <div class="auto-scroll-vertical" style="height: 580px; overflow-y: auto;">
+                                            <div class="card"  style="background-color: rgba(255, 255, 255, 0.9);">
+                                              <div class="list-group card-list-group">
+                                                {% for affaire in today_affaires %}
+                                                
+                                                  {% if t.id == affaire.role.id %}
+                                                  <div class="list-group-item">
+                                                    <div class="row g-2 align-items-center">
+                                                      <table>
+                                                        {% if affaire.demandeurs and affaire.defendeurs %}
+                                                        <tr>
+                                                          <td style="width: 5%;">{{ affaire.numOrdre }}</td>
+                                                          <td style="width: 30%; text-align: left;"><h4>{{ affaire.objet }}</h4></td>
+                                                          <td style="width: 30%;"> 
+                                                            <h4 class="mb-0"><a style="color:black; text-decoration:none" href="{% url 'affaires.details' affaire.idAffaire %}">{{affaire.demandeurs }}</a></h4>
+                                                            <h5><span class="badge bg-secondary text-light">dem</span> / <span class="badge bg-secondary text-light">RG:{{ affaire.numRg }}</span></h5>
+                                                          </td>
+                                                          <td style="width: 5%;text-align: center;"><h5><mark>C/</mark></h5></td>
+                                                          <td style="width: 30%; text-align: right;">
+                                                            <h4 class="mb-0"><a style="color:black; text-decoration:none" href="{% url 'affaires.details' affaire.idAffaire %}">{{ affaire.defendeurs }}</a></h4>
+                                                            <h5><span class="badge bg-secondary text-light">def</span> / <span class="badge bg-secondary text-light">RG:{{ affaire.numRg }}</h5>
+                                                          </td>
+                                                        
+                                                        </tr>
+                                                        {% endif %}
+
+                                                        {% if affaire.appelants and affaire.intimes %}
+                                                        <tr>
+                                                          <td style="width: 5%;">{{ affaire.numOrdre }}</td>
+                                                          <td style="width: 30%; text-align: left;"><h4>{{ affaire.objet }}</h4></td>
+                                                          <td style="width: 30%;"> 
+                                                            <h4 class="mb-0"><a style="color:black; text-decoration:none" href="{% url 'affaires.details' affaire.idAffaire %}">{{affaire.appelants }}</a></h4>
+                                                            <h5><span class="badge bg-secondary text-light">app</span> / <span class="badge bg-secondary text-light">RG:{{ affaire.numRg }}</h5>
+                                                          </td>
+                                                          <td style="width: 5%;text-align: center;"><h5><mark>C/</mark></h5></td>
+                                                          <td style="width: 30%; text-align: right;">
+                                                            <h4 class="mb-0"><a style="color:black; text-decoration:none" href="{% url 'affaires.details' affaire.idAffaire %}">{{ affaire.intimes }}</a></h4>
+                                                            <h5><span class="badge bg-secondary text-light">int</span> / <span class="badge bg-secondary text-light">RG:{{ affaire.numRg }}</h5>
+                                                          </td>
+                                                        
+                                                        </tr>
+                                                        {% endif %}
+
+                                                        {% if affaire.prevenus and affaire.partieCiviles %}
+                                                        <tr>
+                                                          <td style="width: 5%;">{{ affaire.numOrdre }}</td>
+                                                          <td style="width: 30%; text-align: left;"><h4>{{ affaire.objet }}</h4></td>
+                                                          <td style="width: 30%;"> 
+                                                            <h4 class="mb-0"><a style="color:black; text-decoration:none" href="{% url 'affaires.details' affaire.idAffaire %}">{{affaire.prevenus }}</a></h4>
+                                                            <h5><span class="badge bg-secondary text-light">pre</span> / <span class="badge bg-secondary text-light">RG:{{ affaire.numRg }}</h5>
+                                                          </td>
+                                                          <td style="width: 5%;text-align: center;"><h5><mark>C/</mark></h5></td>
+                                                          <td style="width: 30%; text-align: right;">
+                                                            <h4 class="mb-0"><a style="color:black; text-decoration:none" href="{% url 'affaires.details' affaire.idAffaire %}">{{ affaire.partieCiviles }}</a></h4>
+                                                            <h5><span class="badge bg-secondary text-light">pc</span> / <span class="badge bg-secondary text-light">RG:{{ affaire.numRg }}</h5>
+                                                          </td>
+                                                        
+                                                        </tr>
+                                                        {% endif %}
+                                                      </table>
+                                                    
+                                                      <!-- <div class="col-auto text-muted">
+                                                        <b class="text-success">Décision rendue</b>
+                                                      </div> -->
+                                                    
+                                                    </div>
+                                                  </div>
+                                                {% endif %}
+                                              
+                                                {% endfor %}
+    
+                                              </div>
+                                            </div>
+                                          </div>
+                                          
+                                        </div>
+                                      
+                                    </div>
+    
+                                </div>
+
+                            {% empty %}
+
+                            <div class="carousel-item active">
+                              <h2 class="mb-3 text-warning text-center"><i class="fa fa-info-circle"></i> Aucun Fond publié pour le moment !</h2>
+                            </div>
+                          
+                            {% endfor %}
+                        </div>
+                          <!-- Boutons de navigation -->
+                        <!-- <button class="carousel-control-prev" type="button" data-bs-target="#roles-carousel" data-bs-slide="prev">
+                          <span class="carousel-control-prev-icon"></span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#roles-carousel" data-bs-slide="next">
+                          <span class="carousel-control-next-icon"></span>
+                        </button> -->
+                      </div>
+                    </td>
+
+                    <!-- REFERE -->
+                    <td style="width: 50%;">
+                      <div id="roles-carousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="15000">
+                        <div class="carousel-inner">
+                          {% for t in today_roles_refere %}
+                    
+                                <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                  
+                                    <h3 class="mb-3 text-white text-center"><span style="text-decoration: underline;" >{{ t.get_section_display }} </span></h3>
+                                    <h4 class="mb-3 text-white text-center"><span style="text-decoration: underline;">Président(e) :</span>  {{ t.president }} | <span style="text-decoration: underline;">Juge Consulaire :</span>  {{ t.juge }} | <span style="text-decoration: underline;">Greffier(e) :</span>  {{ t.greffier }}</h4>
+    
+                                    <div class="row">
+                                      <div class="col-md-12">
+                                        <table style="color: white; border-top: 1px solid white; width: 100%;">
+                                          <th style="width: 5%; text-align: center;">N°</th>
+                                          <th style="width: 35%; text-align: center; ">OBJET</th>
+                                          <th style="width: 60%; text-align: center; ">PARTIES</th>
+                                        </table>
+                                          <div class="auto-scroll-vertical" style="height: 580px; overflow-y: auto;">
+                                            <div class="card"  style="background-color: rgba(255, 255, 255, 0.9);">
+                                              <div class="list-group card-list-group">
+                                                {% for affaire in today_affaires %}
+                                                
+                                                  {% if t.id == affaire.role.id %}
+                                                      <div class="list-group-item">
+                                                        <div class="row g-2 align-items-center">
+                                                          <table>
+                                                            {% if affaire.demandeurs and affaire.defendeurs %}
+                                                            <tr>
+                                                              <td style="width: 5%;">{{ affaire.numOrdre }}</td>
+                                                              <td style="width: 30%; text-align: left;"><h4>{{ affaire.objet }}</h4></td>
+                                                              <td style="width: 30%;"> 
+                                                                <h4 class="mb-0"><a style="color:black; text-decoration:none" href="{% url 'affaires.details' affaire.idAffaire %}">{{affaire.demandeurs }}</a></h4>
+                                                                <h5><span class="badge bg-secondary text-light">dem</span> / <span class="badge bg-secondary text-light">RG:{{ affaire.numRg }}</span></h5>
+                                                              </td>
+                                                              <td style="width: 5%;text-align: center;"><h5><mark>C/</mark></h5></td>
+                                                              <td style="width: 30%; text-align: right;">
+                                                                <h4 class="mb-0"><a style="color:black; text-decoration:none" href="{% url 'affaires.details' affaire.idAffaire %}">{{ affaire.defendeurs }}</a></h4>
+                                                                <h5><span class="badge bg-secondary text-light">def</span> / <span class="badge bg-secondary text-light">RG:{{ affaire.numRg }}</h5>
+                                                              </td>
+                                                            
+                                                            </tr>
+                                                            {% endif %}
+
+                                                            {% if affaire.appelants and affaire.intimes %}
+                                                            <tr>
+                                                              <td style="width: 5%;">{{ affaire.numOrdre }}</td>
+                                                              <td style="width: 30%; text-align: left;"><h4>{{ affaire.objet }}</h4></td>
+                                                              <td style="width: 30%;"> 
+                                                                <h4 class="mb-0"><a style="color:black; text-decoration:none" href="{% url 'affaires.details' affaire.idAffaire %}">{{affaire.appelants }}</a></h4>
+                                                                <h5><span class="badge bg-secondary text-light">app</span> / <span class="badge bg-secondary text-light">RG:{{ affaire.numRg }}</h5>
+                                                              </td>
+                                                              <td style="width: 5%;text-align: center;"><h5><mark>C/</mark></h5></td>
+                                                              <td style="width: 30%; text-align: right;">
+                                                                <h4 class="mb-0"><a style="color:black; text-decoration:none" href="{% url 'affaires.details' affaire.idAffaire %}">{{ affaire.intimes }}</a></h4>
+                                                                <h5><span class="badge bg-secondary text-light">int</span> / <span class="badge bg-secondary text-light">RG:{{ affaire.numRg }}</h5>
+                                                              </td>
+                                                            
+                                                            </tr>
+                                                            {% endif %}
+
+                                                            {% if affaire.prevenus and affaire.partieCiviles %}
+                                                            <tr>
+                                                              <td style="width: 5%;">{{ affaire.numOrdre }}</td>
+                                                              <td style="width: 30%; text-align: left;">{{ affaire.objet }}</td>
+                                                              <td style="width: 30%;"> 
+                                                                <h4 class="mb-0"><a style="color:black; text-decoration:none" href="{% url 'affaires.details' affaire.idAffaire %}">{{affaire.prevenus }}</a></h4>
+                                                                <h5><span class="badge bg-secondary text-light">pre</span> / <span class="badge bg-secondary text-light">RG:{{ affaire.numRg }}</h5>
+                                                              </td>
+                                                              <td style="width: 5%;text-align: center;"><h5><mark>C/</mark></h5></td>
+                                                              <td style="width: 30%; text-align: right;">
+                                                                <h4 class="mb-0"><a style="color:black; text-decoration:none" href="{% url 'affaires.details' affaire.idAffaire %}">{{ affaire.partieCiviles }}</a></h4>
+                                                                <h5><span class="badge bg-secondary text-light">pc</span> / <span class="badge bg-secondary text-light">RG:{{ affaire.numRg }}</h5>
+                                                              </td>
+                                                            
+                                                            </tr>
+                                                            {% endif %}
+                                                          </table>
+                                                        
+                                                          <!-- <div class="col-auto text-muted">
+                                                            <b class="text-success">Décision rendue</b>
+                                                          </div> -->
+                                                        
+                                                        </div>
+                                                      </div>
+                                                    {% endif %}
+                                              
+                                                {% endfor %}
+    
+                                              </div>
+                                            </div>
+                                          </div>
+                                          
+                                        </div>
+                                      
+                                    </div>
+    
+                                </div>
+
+
+                            {% empty %}
+
+                            <div class="carousel-item active">
+                              <h2 class="mb-3 text-warning text-center"><i class="fa fa-info-circle"></i> Aucun Référé publié pour le moment !</h2>
+                            </div>
+                          
+                            {% endfor %}
+                        </div>
+                          <!-- Boutons de navigation -->
+                        <!-- <button class="carousel-control-prev" type="button" data-bs-target="#roles-carousel" data-bs-slide="prev">
+                          <span class="carousel-control-prev-icon"></span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#roles-carousel" data-bs-slide="next">
+                          <span class="carousel-control-next-icon"></span>
+                        </button> -->
+                      </div>
+                      
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <div class="mx-auto my-2" >
+                  <!-- 📢 CAROUSEL AVEC 3 IMAGES PAR SLIDE -->
+                  <div class="pub-carousel-container">
+                    <div id="pubCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="5000">
+                      <div class="carousel-inner">
+                        <!-- Slide 1 -->
+                        <div class="carousel-item active">
+                          <div class="container">
+                            <div class="row text-center">
+                              <div class="col-md-4 col-4">
+                                <a style="color:black; text-decoration:none" href="https://smartylex.com/" target="_blank"><img src="{% static '_base/assets_role/dist/img/pub1.jpg' %}" class="pub-img" alt="Pub 1"></a>
+                              </div>
+                              <div class="col-md-4 col-4">
+                                <a style="color:black; text-decoration:none" href="https://judicalex-gn.org/" target="_blank"><img src="{% static '_base/assets_role/dist/img/pub2.jpg' %}" class="pub-img" alt="Pub 2"></a>
+                              </div>
+                              <div class="col-md-4 col-4">
+                                <a style="color:black; text-decoration:none" href="https://smartylex.com/" target="_blank"><img src="{% static '_base/assets_role/dist/img/pub3.jpg' %}" class="pub-img" alt="Pub 3"></a>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+  
+                        <!-- Slide 2 -->
+                        <div class="carousel-item">
+                          <div class="container">
+                            <div class="row text-center">
+                              <div class="col-md-4 col-4">
+                                <a style="color:black; text-decoration:none" href="https://smartylex.com/" target="_blank"><img src="{% static '_base/assets_role/dist/img/pub4.jpg' %}" class="pub-img" alt="Pub 4"></a>
+                              </div>
+                              <div class="col-md-4 col-4">
+                                <a style="color:black; text-decoration:none" href="https://judicalex-gn.org/" target="_blank"><img src="{% static '_base/assets_role/dist/img/pub5.jpg' %}" class="pub-img" alt="Pub 5"></a>
+                              </div>
+                              <div class="col-md-4 col-4">
+                                <a style="color:black; text-decoration:none" href="https://smartylex.com/" target="_blank"><img src="{% static '_base/assets_role/dist/img/pub6.jpg' %}" class="pub-img" alt="Pub 6"></a>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+               
+              </div>
+
+              
+              {% if messages %}
+                <div style="background-color: #f39c12; color: white; padding: 2px; font-size: 18px;">
+                  <marquee behavior="scroll" direction="left">
+                    {% for msg in messages %}
+                    <b><!-- Download SVG icon from http://tabler-icons.io/i/bell-ringing -->
+                      <i class="fa fa-info-circle"></i> Information :</b> {{ msg.contenu }}&nbsp;&nbsp;&nbsp;&nbsp;
+                    {% endfor %}
+                  </marquee>
+                </div>
+                {% endif %}
+            
+                
+            </div>
+
+          
+          
+        </div>
+        
+      </div>
+
+    </div>
+</div>
+
+
+<script>
+    const fullscreenBtn = document.getElementById("fullscreenBtn");
+    const targetElement = document.getElementById("fullscreenDiv");
+    const b_message = document.getElementById("b-message");
+  
+    fullscreenBtn.addEventListener("click", function (e) {
+      e.preventDefault();
+  
+      // Vérifie si le document est déjà en plein écran
+      if (
+        document.fullscreenElement ||
+        document.webkitFullscreenElement ||
+        document.mozFullScreenElement ||
+        document.msFullscreenElement
+      ) {
+        // Quitter le plein écran
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+          document.mozCancelFullScreen();
+        } else if (document.msExitFullscreen) {
+          document.msExitFullscreen();
+        }
+      } else {
+        // Entrer en plein écran
+        if (targetElement.requestFullscreen) {
+          targetElement.requestFullscreen();
+        } else if (targetElement.webkitRequestFullscreen) {
+          targetElement.webkitRequestFullscreen();
+        } else if (targetElement.mozRequestFullScreen) {
+          targetElement.mozRequestFullScreen();
+        } else if (targetElement.msRequestFullscreen) {
+          targetElement.msRequestFullscreen();
+        }
+      }
+    });
+  </script>
+
+
+<script>
+  const scrollDivs = document.querySelectorAll(".auto-scroll-vertical");
+  const scrollSpeed = 0.6; // pixels per tick
+  const pauseDuration = 2000; // pause en haut/bas (ms)
+  const directions = new Map();   // 1 = bas, -1 = haut
+  const pauseUntil = new Map();   // Date jusqu'à laquelle on attend
+
+  // Initialisation
+  scrollDivs.forEach(div => {
+    directions.set(div, 1);
+    pauseUntil.set(div, 0);
+  });
+
+  function autoScrollVertical() {
+    const now = Date.now();
+
+    scrollDivs.forEach(div => {
+      const direction = directions.get(div);
+      const currentScroll = div.scrollTop;
+      const maxScroll = div.scrollHeight - div.clientHeight;
+
+      // Si en pause, ne rien faire pour cette div
+      if (now < pauseUntil.get(div)) return;
+
+      // Si atteint le bas ou le haut
+      if ((direction === 1 && currentScroll >= maxScroll) ||
+          (direction === -1 && currentScroll <= 0)) {
+
+        // Pause avant de changer de direction
+        pauseUntil.set(div, now + pauseDuration);
+        directions.set(div, direction * -1); // Inverser direction
+        return;
+      }
+
+      // Scroll en cours
+      div.scrollTop = currentScroll + scrollSpeed * direction;
+    });
+
+    requestAnimationFrame(autoScrollVertical);
+  }
+
+  requestAnimationFrame(autoScrollVertical);
+</script>
+
+

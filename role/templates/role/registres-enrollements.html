@@ -1,0 +1,132 @@
+{% extends 'role/base.html' %}
+
+
+{% block title %}Gestion des rôles{% endblock title %}
+
+{% block content %}
+{% load static %}
+
+<div class="wrapper">
+
+    <div class="page-wrapper">
+        <div class="container-xl">
+
+            <!-- Page title -->
+            <div class="page-header d-print-none">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <!-- Page pre-title -->
+
+                        <h2 class="page-title" style="color:white">
+                            Administration |&nbsp;<span style="color:red">Registres d'Enrollement</span>
+                        </h2>
+                    </div>
+                   
+                </div>
+            </div>
+
+            <!-- <div class="alert alert-success alert-dismissible mt-3" role="alert">
+                <div class="d-flex">
+                    <div>
+                        
+                    </div>
+                    <div>
+                        <h4 class="alert-title">Felicitation !</h4>
+                        <div class="text-muted"> Message</div>
+                    </div>
+                </div>
+                <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+            </div><br /> -->
+
+        </div>
+        <div class="page-body">
+            <div class="container-xl">
+                <div class="row row-deck row-cards">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <!-- Download SVG icon from http://tabler-icons.io/i/menu-2 -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
+                                        viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                                        stroke-linecap="round" stroke-linejoin="round">
+                                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                        <line x1="4" y1="6" x2="20" y2="6" />
+                                        <line x1="4" y1="12" x2="20" y2="12" />
+                                        <line x1="4" y1="18" x2="20" y2="18" />
+                                    </svg> Juridictions
+                                </h3>
+                            </div>
+                            <div class="card-body border-bottom py-3 row">
+                                
+                                {% for j in juridictions %}
+
+                                    <div class="col-md-3 col-xl-3 mb-4">
+                                        <a href="{% url 'role.enrollementForAdmin' %}">
+                                         <div class="card">
+                                            <div class="card-body text-center">
+                                                <div class="mb-3">
+                                                    <span class="avatar avatar-xl avatar-rounded">{{j.typeTribunal}}</span>
+                                                </div>
+                                                <div class="card-title mb-1">{{j.name}}</div>
+                                            </div>
+                                        </div>
+                                        </a> 
+                                    </div>
+                                    
+                                {% endfor %}
+
+                                    <!-- Pagination -->
+                                    <div class="card">
+                                        <div class="card-body">
+                                        <ul class="pagination ">
+                                            {% if juridictions.has_previous %}
+                                            
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ juridictions.previous_page_number }}" tabindex="-1" aria-disabled="true">
+                                                <!-- Download SVG icon from http://tabler-icons.io/i/chevron-left -->
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><polyline points="15 6 9 12 15 18" /></svg>
+                                                précédent
+                                                </a>
+                                            </li>
+                                            {% endif %}
+                                            {% for num in juridictions.paginator.page_range %}
+                                                {% if juridictions.number == num %}
+                                                    <li class="page-item active">
+                                                        <span class="page-link">{{ num }}</span>
+                                                    </li>
+                                                {% else %}
+                                                    <li class="page-item">
+                                                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                                    </li>
+                                                {% endif %}
+                                            
+                                            {% endfor %}
+                                            {% if juridictions.has_next %}
+                                                <li class="page-item">
+                                                    <a class="page-link" href="?page={{ juridictions.next_page_number }}">
+                                                        suivant <!-- Icon -->
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><polyline points="9 6 15 12 9 18" /></svg>
+
+                                                    </a>
+                                                </li>
+                                            
+                                            {% endif %}
+                                        
+                                        </ul>
+                                        
+                                        </div>
+                                    </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+{% endblock %}

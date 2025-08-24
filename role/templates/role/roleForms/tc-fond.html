@@ -1,0 +1,128 @@
+
+{% load static %}
+
+<style>
+    @keyframes blink {
+        0% { border-color: goldenrod;  border-width: 4px;}
+        50% { border-color: transparent; }
+        100% { border-color: goldenrod;  border-width: 4px; }
+    }
+
+    .blinking-border {
+        animation: blink 1s 5;
+    }
+</style>
+
+<div class="row mb-3">
+    <!-- <div class="col-lg-6">
+        <div class="mb-3">
+            <label class="form-label">Section/Chambre</label>
+            <input type="text" class="form-control" name="{{form.section.name}}">
+        </div>
+    </div> -->
+   
+    <div class="col-lg-6">
+        <div class="mb-3">
+            <label class="form-label">President(e)<span style="color:red">*</span></label>
+            <input type="text" class="form-control" name="{{form.president.name}}" required>
+        </div>
+    </div>
+</div>
+
+
+<div class="form-selectgroup-boxes row mb-3">
+    <div class="col-lg-6">
+        <div class="mb-3">
+            <label class="form-label">Juges Consulaires<span style="color:red">*</span></label>
+            <input type="text" class="form-control" name="{{form.juge.name}}" required>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="mb-3">
+            <label class="form-label">Greffier(e)<span style="color:red">*</span></label>
+            <input type="text" class="form-control" name="{{form.greffier.name}}" required>
+        </div>
+    </div>
+</div>
+<!-- <div class="mb-3">
+    <div class="col-lg-6">
+        <div class="form-label">Piece Jointe</div>
+        <input type="file" class="form-control"  name="fichier"   accept="image/*,.pdf,"/>
+    </div>
+</div> -->
+
+<p style="margin-bottom: -20px;"><b>INFO :</b> Nous vous suggérons au debut de la liste les affaires enrollées, renvoyées, en délibérés prorogés et mises en délibérées. Vous pouvez aussi ajouter, supprimer et editer une ou plusieurs affaires. </p>
+<hr class="mb-3" style="color: red; height:2px">
+
+
+{{ formset.management_form }}
+<!-- <button type="button" name="add" id="dynamic-ar"
+    class="btn btn-outline-primary mb-2" title="Ajouter une ligne">
+    <i class="fa fa-plus"></i>&nbsp; Ajouter une nouvelle ligne
+</button> -->
+<table class="table table-bordered" id="dynamicAddRemove">
+   
+    <tr>
+        <th style="width:80px;">N° Ordre</th>
+        <th style="width:150px;">NUA</th>
+        <th style="width:100px;">RG</th>
+        <th>Demandeurs</th>
+        <th>Défendeurs</th>
+        <th>Objet</th>
+        <!-- <th>Action</th> -->
+    </tr>
+  
+
+    {% for form_data in formset %}
+    <tr class="blinking-border">
+        <td hidden>{{ form_data.idAffaire }}</td>
+        <td>{{ form_data.numOrdre }}</td>
+        <td>{{ form_data.numAffaire }}</td>
+        <td>{{ form_data.numRg}}</td>
+        <td>{{ form_data.demandeurs }}</td>
+        <td>{{ form_data.defendeurs }}</td>
+        <td>{{ form_data.objet }}</td>
+        <!-- <td><button type="button" class="btn btn-outline-danger remove-input-field" title="Supprimer la ligne"><i class="fa fa-trash"></i></button></td> -->
+
+    </tr>
+    {% endfor %}
+     
+    
+</table>
+
+<div class="card-footer d-flex align-items-center">
+    <button type="submit" class="btn btn-outline-primary btn-block"
+        style="float:right ;">
+        <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
+        <i class="pli-data-save"></i> Enregistrer
+    </button>
+</div>
+
+
+
+<script type="text/javascript">
+    $(document).ready(function() {
+
+        var i = parseInt($("#id_form-TOTAL_FORMS").val()); // Initialiser 'i' avec la valeur actuelle du nombre total de formulaires
+        totalForm = i; // Utiliser la même variable pour suivre le nombre total de formulaires
+       
+        $("#dynamic-ar").click(function() {
+
+            totalForm++; // Incrémenter le nombre total de formulaires
+            $("#dynamicAddRemove").append('<tr><td hidden><input type="hidden" name="form-'+ i + '-idAffaire" class="form-control" /></td><td><input type="number" name="form-'+ i + '-numOrdre" class="form-control" required min="1" /></td><td><input type="text" name="form-'+ i + '-numRg" class="form-control" required /></td><td><textarea rows="2" name="form-'+ i + '-demandeurs" class="form-control" required></textarea></td><td><textarea rows="2" name="form-'+ i + '-defendeurs" class="form-control" required></textarea></td><td><textarea rows="2" name="form-'+ i + '-objet" class="form-control" required></textarea></td><td><button type="button" class="btn btn-outline-danger remove-input-field" title="Supprimer la ligne"><i class="fa fa-trash"></i></button></td></tr>');
+            $("#id_form-TOTAL_FORMS").val(totalForm);
+
+
+        });
+
+        $(document).on('click', '.remove-input-field', function() {
+            $(this).parents('tr').remove();
+             --totalForm;
+            $("#id_form-TOTAL_FORMS").val(totalForm);
+
+
+        });
+    });
+</script>
+
+

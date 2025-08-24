@@ -1,0 +1,163 @@
+{% extends 'role/layout.html' %}
+
+
+{% block title %}Enrollement{% endblock title %}
+    
+{% block content %}
+
+{% load static %}
+
+<style>
+    .bg-danger-light {
+         background-color: #f8d7da; /* Rouge clair */
+    }
+
+</style>
+
+<section class="content">
+    <div class="content__header rounded-0">
+        <div class="content__wrap">
+          <h1 class="text-center my-2"><i class="pli-folder-archive fs-1"></i> Décisions de justice</h1>
+          <p class="text-center mb-4">Gerez les rôles d'audiences du tribunal</p>
+          <nav aria-label="breadcrumb" style="font-size: 18px;">
+            <ol class="breadcrumb">
+               <li class="breadcrumb-item"><a href="{% url 'role.index' %}">Accueil</a></li>
+               <li class="breadcrumb-item"><a href="{% url 'role.affaires' %}">Plumitifs</a></li>
+               <li class="breadcrumb-item active" aria-current="page">Décisions</li>
+            </ol>
+         </nav>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="p-2">
+
+            <!-- Page title -->
+            <div class="page-header d-print-none mt-4">
+                <div class="row align-items-center mb-2">
+                    <div class="col-md-4">
+                        <!-- Page pre-title -->
+                        <h1 class="" style="color:white">
+                            <span class="text-primary"><i class="fa fa-history"></i> Historique des modifications</span>
+                        </h1>
+                    </div>
+                    <!-- Page title actions -->
+                    <div class="col-auto ms-auto d-print-none">
+                        <div class="btn-list">
+
+                            <a href="#" class="btn btn-primary d-sm-none btn-icon" data-bs-toggle="modal" data-bs-target="#modal-report" aria-label="Create new report">
+                                <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
+                                <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                    <line x1="12" y1="5" x2="12" y2="19" />
+                                    <line x1="5" y1="12" x2="19" y2="12" />
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- <div class="alert alert-success alert-dismissible mt-3" role="alert">
+                <div class="d-flex">
+                    <div>
+                        
+                    </div>
+                    <div>
+                        <h4 class="alert-title">Felicitation !</h4>
+                        <div class="text-muted"> Message</div>
+                    </div>
+                </div>
+                <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+            </div><br /> -->
+           
+        </div>
+        <div class="page-body">
+            <div class="p-2">
+                <div class="row row-deck row-cards">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                            
+                             
+
+                            </div>
+                            <div class="card-body border-bottom py-3">
+                            
+                                <div class="table-responsive">
+                                    <table class="table table-transparent table-responsive mb-5">
+                                        <thead>
+                                            <tr>
+                                                <th class="text-center" style="width: 1%;font-size: small;">N°</th>
+                                                <th class="text-center" style="font-size:small;text-align: center;">Type de décision</th>
+                                                <th class="text-center" style="font-size:small;">Décision du</th>
+                                                <th style="font-size:small;">Décision</th>
+                                                <th style="font-size:small;">Prochaine Audience</th>
+                                                <th  class="text-center" style="font-size:small;">Modifié par</th>
+                                                <th  class="text-center" style="font-size:small;">Date de modification</th>
+        
+                                            </tr>
+                                        </thead>
+                                            
+                                        
+                                        {% for decision in historiques  %}
+                                                                            
+                                        <tr>
+                                            <td scope="col">
+                                               {{forloop.counter}} 
+                                            </td>
+        
+                                            <td class="text-center">
+                                                <p class="strong mb-1">{{decision.typeDecision}}</p>
+                                            </td>
+        
+                                            <td class="text-center">{{ decision.dateDecision|default:"Non défini" }}</td>
+                                        
+                                            <td>
+                                                <p class="strong mb-1" style="white-space: pre-wrap;">{{decision.decision}}</p>
+                                            </td>
+                                            <td>
+                                                <span class="strong mb-1 bg-secondary p-2" style="color: white;">{{decision.prochaineAudience|default:"Non défini"}}</span>
+                                            </td>
+                                            <td scope="col" style="text-align: center;"><b>{{decision.modified_by}}</b></td>
+                                            
+                                            <td scope="col" style="text-align: center;"><b>{{decision.modified_at}}</b></td>
+                                           
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="7" class="text-center"><h3>Aucune décision disponible</h3></td>
+                                        </tr>
+                                        {% endfor %}
+        
+                                    </table>
+                                   
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+  
+
+<script>
+
+    $(document).ready(function () {
+        $('#nav-enrollement').addClass('bg-primary text-white');
+        $('#txt-enrollement').addClass('text-white');
+    });
+    
+    </script>
+
+{% endblock %}
+
+
+
+    

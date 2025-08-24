@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light" data-scheme="gray">
+   {% load static %}
+
+
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1">
+   <meta name="description" content="Nifty is a responsive admin dashboard template based on Bootstrap 5 framework. There are a lot of useful components.">
+  
+   
+   <title> {% block title %}  {% endblock title %} - RCCM </title>
+
+
+   <!-- STYLESHEETS -->
+   {% include 'rccm/tools/css.html' %}
+
+   {% block pageStyle %} {% endblock pageStyle %}
+
+
+
+</head>
+
+<body class="out-quart">
+
+   <!-- PAGE CONTAINER -->
+   <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+   <div id="root" class="root mn--max hd--sticky tm--expanded-hd">
+
+      <!-- CONTENTS -->
+      {% block content %} {% endblock content %}
+        
+
+      <!-- HEADER -->
+      {% include 'rccm/tools/header.html' %}
+     
+
+      <!-- MAIN NAVIGATION -->
+      {% include 'rccm/tools/navbar.html' %}
+
+
+      <!-- SIDEBAR -->
+      {% include 'rccm/tools/sidebar.html' %}
+
+   </div>
+
+
+   <!-- JAVASCRIPTS -->
+   {% include 'rccm/tools/js.html' %}
+
+
+</body>
+
+</html>

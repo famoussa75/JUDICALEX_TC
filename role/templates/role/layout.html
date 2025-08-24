@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light" data-scheme="navy">
+   {% load static %}
+
+
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1">
+   <meta name="description" content="Nifty is a responsive admin dashboard template based on Bootstrap 5 framework. There are a lot of useful components.">
+  
+   
+   <title> {% block title %}  {% endblock title %} - Rôle </title>
+
+
+   <!-- STYLESHEETS -->
+   {% include 'role/tools/css.html' %}
+
+
+   {% block pageStyle %} {% endblock pageStyle %}
+
+   <style>
+      #flash-message {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        /* animation: flash-blink 6s ease-in-out 6; */
+      }
+    
+      @keyframes flash-blink {
+        0% { opacity: 1; }
+        25% { opacity: 0.4; }
+        50% { opacity: 1; }
+        75% { opacity: 0.4; }
+        100% { opacity: 1; }
+      }
+    </style>
+    
+
+</head>
+
+<body class="out-quart">
+
+   {% if messages %}
+   <div id="flash-message">
+   {% for message in messages %}
+      {% if message.tags == "error" %}
+         <div class="alert alert-callout alert-danger alert-dismissible fade show rounded-2 shadow" role="alert">
+         <strong style="font-size: 1.1rem;">{{ message }}</strong>
+         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+         </div>
+      {% elif message.tags == "success" %}
+         <div class="alert alert-callout alert-success alert-dismissible fade show rounded-2 shadow" role="alert">
+         <strong style="font-size: 1.1rem;">
+            {{ message }} <i class="fa fa-check-circle"></i>
+         </strong>
+         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+         </div>
+      {% endif %}
+   {% endfor %}
+   </div>
+   {% endif %}
+
+
+
+   <!-- PAGE CONTAINER -->
+   <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+   <div id="root" class="root mn--max sb--show sb--stuck tm--expanded-hd">
+
+
+
+      <!-- CONTENTS -->
+      {% block content %} {% endblock content %}
+
+        
+
+      <!-- HEADER -->
+      {% include 'role/tools/header.html' %}
+     
+
+      <!-- MAIN NAVIGATION -->
+      {% include 'role/tools/navbar.html' %}
+
+           
+   </div>
+
+
+   <!-- JAVASCRIPTS -->
+   {% include 'role/tools/js.html' %}
+
+
+</body>
+
+</html>

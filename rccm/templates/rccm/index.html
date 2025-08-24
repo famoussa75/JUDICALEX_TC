@@ -1,0 +1,396 @@
+{% extends 'rccm/layout.html' %}
+
+
+{% block title %}Tableau de bord{% endblock title %}
+
+{% block content %}
+{% load static %}
+
+<section id="content" class="content">
+   <div class="content__header content__boxed overlapping" >
+      <div class="content__wrap">
+
+
+         <!-- Page title and information -->
+         <h1 class="page-title mb-2"><i class="demo-pli-home fs-3"></i> Accueil</h1>
+         <h2 class="h5">Gestion Rccm du Tribunal de Commerce.</h2>
+         <!-- END : Page title and information -->
+
+      </div>
+
+   </div>
+
+   <div class="content__boxed">
+      <div class="content__wrap">
+         <div class="row">
+            <div class="col-xl-7 mb-3 mb-xl-0">
+
+               <div class="card h-100">
+                  <div class="card-header d-flex align-items-center border-0">
+                     <div class="me-auto">
+                        <h3 class="h4 m-0">Statistique</h3>
+                     </div>
+                     <div class="toolbar-end">
+                        <button type="button" class="btn btn-icon btn-sm btn-hover btn-light" aria-label="Refresh Network Chart">
+                           <i class="demo-pli-repeat-2 fs-5"></i>
+                        </button>
+                        <div class="dropdown">
+                           <button class="btn btn-icon btn-sm btn-hover btn-light" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Network dropdown">
+                              <i class="demo-pli-dot-horizontal fs-4"></i>
+                              <span class="visually-hidden">Toggle Dropdown</span>
+                           </button>
+                           <ul class="dropdown-menu dropdown-menu-end">
+                              <li>
+                                 <a href="#" class="dropdown-item">
+                                    <i class="demo-pli-pen-5 fs-5 me-2"></i> Edit Date
+                                 </a>
+                              </li>
+                              <li>
+                                 <a href="#" class="dropdown-item">
+                                    <i class="demo-pli-refresh fs-5 me-2"></i> Refresh
+                                 </a>
+                              </li>
+                              <li>
+                                 <hr class="dropdown-divider">
+                              </li>
+                              <li>
+                                 <a href="#" class="dropdown-item">
+                                    <i class="demo-pli-file-csv fs-5 me-2"></i> Save as CSV
+                                 </a>
+                              </li>
+                              <li>
+                                 <a href="#" class="dropdown-item">
+                                    <i class="demo-pli-calendar-4 fs-5 me-2"></i> View Details
+                                 </a>
+                              </li>
+                           </ul>
+                        </div>
+                     </div>
+                  </div>
+
+
+                  <!-- Network - Area Chart -->
+                  <div class="card-body py-0" style="height: 250px; max-height: 275px">
+                     <canvas id="_dm-networkChart"></canvas>
+                  </div>
+                  <!-- END : Network - Area Chart -->
+
+
+                  <div class="card-body mt-4">
+                     <div class="row">
+                        <div class="col-md-8">
+
+                           <!-- CPU Temperature -->
+                           <h4 class="h5 mb-3">Total Rccm</h4>
+                           <div class="row">
+                              <div class="col-5">
+                                 <div class="h5 display-6 fw-normal">
+                                    433
+                                 </div>
+                              </div>
+                              <div class="col-7 text-sm">
+                                 <div class="d-flex justify-content-between align-items-start px-3 mb-3">
+                                    Personnes physiques
+                                    <span class="d-block badge bg-success ms-auto">270</span>
+                                 </div>
+                                 <div class="d-flex justify-content-between align-items-start px-3">
+                                    Personnes Morales
+                                    <span class="d-block badge bg-danger ms-auto">898</span>
+                                 </div>
+                              </div>
+                            
+                           </div>
+                           <!-- END : CPU Temperature -->
+
+
+                           <!-- Today Tips -->
+                           <div class="mt-4">
+                              <span class="badge bg-warning ms-auto fs-7"><b>Information</b></span>
+                              <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt.</p>
+                           </div>
+                           <!-- END : Today Tips -->
+
+
+                        </div>
+                        <div class="col-md-4">
+
+
+                           <!-- CPU Temperature -->
+                           <h4 class="h5 mb-3">Total Formalités</h4>
+                           <div class="row">
+                              <div class="col-12">
+                                 <div class="h5 display-6 fw-normal">
+                                    1433
+                                 </div>
+                              </div>
+                            
+                           </div>
+
+                     
+                           <!-- END : Bandwidth usage and progress bars -->
+
+
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+            <div class="col-xl-5">
+               <div class="row">
+                  <div class="col-sm-6">
+
+
+                     <!-- Tile - HDD Usage -->
+                     <div class="card bg-gray text-primary overflow-hidden mb-3">
+                        <div class="p-3 pb-2">
+                           <h5 class="mb-3"><i class="demo-pli-pen-5 fs-3 me-2"></i> Modifications</h5>
+                           <span class="fw-bold h1" style="font-size:4em;">132</span> <span>cas enregistré(s)</span>
+                        </div>
+                     </div>
+                     <!-- END : Tile - HDD Usage -->
+
+
+                  </div>
+                  <div class="col-sm-6">
+
+
+                     <!-- Tile - HDD Usage -->
+                     <div class="card text-white overflow-hidden mb-3 bg-teal" >
+                        <div class="p-3 pb-2">
+                           <h5 class="mb-3"> <i class="demo-pli-close fs-3 me-2"></i> Radiations</h5>
+                           <span class="fw-bold h1" style="font-size:4em;">252</span> <span>cas enregistré(s)</span>
+                        </div>
+                     </div>
+                     <!-- END : Tile - HDD Usage -->
+
+
+                  </div>
+               </div>
+               <div class="row">
+                  <div class="col-sm-6">
+
+
+                     <!-- Tile - HDD Usage -->
+                     <div class="card bg-warning text-white overflow-hidden mb-3">
+                        <div class="p-3 pb-2">
+                           <h5 class="mb-3"><i class="demo-pli-download-from-cloud fs-3 me-2"></i> Dissolutions</h5>
+                           <span class="fw-bold h1" style="font-size:4em;">28</span> <span>cas enregistré(s)</span>
+                        </div>
+                     </div>
+                     <!-- END : Tile - HDD Usage -->
+
+
+
+                  </div>
+                  <div class="col-sm-6">
+
+                     <!-- Tile - HDD Usage -->
+                     <div class="card bg-danger text-white overflow-hidden mb-3">
+                        <div class="p-3 pb-2">
+                           <h5 class="mb-3"><i class="demo-pli-trash fs-3 me-2"></i> Liquidations</h5>
+                           <span class="fw-bold h1" style="font-size:4em;">13</span><span>cas enregistré(s)</span>
+                        </div>
+                     </div>
+                     <!-- END : Tile - HDD Usage -->
+
+                  </div>
+               </div>
+
+
+               <!-- Simple state widget -->
+               <div class="card">
+                  <div class="card-body text-center">
+                     <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0 p-3">
+                           <div class="h3 display-3">95</div>
+                           <span class="h6">Formalités</span>
+                        </div>
+                        <div class="flex-grow-1 text-center ms-3">
+                           <p class="text-body-secondary">La société avec plus de modification</p>
+                           <button class="btn btn-sm btn-primary">SMARTYLEX SARLU</button>
+
+                           <!-- Social media statistics -->
+                           <div class="mt-4 pt-3 d-flex justify-content-around border-top">
+                              <div class="text-center">
+                                 <h4 class="mb-1">20x</h4>
+                                 <small class="text-body-secondary">Changement de dénomination</small>
+                              </div>
+                              <div class="text-center">
+                                 <h4 class="mb-1">30x</h4>
+                                 <small class="text-body-secondary">Changement de siēge</small>
+                              </div>
+                              <div class="text-center">
+                                 <h4 class="mb-1">25x</h4>
+                                 <small class="text-body-secondary">Extension d'activité</small>
+                              </div>
+                              
+                           </div>
+                           <!-- END : Social media statistics -->
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <!-- END : Simple state widget -->
+
+
+            </div>
+         </div>
+      </div>
+   </div>
+
+   <div class="content__boxed">
+      <div class="content__wrap">
+
+         <!-- Table with toolbar -->
+         <div class="card">
+            <div class="card-header">
+               <h4 class="card-title mb-3">Formalités créées aujourd'hui</h4>
+               <div class="row">
+
+                  <!-- Left toolbar -->
+                  <div class="col-md-6 d-flex gap-1 align-items-center mb-3">
+                     <button class="btn btn-primary hstack gap-2">
+                        <i class="demo-psi-add fs-5"></i>
+                        <span class="vr"></span>
+                        Nouvelle formalité
+                     </button>
+                     <button class="btn btn-icon btn-outline-light" aria-label="Print table">
+                        <i class="demo-pli-printer fs-5"></i>
+                     </button>
+                     <div class="btn-group">
+                        <button class="btn btn-icon btn-outline-light" aria-label="Information"><i class="demo-pli-exclamation fs-5"></i></button>
+                        <button class="btn btn-icon btn-outline-light" aria-label="Remove"><i class="demo-pli-recycling fs-5"></i></button>
+                     </div>
+                  </div>
+                  <!-- END : Left toolbar -->
+
+                  <!-- Right Toolbar -->
+                  <div class="col-md-6 d-flex gap-1 align-items-center justify-content-md-end mb-3">
+                     <div class="form-group">
+                        <input type="text" placeholder="Search..." class="form-control" autocomplete="off">
+                     </div>
+                     <div class="btn-group">
+                        <button class="btn btn-icon btn-outline-light" aria-label="Download"><i class="demo-pli-download-from-cloud fs-5"></i></button>
+                        <div class="btn-group dropdown">
+                           <button class="btn btn-icons btn-outline-light dropdown-toggle hstack gap-2" data-bs-toggle="dropdown" aria-expanded="false">
+                              Options
+                              <span class="vr"></span>
+                              <span class="visually-hidden">Toggle Dropdown</span>
+                           </button>
+                           <ul class="dropdown-menu dropdown-menu-end">
+                              <li><a class="dropdown-item" href="#">Action</a></li>
+                              <li><a class="dropdown-item" href="#">Another action</a></li>
+                              <li><a class="dropdown-item" href="#">Something else here</a></li>
+                              <li>
+                                 <hr class="dropdown-divider">
+                              </li>
+                              <li><a class="dropdown-item" href="#">Separated link</a></li>
+                           </ul>
+                        </div>
+                     </div>
+                  </div>
+                  <!-- END : Right Toolbar -->
+
+               </div>
+            </div>
+
+            <div class="card-body">
+               <div class="table-responsive">
+                  <table class="table table-striped">
+                     <thead>
+                        <tr>
+                           <th>Numéro de formalité</th>
+                           <th class="text-nowrap">Date de Création</th>
+                           <th>Categorie</th>
+                           <th>Créer par</th>
+                           <th class="text-center">Type de société</th>
+                           <th class="text-center">Action</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr>
+                           <td><a href="#" class="btn-link"> 53431</a></td>
+                           <td><i class="demo-pli-clock"></i> 21 Fevrier 2025</td>
+                           <td><span class="text-body">Modification</span></td>
+                           <td>Aly</td>
+                           <td class="text-center fs-5">
+                              <div class="d-block badge bg-success">Personne Physique</div>
+                           </td>
+                           <td class="text-center">-</td>
+                        </tr>
+                        <tr>
+                           <td><a href="#" class="btn-link"> 53432</a></td>
+                           <td><i class="demo-pli-clock"></i> 21 Fevrier 2025</td>
+                           <td><span class="text-body">Modification</span></td>
+                           <td>Mariam</td>
+                           <td class="text-center fs-5">
+                              <div class="d-block badge bg-primary">Personne Morale</div>
+                           </td>
+                           <td class="text-center">-</td>
+                        </tr>
+                        <tr>
+                           <td><a href="#" class="btn-link"> 53433</a></td>
+                           <td><i class="demo-pli-clock"></i> 21 Fevrier 2025</td>
+                           <td><span class="text-body">Dissolution</span></td>
+                           <td>Mariam</td>
+                           <td class="text-center fs-5">
+                              <div class="d-block badge bg-primary">Personne Morale</div>
+                           </td>
+                           <td class="text-center">-</td>
+                        </tr>
+                        <tr>
+                           <td><a href="#" class="btn-link"> 53434</a></td>
+                           <td><i class="demo-pli-clock"></i> 21 Fevrier 2025</td>
+                           <td><span class="text-body">Radiation</span></td>
+                           <td>Oumar</td>
+                           <td class="text-center fs-5">
+                              <div class="d-block badge bg-success">Personne Physique</div>
+                           </td>
+                           <td class="text-center">-</td>
+                        </tr>
+                    
+                     </tbody>
+                  </table>
+               </div>
+
+               <nav class="text-align-center mt-5" aria-label="Table navigation">
+                  <ul class="pagination justify-content-center">
+                     <li class="page-item disabled">
+                        <a class="page-link" href="#">Previous</a>
+                     </li>
+                     <li class="page-item active" aria-current="page">
+                        <span class="page-link">1</span>
+                     </li>
+                     <li class="page-item"><a class="page-link" href="#">2</a></li>
+                     <li class="page-item"><a class="page-link" href="#">3</a></li>
+                     <li class="page-item disabled"><a class="page-link" href="#">...</a></li>
+                     <li class="page-item"><a class="page-link" href="#">5</a></li>
+                     <li class="page-item">
+                        <a class="page-link" href="#">Next</a>
+                     </li>
+                  </ul>
+               </nav>
+            </div>
+         </div>
+         <!-- END : Table with toolbar -->
+
+      </div>
+   </div>
+
+
+  <!-- FOOTER -->
+  {% include '_base/tools/footer.html' %}
+
+   <!-- END - FOOTER -->
+   <script>
+      $(document).ready(function() {
+          $('#nav-accueil').addClass('bg-primary text-white');
+          $('#txt-accueil').addClass('text-white');
+      });
+  </script>
+  
+
+</section>
+
+{% endblock %}
+

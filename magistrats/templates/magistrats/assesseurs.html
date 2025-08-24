@@ -1,0 +1,344 @@
+
+{% extends 'role/base.html' %}
+
+
+{% block title %}Magistrats{% endblock title %}
+    
+{% block content %}
+{% load static %}
+<div class="wrapper">
+
+    <div class="page-wrapper">
+        <div class="container-xl">
+            <!-- Page title -->
+            <div class="page-header d-print-none">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <!-- Page pre-title -->
+                    
+                        <h2 class="page-title" style="color:white">
+                            Administration |&nbsp;<span style="color:red"> Assesseurs</span>
+                        </h2>
+                    </div>
+                    <!-- Page title actions -->
+                    <div class="col-auto ms-auto d-print-none">
+                        <div class="btn-list">
+
+                            <a href="#" class="btn btn-primary d-none d-sm-inline-block" data-bs-toggle="modal"
+                                data-bs-target="#modal-report">
+                                <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
+                                <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
+                                    viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                    <line x1="12" y1="5" x2="12" y2="19" />
+                                    <line x1="5" y1="12" x2="19" y2="12" />
+                                </svg>
+                                Nouveau assesseur
+                            </a>
+                            <a href="#" class="btn btn-primary d-sm-none btn-icon" data-bs-toggle="modal"
+                                data-bs-target="#modal-report" aria-label="Create new report">
+                                <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
+                                <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
+                                    viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                    <line x1="12" y1="5" x2="12" y2="19" />
+                                    <line x1="5" y1="12" x2="19" y2="12" />
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="page-body">
+            <div class="container-xl">
+              
+                
+                {% if form.errors %}
+                <div class="alert alert-danger alert-dismissible" role="alert">
+                    <div class="d-flex">
+                        <div>
+                         
+                        </div>
+                        <div>
+                            <h4 class="alert-title">Erreur de formulaire !</h4>
+                            <div class="text-muted"> {{form.errors}}</div>
+                        </div>
+                    </div>
+                    <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+                </div><br /> 
+                {% endif %}
+                {% if error %}
+                <div class="alert alert-danger alert-dismissible" role="alert">
+                    <div class="d-flex">
+                        <div>
+                         
+                        </div>
+                        <div>
+                            <h4 class="alert-title">Erreur de formulaire !</h4>
+                            <div class="text-muted"> {{msg}}</div>
+                        </div>
+                    </div>
+                    <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+                </div><br /> 
+                {% endif %}
+                    
+                
+              
+
+                <div class="row row-deck row-cards">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <!-- Download SVG icon from http://tabler-icons.io/i/menu-2 -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
+                                        viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                                        stroke-linecap="round" stroke-linejoin="round">
+                                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                        <line x1="4" y1="6" x2="20" y2="6" />
+                                        <line x1="4" y1="12" x2="20" y2="12" />
+                                        <line x1="4" y1="18" x2="20" y2="18" />
+                                    </svg> Tous les Assesseurs
+                                </h3>
+                            </div>
+
+                            <div class="card-body border-bottom py-3">
+                                <div class="d-flex mb-4">
+                                    <div class="text-muted">
+                                        <select id="categoryFilter" class="categoryFilter form-select">
+                                            <option value="">Tous</option>
+                                            <option value="admin">Admins</option>
+                                            <option value="visiteur">Visiteurs</option>
+
+                                        </select>
+                                    </div>
+
+                                </div>
+
+
+                                <table id="filterTable" class="filterTable  table table-bordered table-hover"
+                                    style="width:100%">
+                                    <thead>
+                                        <tr style="background-color: red ;">
+                                            <th scope="col" style="width:5px ;">No.</th>
+                                            <th scope="col">Prénoms et Noms</th>
+                                            <th scope="col">juridiction</th>
+                                            <th scope="col">Date de creation</th>
+                                            <th scope="col"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>     
+                                 
+                                        {% for a in assesseurs %}
+                                    
+                                        <tr>
+                                          <td>{{forloop.counter}}</td>
+                                          <td>{{a.prenomNom}}</td>
+                                          <td>{{a.juridiction}}</td>
+                                          <td>{{a.created_at}}</td>
+                                          <td>
+                                            <div class="dropdown">
+                                                <a href="#" class="card-dropdown" data-bs-toggle="dropdown"
+                                                    aria-expanded="false">
+                                                    <!-- Download SVG icon from http://tabler-icons.io/i/dots-vertical -->
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
+                                                        viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                                                        stroke-linecap="round" stroke-linejoin="round">
+                                                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                                        <circle cx="12" cy="12" r="1"></circle>
+                                                        <circle cx="12" cy="19" r="1"></circle>
+                                                        <circle cx="12" cy="5" r="1"></circle>
+                                                    </svg>
+                                                </a>
+                                                <div class="dropdown-menu dropdown-menu-end">
+                                                    <a href="#" data-bs-toggle="modal" data-bs-target="#modal-report2" class="dropdown-item editInfoAssesseur" id="{{a.id}}">
+                                                       <!-- Download SVG icon from http://tabler-icons.io/i/pencil -->
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 20h4l10.5 -10.5a1.5 1.5 0 0 0 -4 -4l-10.5 10.5v4" /><line x1="13.5" y1="6.5" x2="17.5" y2="10.5" /></svg>
+                                                        &nbsp;Modifier
+                                                    </a>
+                                                    <a href="#"  data-bs-toggle="modal" data-bs-target="#modal-report3" class="dropdown-item deleteInfoAssesseur" id="{{a.id}}">
+                                                        <!-- Download SVG icon from http://tabler-icons.io/i/trash -->
+	                                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><line x1="4" y1="7" x2="20" y2="7" /><line x1="10" y1="11" x2="10" y2="17" /><line x1="14" y1="11" x2="14" y2="17" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
+                                                        </svg>&nbsp;Supprimer
+                                                    </a>
+                                                </div> 
+                                            </div>
+                                          </td>
+
+                                        </tr>
+
+                                        {% endfor %}
+                                      
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Creation d'un conseiller -->
+<div class="modal modal-blur fade" id="modal-report" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <!-- Download SVG icon from http://tabler-icons.io/i/user-plus -->
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
+                        stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                        <circle cx="9" cy="7" r="4" />
+                        <path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+                        <path d="M16 11h6m-3 -3v6" />
+                    </svg> Nouveau assesseur
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form class="card card-md" method="POST" action="{% url 'magistrats.assesseur' %}">
+               {% csrf_token %}
+                <div class="modal-body" style="padding-left: 100px; padding-right: 100px;">
+
+                    <div class="mb-3">
+                        <label class="form-label">Juridiction</label>
+                        <select name="juridiction_id" class="form-select" id="select_box" required>
+                            <option value="">Selectionner une juridiction</option>
+                            
+                            {% for juridiction in juridictions  %}
+                                <option value="{{juridiction.id}}">{{juridiction.name}}</option>                              
+                            {% endfor %}
+                                
+                           
+                        </select>
+
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Prénom et Nom</label>
+                        <input id="name" type="text" class="form-control"
+                            name="{{form.prenomNom.name}}"  required autocomplete="name" autofocus>
+                    </div>
+                 
+                   
+                </div>
+                <input id="privilege" type="hidden" class="form-control" name="privilege" value="admin">
+                <div class="modal-footer" style="padding-left: 100px; padding-right: 100px;">
+                    <a href="#" type="button" class="btn btn-link link-secondary" data-bs-dismiss="modal">
+                        Annuler
+                    </a>
+                    <button type="submit" class="btn btn-primary w-30">
+                        <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
+                            stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round"
+                            stroke-linejoin="round">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                            <line x1="12" y1="5" x2="12" y2="19" />
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                        </svg>
+                        Enregistrer
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<!-- Modification des informations -->
+<div class="modal modal-blur fade" id="modal-report2" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <!-- Download SVG icon from http://tabler-icons.io/i/pencil -->
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 20h4l10.5 -10.5a1.5 1.5 0 0 0 -4 -4l-10.5 10.5v4" /><line x1="13.5" y1="6.5" x2="17.5" y2="10.5" /></svg>
+                     Mise à jour
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form class="card card-md" method="POST" id="formUpdate" action="">
+               {% csrf_token %}
+                <div class="modal-body" style="padding-left: 100px; padding-right: 100px;">
+
+                    <div class="mb-3">
+                        <label class="form-label">Juridiction</label>
+                        <select name="juridiction_id" class="form-select" id="modifJuridiction" required>
+                            
+                            {% for juridiction in juridictions  %}
+                                <option value="{{juridiction.id}}">{{juridiction.name}}</option>                              
+                            {% endfor %}
+                                
+                           
+                        </select>
+
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Prénom et Nom</label>
+                        <input id="modifName" type="text" class="form-control"
+                            name="{{form.prenomNom.name}}"  required autocomplete="name" autofocus>
+                    </div>
+                   
+                   
+                </div>
+                <input id="privilege" type="hidden" class="form-control" name="privilege" value="admin">
+                <div class="modal-footer" style="padding-left: 100px; padding-right: 100px;">
+                    <a href="#" type="button" class="btn btn-link link-secondary" data-bs-dismiss="modal">
+                        Annuler
+                    </a>
+                    <button type="submit" class="btn btn-primary w-30">
+
+                        Enregistrer les modifications
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+
+<!-- Suppression des informations -->
+<div class="modal modal-blur fade" id="modal-report3" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                   <!-- Download SVG icon from http://tabler-icons.io/i/alert-triangle -->
+	               <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 9v2m0 4v.01" /><path d="M5 19h14a2 2 0 0 0 1.84 -2.75l-7.1 -12.25a2 2 0 0 0 -3.5 0l-7.1 12.25a2 2 0 0 0 1.75 2.75" /></svg>
+                     ALERTE
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form class="card card-md" method="POST" id="formDelete" action="">
+               {% csrf_token %}
+               <div class="modal-body">
+                <p>Veuillez noter que cette action est irreversible, voulez-vous vraiment supprimer cette information ?</p>
+               </div>
+                
+                <div class="modal-footer" >
+
+                    <a href="#" type="button" class="btn btn-link link-secondary" data-bs-dismiss="modal">
+                        Non, je ne veux pas supprimer
+                    </a>
+                    <button type="submit" class="btn btn-primary w-30">
+                        Oui, je veux supprimer
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+{% endblock %}

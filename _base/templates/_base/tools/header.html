@@ -1,0 +1,84 @@
+{% load static %}
+
+<header class="header">
+    <div class="header__inner">
+
+       <!-- Brand -->
+       <div class="header__brand">
+          <div class="brand-wrap">
+
+             <!-- Brand logo -->
+             <a href="{% url '_base.dashboard' %}" class="">
+                <img src="{% static '_base/assets/img/logo-judicalex.png' %}" alt="Logo" class="" height="40">
+             </a>
+
+
+
+             <!-- You can also use IMG or SVG instead of a text element. -->
+             <!--
+       <div class="brand-title">
+          <img src="{% static '_base/assets/img/brand-title.svg' %}" alt="Brand Title">
+       </div>
+       -->
+
+          </div>
+       </div>
+       <!-- End - Brand -->
+
+
+       <div class="header__content">
+
+          <!-- Content Header - Left Side: -->
+          <div class="header__content-start">
+
+
+             <!-- Navigation Toggler -->
+             <button type="button" class="nav-toggler header__btn btn btn-icon btn-sm" aria-label="Nav Toggler">
+                <i class="demo-psi-list-view"></i>
+             </button>
+
+             <div class="vr mx-1 d-none d-md-block"></div>
+
+             <div class="brand-title"><img src="{% static '_base/assets/icons/clarity--balance-line.svg' %}" alt="" style="color: white;"> Tribunal de Commerce de Conakry</div>
+             
+            
+          </div>
+          <!-- End - Content Header - Left Side -->
+
+          
+          
+          <div class="flex-shrink-0 me-3">
+            {% if request.user.is_authenticated %}
+               {% if request.user.photo %}
+                  <img class="img-xs rounded-circle" src="{{ request.user.photo.url }}" alt="Profile Picture" loading="lazy">
+               {% else %}
+                  <img class="img-xs rounded-circle" src="{% static '_base/assets/img/profile-photos/1.png' %}" alt="Profile Picture" loading="lazy">
+               {% endif %}
+            {% endif %}
+
+          </div>
+          {% if request.user.is_authenticated %}
+            <span class="fs-5">👋 Bienvenue, <b>{{ request.user.first_name }} {{ request.user.last_name }}</b> !</span>
+         {% endif %}
+
+          <!-- Content Header - Right Side: -->
+          <div class="header__content-end">
+
+             <div class="vr mx-1 d-none d-md-block"></div>
+
+             <div class="form-check form-check-alt form-switch mx-md-2">
+                <input id="headerThemeToggler" class="form-check-input mode-switcher" type="checkbox" role="switch">
+                <label class="form-check-label ps-1 fw-bold d-none d-md-flex align-items-center " for="headerThemeToggler">
+                   <i class="mode-switcher-icon icon-light demo-psi-sun fs-5"></i>
+                   <i class="mode-switcher-icon icon-dark d-none demo-psi-half-moon"></i>
+                </label>
+             </div>
+
+             <div class="vr mx-1 d-none d-md-block"></div>
+
+             <span><i class="demo-pli-information"></i>&nbsp;&nbsp;Support</span>
+
+          </div>
+       </div>
+    </div>
+ </header>

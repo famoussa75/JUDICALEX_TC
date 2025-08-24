@@ -1,0 +1,25 @@
+
+{% load static %}
+
+<style>
+    @keyframes blink {
+        0% { border-color: goldenrod;  border-width: 4px;}
+        50% { border-color: transparent; }
+        100% { border-color: goldenrod;  border-width: 4px; }
+    }
+
+    .blinking-border {
+        animation: blink 1s 5;
+    }
+</style>
+
+<div class="row mb-3">
+    <div class="col-lg-12">
+        <div class="alert alert-info" role="alert">
+            {{ message }}
+        </div>        
+    </div>
+</div>
+
+
+

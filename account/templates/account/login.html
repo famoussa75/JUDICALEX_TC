@@ -1,0 +1,153 @@
+
+{% extends 'account/account_layout.html' %}
+{% load static %}
+
+{% block title %} Connexion {% endblock title %}
+    
+
+{% block content %}
+
+      <!-- CONTENTS -->
+
+      <section id="content" class="content">
+         <div class="container-fluid py-3 px-4">
+            <div class="row align-items-center gy-4">
+          
+              <!-- Armoiries et Drapeau -->
+              <div class="col-12 col-md-4">
+                <div class="d-flex flex-column flex-md-row align-items-center">
+                  
+                  <!-- Armoiries -->
+                  <div class="me-md-3 mb-3 mb-md-0 text-center text-md-start">
+                    <img src="{% static '_base/assets_role/statics/armoirie.png' %}" alt="Armoiries" style="height: 90px;">
+                  </div>
+                  
+                  <!-- Texte + Drapeau + Branding -->
+                  <div class="text-center text-center">
+                    <h5 class="mb-1 text-white">République de Guinée</h5>
+                    <p class="mb-1 text-white" style="font-size: 0.9rem;">Travail - Justice - Solidarité</p>
+                    <img src="{% static '_base/assets_role/statics/flag-guinee.png' %}" alt="Drapeau Guinée" style="height: 13px; width: 200px;">
+                    
+                    <div class="mt-2">
+                      <img src="{% static '_base/assets_role/statics/branding.png' %}" alt="Branding" style="height: 45px;" class="me-2">
+                      <img src="{% static '_base/assets_role/statics/simandou.png' %}" alt="Simandou" style="height: 45px;">
+                    </div>
+                  </div>
+                </div>
+              </div>
+          
+              <!-- Ministère (centré) -->
+              <div class="col-12 col-md-4 text-center">
+                <h3 class="text-white" style="text-decoration: underline; text-transform: uppercase;">
+                  <b>Ministère de la Justice et des Droits de l'Homme</b>
+                </h3>
+              </div>
+          
+              <!-- Logo e-Justice -->
+              <div class="col-12 col-md-4 text-center text-md-end">
+                <img src="{% static '_base/assets_role/statics/ejustice_logo_white.png' %}" alt="e-Justice Logo" style="height: 55px;">
+              </div>
+          
+            </div>
+          </div>
+          
+        
+        
+        
+         <div class="content__boxed w-100 min-vh-100 d-flex flex-column align-items-center justify-content-center" style="margin-top: -150px;">
+           
+            <img src="{% static '_base/assets/icons/clarity--balance-line.svg' %}" alt="" style="color: white; height: 50px;">
+            <h1 style="text-align: center; color: white; font-size: 4em" class="mb-4">Tribunal de Commerce de Conakry</h1>
+            <div class="content__wrap">
+
+               <!-- Login card -->
+               <div class="card shadow-lg">
+                  <div class="card-body p-4">
+
+                     <div class="text-center">
+                        <h1 class="h3">Connectez - Vous</h1>
+                        <p>Renseignez les champs ci-dessous</p>
+                     </div>
+
+                     {% if request.GET.msg_error_login %}
+       
+                     <div class="" >
+                       <div class="alert alert-danger" role="alert" data-mdb-color="danger">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-circle-letter-x" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="red" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                           <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                           <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
+                           <path d="M10 8l4 8" />
+                           <path d="M10 16l4 -8" />
+                         </svg>
+                         {{ request.GET.msg_error_login }}
+                       </div>
+                     </div>
+                   
+                   {% endif %}
+
+                     <form class="mt-4" method="POST" action="{% url 'login' %}">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                           <input type="email" name="email" class="form-control" placeholder="Email" autofocus required>
+                        </div>
+
+                        <div class="mb-3">
+                           <input type="password" name="password" class="form-control" placeholder="Mot de passe" required>
+                        </div>
+
+                        <div class="form-check">
+                           <input id="_dm-loginCheck" class="form-check-input" type="checkbox">
+                           <label for="_dm-loginCheck" class="form-check-label">
+                              Se rappeler de moi
+                           </label>
+                        </div>
+
+                        <div class="d-grid mt-5">
+                           <button class="btn btn-primary btn-lg" type="submit">Connexion</button>
+                        </div>
+                     </form>
+
+                     <div class="d-flex justify-content-between gap-md-5 mt-4">
+                        <a href="./front-pages-password-reminder.html" class="btn-link text-decoration-none">Mot de passe oublié ?</a>
+                        <a href="#" class="btn-link text-decoration-none">Contactez l'administrateur</a>
+                     </div>
+
+                     <!-- Social media buttons
+                      <div class="d-flex align-items-center justify-content-between border-top pt-3 mt-3">
+                        <h5 class="m-0">Login with</h5>
+
+                        <div class="ms-3">
+                           <a href="#" class="btn btn-sm btn-icon btn-hover btn-primary text-inherit">
+                              <i class="demo-psi-facebook fs-5"></i>
+                           </a>
+                           <a href="#" class="btn btn-sm btn-icon btn-hover btn-info text-inherit">
+                              <i class="demo-psi-twitter fs-5"></i>
+                           </a>
+                           <a href="#" class="btn btn-sm btn-icon btn-hover btn-danger text-inherit">
+                              <i class="demo-psi-google-plus fs-5"></i>
+                           </a>
+                           <a href="#" class="btn btn-sm btn-icon btn-hover btn-warning text-inherit">
+                              <i class="demo-psi-instagram fs-5"></i>
+                           </a>
+                        </div>
+                         END : 
+
+                      </div>
+                    Social media buttons -->
+
+
+                  </div>
+               </div>
+
+               <!-- END : Login card -->
+
+            </div>
+         </div>
+
+
+      </section>
+
+      <!-- END - CONTENTS -->
+{% endblock %}
+

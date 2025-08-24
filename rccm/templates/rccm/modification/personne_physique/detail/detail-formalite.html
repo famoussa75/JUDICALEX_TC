@@ -1,0 +1,292 @@
+
+
+<style>
+	.first_div{
+		overflow: hidden; 
+		position: relative; 
+		background-color: white; 
+		width: 950px; 
+		height: 1286px;
+		font-size:37px;
+		font-family:TimesNewRomanPS-BoldItalicMT_z;
+		color:#000;
+	}
+
+    .form-check-input {
+        appearance: none;
+        -webkit-appearance: none;
+        width: 16px;
+        height: 16px;
+        border: 1px solid #000;
+        cursor: not-allowed;
+        position: relative;
+    }
+
+.fake-checkbox {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 1px solid #000;
+  background-color: #fff;
+  position: relative;
+  border-radius: 10px;
+}
+
+.fake-checkbox.checked::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 5px;
+  width: 4px;
+  height: 8px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.fake-checkbox.checked {
+  background-color: #000;
+}
+
+</style>
+<style>
+	.police-15{
+		font-size: 15px;
+	}
+	.police-18{
+		font-size: 18px;
+	}
+	.police-40{
+		font-size: 40px;
+	}
+	.police-34{
+		font-size: 34px;
+	}
+	.police-25{
+		font-size: 25px;
+	}
+	.police-28{
+		font-size: 28px;
+	}
+	.police-30{
+		font-size: 30px;
+	}
+	.police-37{
+		font-size: 30px;
+	}
+    .police-11{
+		font-size: 11px;
+	}
+</style>
+
+
+
+<div style="overflow-y: scroll; height:1286px;" >
+
+    <!-- Page 1 -->
+    <div id="page1" style="font-style: italic; height: 1286px;width: 909px;" class="d-flex justify-content-center align-items-center mb-3" >
+    {% include 'rccm/modification/personne_physique/detail/1.html' %}
+
+    </div>
+
+
+    <!-- Page 2 -->
+    <div id="page2" style="height: 1286px;width: 909px;" class="d-flex justify-content-center align-items-center  mb-3" >
+        {% include 'rccm/modification/personne_physique/detail/2.html' %}
+    </div>
+
+
+    <!-- Page 3 -->
+    <div id="page3" style="height: 1286px;width: 909px;" class="d-flex justify-content-center align-items-center  mb-3">
+        {% include 'rccm/modification/personne_physique/detail/3.html' %}
+    </div>
+
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        generateQR(); // Générer un QR Code au chargement de la page
+    });
+
+    function generateQR() {
+		console.log('ok');
+        let text ='https://www.judicalex-gn.org/rccm/form/rccm-detail/1/';
+        document.getElementById("qrcode1").innerHTML = ""; // Effacer l'ancien QR Code
+        document.getElementById("qrcode2").innerHTML = ""; // Effacer l'ancien QR Code
+        document.getElementById("qrcode3").innerHTML = ""; // Effacer l'ancien QR Code
+
+        new QRCode(document.getElementById("qrcode1"), {
+            text: text,
+            width: 80,
+            height: 80
+        });
+		new QRCode(document.getElementById("qrcode2"), {
+            text: text,
+            width: 80,
+            height: 80
+        });
+		new QRCode(document.getElementById("qrcode3"), {
+            text: text,
+            width: 80,
+            height: 80
+        });
+    }
+</script>
+
+
+<script>
+
+$(document).ready(function () {
+    // Récupérez la date initiale
+    var dateModification = $('#dateModification_value').html();
+    var dateCreationRccm = $('#dateCreationRccm').html();
+    var dateNaissance = $('#dateNaissance').html();
+    var dateNaissance2 = $('#dateNaissance2').html();
+
+    // Vérifiez si la date est valide avant de continuer
+    if (dateModification) {
+        var date = new Date(dateModification); // Convertir la chaîne en objet Date
+
+        // Vérifiez si l'objet Date est valide
+        if (!isNaN(date.getTime())) {
+            // Formatez la date au format "jour mois année"
+            var options = { day: 'numeric', month: 'long', year: 'numeric' };
+            var formattedDate = new Intl.DateTimeFormat('fr-FR', options).format(date);
+
+            // Formatez la date au format "dd/mm/yyyy"
+            var day = String(date.getDate()).padStart(2, '0'); // Ajoute un zéro si nécessaire
+            var month = String(date.getMonth() + 1).padStart(2, '0'); // Les mois commencent à 0
+            var year = date.getFullYear();
+            var formattedDate2 = `${day}/${month}/${year}`; // Assemblez le format
+
+            // Affichez les dates formatées dans les éléments cibles
+            $('#dateModification_value').html(formattedDate);
+            $('#dateModification_value2').html(formattedDate2);
+            $('#dateModification_value3').html(formattedDate2);
+            $('#dateModification_value4').html(formattedDate2);
+            $('#dateModification_value5').html(formattedDate2);
+        } else {
+            console.error('Date invalide : ', dateModification);
+        }
+    } else {
+        console.warn('Aucune date trouvée dans #dateModification_value');
+    }
+
+     // Vérifiez si la date est valide avant de continuer
+     if (dateCreationRccm) {
+        var date = new Date(dateCreationRccm); // Convertir la chaîne en objet Date
+
+        // Vérifiez si l'objet Date est valide
+        if (!isNaN(date.getTime())) {
+            // Formatez la date au format "jour mois année"
+            var options = { day: 'numeric', month: 'long', year: 'numeric' };
+            var formattedDate = new Intl.DateTimeFormat('fr-FR', options).format(date);
+
+          
+            // Affichez les dates formatées dans les éléments cibles
+            $('#dateCreationRccm').html(formattedDate);
+           
+        } else {
+            console.error('Date invalide : ', dateCreationRccm);
+        }
+    } else {
+        console.warn('Aucune date trouvée dans #dateCreationRccm');
+    }
+
+	if (dateNaissance) {
+        var date2 = new Date(dateNaissance); // Convertir la chaîne en objet Date
+
+        // Vérifiez si l'objet Date est valide
+        if (!isNaN(date2.getTime())) {
+
+            // Formatez la date au format "dd/mm/yyyy"
+            var day = String(date2.getDate()).padStart(2, '0'); // Ajoute un zéro si nécessaire
+            var month = String(date2.getMonth() + 1).padStart(2, '0'); // Les mois commencent à 0
+            var year = date2.getFullYear();
+            var formattedDate2 = `${day}/${month}/${year}`; // Assemblez le format
+
+            // Affichez les dates formatées dans les éléments cibles
+            $('#dateNaissance').html(formattedDate2);
+           
+        } else {
+            console.error('Date invalide : ', dateNaissance);
+        }
+    } else {
+        console.warn('Aucune date trouvée dans #dateNaissance');
+    }
+
+    if (dateNaissance2) {
+        var date2 = new Date(dateNaissance2); // Convertir la chaîne en objet Date
+
+        // Vérifiez si l'objet Date est valide
+        if (!isNaN(date2.getTime())) {
+
+            // Formatez la date au format "dd/mm/yyyy"
+            var day = String(date2.getDate()).padStart(2, '0'); // Ajoute un zéro si nécessaire
+            var month = String(date2.getMonth() + 1).padStart(2, '0'); // Les mois commencent à 0
+            var year = date2.getFullYear();
+            var formattedDate2 = `${day}/${month}/${year}`; // Assemblez le format
+
+            // Affichez les dates formatées dans les éléments cibles
+            $('#dateNaissance2').html(formattedDate2);
+           
+        } else {
+            console.error('Date invalide : ', dateNaissance2);
+        }
+    } else {
+        console.warn('Aucune date trouvée dans #dateNaissance2');
+    }
+});
+
+</script>
+
+<script>
+	$(document).ready(function () {
+
+        $('#downloadPdf').click(function () {
+            var divIds = ['page1', 'page2', 'page3'];
+
+            var pdf = new jspdf.jsPDF('p', 'mm', 'a4');
+            var pageWidth = pdf.internal.pageSize.getWidth();
+            var pageHeight = pdf.internal.pageSize.getHeight();
+
+            var processDiv = function (index) {
+                if (index >= divIds.length) {
+                    pdf.save('document.pdf');
+                    return;
+                }
+
+                var divId = divIds[index];
+                var content = document.getElementById(divId);
+
+                html2canvas(content, {
+                    scale: 3, // 💡 augmenter pour une meilleure qualité (2 à 4 recommandé)
+                    useCORS: true // utile si images chargées avec CORS
+                }).then(function (canvas) {
+                    var imgData = canvas.toDataURL('image/png');
+
+                    var imgWidth = pageWidth;
+                    var imgHeight = (canvas.height * pageWidth) / canvas.width;
+
+                    pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+
+                    if (index < divIds.length - 1) {
+                        pdf.addPage();
+                    }
+
+                    processDiv(index + 1);
+                });
+            };
+
+            processDiv(0);
+        });
+
+
+    });
+
+
+</script>
