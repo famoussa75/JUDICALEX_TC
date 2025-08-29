@@ -512,6 +512,10 @@
                             {% endfor %}
                         </select>
                     </div>
+                    <div class="mb-3">
+                        <label class="form-label">Date de prochaine audience:</label>
+                        {{ form.prochaineAudience }}
+                    </div>
                 `;
             }
             else if (selectedValue === "Delibere-proroge") {
@@ -625,7 +629,7 @@
                     <div class="row field-block mb-3">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Renvoyé au :</label>
-                            <input type="date" name="prochaineAudience" class="form-control" id="editProchaineAudience">
+                            {{ form.prochaineAudience }}
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Pour :</label>
@@ -638,12 +642,13 @@
                 dynamicFieldsEdit.innerHTML = `
                     <div class="mb-3">
                         <label class="form-label">Mise en délibéré pour décision être rendue le :</label>
-                        <input type="date" name="prochaineAudience" class="form-control" id="editProchaineAudience">
+                        {{ form.prochaineAudience }}
                     </div>
                 `;
             }
             else if (selectedValue === "Vide-du-delibere") {
                 dynamicFieldsEdit.innerHTML = `
+                
                     <div class="mb-3">
                         <label class="form-label">Vidé du délibéré en faveur de :</label>
                         <input type="text" name="gagnant" class="form-control" id="editGagnant">
@@ -665,13 +670,17 @@
                             {% endfor %}
                         </select>
                     </div>
+                    <div class="mb-3">
+                        <label class="form-label">Date de prochaine audience:</label>
+                        {{ form.prochaineAudience }}
+                    </div>
                 `;
             }
             else if (selectedValue === "Delibere-proroge") {
                 dynamicFieldsEdit.innerHTML = `
                     <div class="mb-3">
                         <label class="form-label">Délibéré prorogé au :</label>
-                        <input type="date" name="prochaineAudience" class="form-control" id="editProchaineAudience">
+                        {{ form.prochaineAudience }}
                     </div>
                 `;
             }

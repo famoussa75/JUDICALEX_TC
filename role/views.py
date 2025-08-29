@@ -12,7 +12,7 @@ from django.db import IntegrityError, transaction
 from django.forms import inlineformset_factory, modelformset_factory
 from .models import AffaireRoles, DecisionHistory, EnrollementHistory, Roles, Enrollement, Decisions, SuivreAffaire
 from datetime import datetime, timedelta, date
-from django.db.models import Q
+from django.db.models import Count, Case, When, Value, CharField, Q, F, OuterRef, Subquery
 from django.utils.html import mark_safe
 import re
 from time import sleep
@@ -25,6 +25,12 @@ from reportlab.pdfgen import canvas
 from reportlab.lib import colors
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
+
+from itertools import groupby
+from operator import attrgetter
+
+from django.db.models.functions import Coalesce
+from django.db.models import IntegerField
 
 
 import uuid
@@ -799,39 +805,72 @@ def cancel_affaire(request, id):
     return redirect('role.enrollementForAdmin')  # ou autre URL de redirection
 
 def roleDetail(request, pk):
-     
     search_query = request.GET.get('search', '')
     role = Roles.objects.filter(idRole=pk).first()
-    detailRole = AffaireRoles.objects.filter(role=role).order_by('numOrdre')
-    if search_query:
-         detailRole = detailRole.filter(
-        Q(objet__icontains=search_query) 
-    )
-    paginator = Paginator(detailRole, 10)  # 10 objets par page
 
+    if not role:
+        return HttpResponse("Rôle non trouvé", status=404)
+
+    # Sous-requête : compter toutes les décisions avec le même numAffaire
+    decisions_count_subquery = (
+        Decisions.objects.filter(numAffaire=OuterRef('numAffaire'))
+        .values('numAffaire')
+        .annotate(total=Count('id'))
+        .values('total')[:1]
+    )
+
+    # Annoter chaque affaire avec nb_decisions global et catégorie
+    affaires = AffaireRoles.objects.filter(role=role).annotate(
+        nb_decisions=Coalesce(
+            Subquery(decisions_count_subquery, output_field=IntegerField()), 
+            0
+        ),
+        categorie=Case(
+            When(nb_decisions__lt=2, then=Value('Nouvelles Affaires')),
+            When(nb_decisions__gte=2, then=Value('Affaires Encours')),
+            output_field=CharField(),
+        )
+    ).order_by('categorie', 'numOrdre')
+
+    # Recherche
+    if search_query:
+        affaires = affaires.filter(Q(objet__icontains=search_query))
+
+    # Pagination unique
+    paginator = Paginator(affaires, 10)  # 10 affaires par page
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
+    # Grouper par catégorie pour le template
+    sorted_affaires = sorted(page_obj.object_list, key=attrgetter('categorie', 'numOrdre'))
+    grouped_affaires = []
+    for categorie, items in groupby(sorted_affaires, key=attrgetter('categorie')):
+        grouped_affaires.append({
+            'grouper': categorie,
+            'items': list(items)
+        })
+
+    # Infos utilisateur et juridiction
     juridiction = Juridictions.objects.filter(id=role.juridiction_id).first()
     is_chef = request.user.groups.filter(name='Chef').exists()
-    if request.user.is_authenticated:
-        affaireSuivis = SuivreAffaire.objects.filter(account=request.user)
-    else:
-        affaireSuivis = SuivreAffaire.objects.none()  # ou [] si vous préférez retourner une liste vide
+    affaireSuivis = SuivreAffaire.objects.filter(account=request.user) if request.user.is_authenticated else SuivreAffaire.objects.none()
 
     context = {
-        'role':role,
-        'page_obj':page_obj,
-        'is_chef':is_chef,
-        'affaireSuivis':affaireSuivis
+        'role': role,
+        'grouped_affaires': grouped_affaires,
+        'page_obj': page_obj,
+        'is_chef': is_chef,
+        'affaireSuivis': affaireSuivis
     }
 
-    if juridiction.name=='Tribunal de Commerce de Conakry' and role.typeAudience=='Fond':
-        return render(request, 'role/details/tc-fond-detail.html',context)
-    elif juridiction.name=='Tribunal de Commerce de Conakry' and role.typeAudience=='Refere':
-        return render(request, 'role/details/tc-refere-detail.html',context)
+    # Choix du template selon juridiction et type d'audience
+    if juridiction and juridiction.name == 'Tribunal de Commerce de Conakry' and role.typeAudience == 'Fond':
+        return render(request, 'role/details/tc-fond-detail.html', context)
+    elif juridiction and juridiction.name == 'Tribunal de Commerce de Conakry' and role.typeAudience == 'Refere':
+        return render(request, 'role/details/tc-refere-detail.html', context)
     else:
-        return HttpResponse()
+        return HttpResponse("Template non disponible pour cette juridiction/type d'audience")
+    
 
 def detailAffaire(request, idAffaire):
 
@@ -888,6 +927,7 @@ def detailAffaire(request, idAffaire):
         if form.is_valid():
             decision = form.save(commit=False)
             decision.affaire = affaire
+            decision.numAffaire = affaire.numAffaire
             decision.juridiction = juridiction
             decision.created_by = request.user
             decision.dateDecision = affaire.role.dateEnreg

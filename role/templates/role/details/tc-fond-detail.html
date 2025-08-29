@@ -145,86 +145,86 @@
                                     </button>
                                 </form>
                             </div>
-                            <table class="table table-transparent table-responsive">
-                               
+                            <table class="table table-responsive">
                                 <thead>
                                     <tr>
-                                      
-                                        <th class="text-center" style="width: 5%; font-size:12px;">N° D'ordre</th>
-                                        <th class="text-center" style="width: 5%; font-size:12px;">NUA</th>
-                                        <th class="text-center" style="width: 5%; font-size:12px;">RG</th>
-                                        <th style="font-size:12px;">Demandeurs</th>
-                                        <th style="font-size:12px;">Défendeurs</th>
-                                        <th style="font-size:12px;">Objet</th>
-                                        <th style="font-size:12px;">Décisions</th>
+                                        <th>N° Ordre</th>
+                                        <th>NUA</th>
+                                        <th>RG</th>
+                                        <th>Demandeurs</th>
+                                        <th>Défendeurs</th>
+                                        <th>Objet</th>
+                                        <th>Décisions</th>
                                     </tr>
                                 </thead>
-    
-    
-                                {% for affaire in page_obj %}
-    
-                                <tr>
-                                   
-                                    <td class="text-center">{{affaire.numOrdre}}</td>
-                                    <td class="text-center"><b>{{affaire.numAffaire}}</b></td>
-                                    <td class="text-center">{{affaire.numRg}}</td>
-                                    <td>
-                                        <p class="strong mb-1">{{affaire.demandeurs}}</p>
-                                    </td>
-                                    <td>
-                                        <p class="strong mb-1">{{affaire.defendeurs}} </p>
-                                    </td>
-                                    <td>
-                                        <p class="strong mb-1">{{affaire.objet}}</p>
-                                    </td>
-                                    <td>
-                                        <a href="{% url 'affaires.details' affaire.idAffaire %}" title="décisions">
-                                            Voir les décisions
-                                            <!-- Download SVG icon from http://tabler-icons.io/i/arrow-big-right -->
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24"
-                                                height="24" viewBox="0 0 24 24" stroke-width="2"
-                                                stroke="currentColor" fill="none" stroke-linecap="round"
-                                                stroke-linejoin="round">
-                                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                                <path
-                                                    d="M4 9h8v-3.586a1 1 0 0 1 1.707 -.707l6.586 6.586a1 1 0 0 1 0 1.414l-6.586 6.586a1 1 0 0 1 -1.707 -.707v-3.586h-8a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1z" />
-                                            </svg>
-                                        </a>
-                                    </td>
-                                  
-                                </tr>
-                                {% endfor %}
-    
-                            </table>
-                            <div class="pagination mt-3 d-flex justify-content-center">
-                                <nav aria-label="Page navigation">
-                                    <ul class="pagination">
-                                        {% if page_obj.has_previous %}
-                                            <li class="page-item">
-                                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Précédent</a>
-                                            </li>
-                                        {% else %}
-                                            <li class="page-item disabled"><span class="page-link">Précédent</span></li>
-                                        {% endif %}
+                                <tbody>
+                                    {% regroup page_obj by categorie as grouped_affaires %}
                             
-                                        {% for num in page_obj.paginator.page_range %}
-                                            {% if page_obj.number == num %}
-                                                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-                                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                                                <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
-                                            {% endif %}
+                                    {% for group in grouped_affaires %}
+                                    <tr class="text-center
+                                        {% if group.grouper == 'Nouvelles Affaires' %} bg-success-subtle
+                                        {% elif group.grouper == 'Affaires Encours' %} bg-warning-subtle
+                                        {% endif %}">
+                                        <td colspan="7"><b class="text-primary">📌 {{ group.grouper }}</b></td>
+                                    </tr>
+                                
+                                        {% for affaire in group.list %}
+                                            <tr>
+                                                <td class="text-center">{{ affaire.numOrdre }}</td>
+                                                <td class="text-center"><b>{{ affaire.numAffaire }}</b></td>
+                                                <td class="text-center">{{ affaire.numRg }}</td>
+                                                <td>{{ affaire.demandeurs }}</td>
+                                                <td>{{ affaire.defendeurs }}</td>
+                                                <td>{{ affaire.objet }}</td>
+                                                <td>
+                                                    <a href="{% url 'affaires.details' affaire.idAffaire %}" title="décisions">
+                                                        Décisions
+                                                        <!-- Download SVG icon from http://tabler-icons.io/i/arrow-big-right -->
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24"
+                                                            height="24" viewBox="0 0 24 24" stroke-width="2"
+                                                            stroke="currentColor" fill="none" stroke-linecap="round"
+                                                            stroke-linejoin="round">
+                                                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                                            <path
+                                                                d="M4 9h8v-3.586a1 1 0 0 1 1.707 -.707l6.586 6.586a1 1 0 0 1 0 1.414l-6.586 6.586a1 1 0 0 1 -1.707 -.707v-3.586h-8a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1z" />
+                                                        </svg>
+                                                    </a>
+                                                </td>
+                                            </tr>
                                         {% endfor %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
                             
-                                        {% if page_obj.has_next %}
-                                            <li class="page-item">
-                                                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Suivant</a>
-                                            </li>
-                                        {% else %}
-                                            <li class="page-item disabled"><span class="page-link">Suivant</span></li>
+                            <!-- Pagination unique -->
+                            <div class="pagination mt-3 d-flex justify-content-center">
+                                <ul class="pagination">
+                                    {% if page_obj.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Précédent</a>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item disabled"><span class="page-link">Précédent</span></li>
+                                    {% endif %}
+                            
+                                    {% for num in page_obj.paginator.page_range %}
+                                        {% if page_obj.number == num %}
+                                            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                            <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
                                         {% endif %}
-                                    </ul>
-                                </nav>
+                                    {% endfor %}
+                            
+                                    {% if page_obj.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Suivant</a>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item disabled"><span class="page-link">Suivant</span></li>
+                                    {% endif %}
+                                </ul>
                             </div>
+
                             <div class="row">
                                 <div class="col-6">
     

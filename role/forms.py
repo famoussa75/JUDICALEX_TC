@@ -48,7 +48,7 @@ class EnrollementForm(forms.ModelForm):
         fields =('juridiction','numOrdre','numAffaire','section','numRg','objet','demandeurs','defendeurs','juridiction','typeAudience','dateEnrollement','dateAudience')  
         widgets = {
             'numOrdre': forms.NumberInput(attrs={'class': 'form-control','required': True, 'value': 1}),
-            'numRg': forms.TextInput(attrs={'class': 'form-control','required': True, 'readonly': True}),
+            'numRg': forms.TextInput(attrs={'class': 'form-control','required': True}),
             'demandeurs': forms.Textarea(attrs={'class': 'form-control','required': True,'rows': 2}),
             'defendeurs': forms.Textarea(attrs={'class': 'form-control','required': True,'rows': 2}),
             'numAffaire': forms.TextInput(attrs={'class': 'form-control','required': True, 'readonly': True}),
