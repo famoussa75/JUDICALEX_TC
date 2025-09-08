@@ -87,18 +87,7 @@
                         <div class="card">
                             <div class="card-header">
                                
-                                <div class="row">
-                                    <div class="col-md-2">
-                                        <h3 class="card-title">
-                                            <!-- Download SVG icon from http://tabler-icons.io/i/menu-2 -->
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                                <line x1="4" y1="6" x2="20" y2="6" />
-                                                <line x1="4" y1="12" x2="20" y2="12" />
-                                                <line x1="4" y1="18" x2="20" y2="18" />
-                                            </svg> Affaires enrollées
-                                        </h3>
-                                    </div>
+                                <div class="row mb-4">
                                     <div class="col-md-2">
                                         <form method="get" action="">
                                             <div class="input-group">
@@ -110,15 +99,41 @@
                                                     {% endfor %}
                                                     </select>
                                                 </div>
+                                                 <!-- garder les autres filtres lors de la soumission -->
+                                                <input type="hidden" name="q" value="{{ query }}">
+                                                <input type="hidden" name="typeAudience" value="{{ selected_type_audience }}">
+
                                         </form>
                                     </div>
+                                    <div class="col-md-2">
+                                      
+                                        <form method="get" action="">
+                                            <div class="input-group">
+                                                <button class="btn btn-primary" type="button">Registre</button>
+                                                <select name="typeAudience" class="form-select" onchange="this.form.submit()">
+                                                    <option value="" selected disabled>Tous</option>
+                                                    {% for value, label in type_audiences %}
+                                                        <option value="{{ value }}" {% if selected_type_audience == value %}selected{% endif %} >{{ label }}</option>
+                                                    {% endfor %}
+                                                    </select>
+                                                </div>
+                                                 <!-- garder les autres filtres lors de la soumission -->
+                                                 <input type="hidden" name="year" value="{{ selected_year }}">
+                                                 <input type="hidden" name="q" value="{{ query }}">
+                                        </form>
+                                    </div>
+                                    
                                     <div class="col-md-4">
                                         <form method="get" action="">
                                             <div class="input-group">
                                                 <input type="text" name="q" class="form-control" placeholder="Rechercher..." value="{{ request.GET.q }}">
                                                 <input type="hidden" name="year" value="{{ selected_year }}">
+                                                <input type="hidden" name="typeAudience" value="{{ selected_type_audience }}">
                                                 <button class="btn btn-primary" type="submit">Rechercher</button>
                                             </div>
+                                             <!-- garder les autres filtres lors de la soumission -->
+                                             <input type="hidden" name="year" value="{{ selected_year }}">
+                                             <input type="hidden" name="typeAudience" value="{{ selected_type_audience }}">
                                         </form>
                                     </div>
                                     <div class="col-md-4 text-end">
@@ -146,7 +161,7 @@
                                                 <th scope="col" style="width:5px ;">No.Ordre</th>
                                                 <th scope="col" style="width:5px ;">NUA</th>
                                                 <th scope="col" style="width:10px ;">RG</th>
-                                                <th scope="col" style="text-align: center;">Type d'audience</th>
+                                                <!-- <th scope="col" style="text-align: center;">Type d'audience</th> -->
                                                 <th scope="col" style="text-align: center;">Date d'Enrollement</th>
                                                 <th scope="col" style="text-align: center;">Date d'audience</th>
                                                 <th scope="col" style="text-align: center;">Demanderesse</th>
@@ -169,7 +184,7 @@
                                                 </td>
                                                 <td scope="col"><b>{{e.numAffaire}}</b></td>
                                                 <td scope="col">{{e.numRg}}</td>
-                                                <td scope="col" style="text-align: center;">({{e.typeAudience}})</td>
+                                                <!-- <td scope="col" style="text-align: center;">({{e.typeAudience}})</td> -->
                                                 <td scope="col" style="text-align: center;">{{e.dateEnrollement}}</td>
                                                 <td scope="col" style="text-align: center;">{{e.dateAudience}}</td>
                                                 <td scope="col" style="text-align: center;">{{ e.demandeurs }} </td>
@@ -230,6 +245,8 @@
                                                 <div class="modal-content">
                                                     <form method="POST" action="{% url 'affaires.edit' e.id %}">
                                                     {% csrf_token %}
+                                                    <input type="hidden" name="numAffaire" class="form-control bg-secondary" value="{{ e.numAffaire }}">
+
                                                     <div class="modal-header">
                                                         <h5 class="modal-title" id="editAffaireModalLabel{{ e.id }}">Modifier l'affaire <span class="text-muted" >RG {{ e.numRg }}</span></h5>
                                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
@@ -325,7 +342,7 @@
                                             <ul class="pagination">
                                                 {% if page_obj.has_previous %}
                                                     <li class="page-item">
-                                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Précédent</a>
+                                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_type_audience %}&typeAudience={{ selected_type_audience }}{% endif %}">Précédent</a>
                                                     </li>
                                                 {% else %}
                                                     <li class="page-item disabled"><span class="page-link">Précédent</span></li>
@@ -335,13 +352,15 @@
                                                     {% if page_obj.number == num %}
                                                         <li class="page-item active"><span class="page-link">{{ num }}</span></li>
                                                     {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                                                        <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                                                        <li class="page-item">
+                                                            <a class="page-link" href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_type_audience %}&typeAudience={{ selected_type_audience }}{% endif %}">{{ num }}</a>
+                                                        </li>
                                                     {% endif %}
                                                 {% endfor %}
                                     
                                                 {% if page_obj.has_next %}
                                                     <li class="page-item">
-                                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Suivant</a>
+                                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_type_audience %}&typeAudience={{ selected_type_audience }}{% endif %}">Suivant</a>
                                                     </li>
                                                 {% else %}
                                                     <li class="page-item disabled"><span class="page-link">Suivant</span></li>
@@ -349,6 +368,7 @@
                                             </ul>
                                         </nav>
                                     </div>
+                                    
                                 </div>
                             </div>
 

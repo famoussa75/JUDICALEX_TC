@@ -3,6 +3,7 @@ from . import views
 
 urlpatterns = [
      path('', views.index, name='role.index'),
+     path("backoffice-data/", views.backoffice_data, name="backoffice_data"),
      path('roles/', views.listRole, name='role.liste'),
      path('roles/export/', views.export_roles_excel, name='role.export'),
      path('roles/valide/<int:pk>/', views.valide_role, name='role.valider'),

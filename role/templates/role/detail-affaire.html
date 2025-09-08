@@ -392,34 +392,29 @@
         function updateDecision() {
             const type = typeDecisionSelect.value;
             let text = "";
+            function formatDate(date){
+                let dateFormatee = date;
+                if (date) {
+                    const dateObj = new Date(date);
+                    const jour = String(dateObj.getDate()).padStart(2, '0');
+                    const mois = String(dateObj.getMonth() + 1).padStart(2, '0');
+                    const annee = dateObj.getFullYear();
+                    return `${jour}/${mois}/${annee}`;
+                }else{
+                    return `.....`
+                }
+            }
     
             if (type === "Renvoi") {
                 const date = document.getElementById("prochaineAudience")?.value || "";
                 const raison = document.getElementById("raisonRenvoi")?.value || "";
 
-                let dateFormatee = date;
-                if (date) {
-                    const dateObj = new Date(date);
-                    const jour = String(dateObj.getDate()).padStart(2, '0');
-                    const mois = String(dateObj.getMonth() + 1).padStart(2, '0');
-                    const annee = dateObj.getFullYear();
-                    dateFormatee = `${jour}/${mois}/${annee}`;
-                }
-                text = `Renvoi au ${dateFormatee} pour ${raison}`;
+                text = `Renvoi au  ${formatDate(date)} pour ${raison}`;
             }
             else if (type === "Mise-en-delibere") {
                 const date = document.getElementById("prochaineAudience")?.value || "";
 
-                let dateFormatee = date;
-                if (date) {
-                    const dateObj = new Date(date);
-                    const jour = String(dateObj.getDate()).padStart(2, '0');
-                    const mois = String(dateObj.getMonth() + 1).padStart(2, '0');
-                    const annee = dateObj.getFullYear();
-                    dateFormatee = `${jour}/${mois}/${annee}`;
-                }
-
-                text = `Mise en délibéré pour décision être rendu le ${dateFormatee}`;
+                text = `Mise en délibéré pour décision être rendu le  ${formatDate(date)}`;
             }
             else if (type === "Vide-du-delibere") {
                 const gagnant = document.getElementById("gagnant")?.value || "";
@@ -427,22 +422,13 @@
                 text = `Vidé du délibéré en faveur de ${gagnant} - Dispositif : ${dispositif}`;
             }
             else if (type === "Affectation") {
+                const date = document.getElementById("prochaineAudience")?.value || "";
                 const section = document.getElementById("selectSection")?.value || "";
-                text = `Affectation à la ${section}`;
+                text = `Affectation à la ${section} pour le ${formatDate(date)}`;
             }
             else if (type === "Delibere-proroge") {
                 const date = document.getElementById("prochaineAudience")?.value || "";
-
-                let dateFormatee = date;
-                if (date) {
-                    const dateObj = new Date(date);
-                    const jour = String(dateObj.getDate()).padStart(2, '0');
-                    const mois = String(dateObj.getMonth() + 1).padStart(2, '0');
-                    const annee = dateObj.getFullYear();
-                    dateFormatee = `${jour}/${mois}/${annee}`;
-                }
-
-                text = `Délibéré prorogé au ${dateFormatee}`;
+                text = `Délibéré prorogé au  ${formatDate(date)}`;
             }
             else if (type === "Radiation") {
                 const raison = document.getElementById("radiation")?.value || "";
@@ -515,6 +501,7 @@
                     <div class="mb-3">
                         <label class="form-label">Date de prochaine audience:</label>
                         {{ form.prochaineAudience }}
+
                     </div>
                 `;
             }
@@ -572,19 +559,25 @@
         function updateDecisionEdit() {
             const type = typeDecisionSelectEdit.value;
             let text = "";
-    
-            function formatDate(date) {
-                if (!date) return "";
-                const dateObj = new Date(date);
-                const jour = String(dateObj.getDate()).padStart(2, '0');
-                const mois = String(dateObj.getMonth() + 1).padStart(2, '0');
-                const annee = dateObj.getFullYear();
-                return `${jour}/${mois}/${annee}`;
+
+            function formatDate(date){
+                let dateFormatee = date;
+                if (date) {
+                    const dateObj = new Date(date);
+                    const jour = String(dateObj.getDate()).padStart(2, '0');
+                    const mois = String(dateObj.getMonth() + 1).padStart(2, '0');
+                    const annee = dateObj.getFullYear();
+                    return `${jour}/${mois}/${annee}`;
+                }else{
+                    return `.....`
+                }
             }
     
+            
             if (type === "Renvoi") {
                 const date = document.getElementById("editProchaineAudience")?.value || "";
                 const raison = document.getElementById("editRaisonRenvoi")?.value || "";
+
                 text = `Renvoi au ${formatDate(date)} pour ${raison}`;
             }
             else if (type === "Mise-en-delibere") {
@@ -598,7 +591,8 @@
             }
             else if (type === "Affectation") {
                 const section = document.getElementById("editSelectSection")?.value || "";
-                text = `Affectation à la ${section}`;
+                const date = document.getElementById("editProchaineAudience")?.value || "";
+                text = `Affectation à la ${section} pour le ${formatDate(date)}`;
             }
             else if (type === "Delibere-proroge") {
                 const date = document.getElementById("editProchaineAudience")?.value || "";
@@ -612,6 +606,7 @@
                 const raison = document.getElementById("editRenvoiSinedie")?.value || "";
                 text = `Renvoi sine die pour ${raison}`;
             }
+           
             else if (type === "Autre") {
                 const autre = document.getElementById("editAutre")?.value || "";
                 text = autre;
@@ -629,7 +624,7 @@
                     <div class="row field-block mb-3">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Renvoyé au :</label>
-                            {{ form.prochaineAudience }}
+                            <input type="date" name="prochaineAudience" class="form-control" id="editProchaineAudience">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Pour :</label>
@@ -642,7 +637,7 @@
                 dynamicFieldsEdit.innerHTML = `
                     <div class="mb-3">
                         <label class="form-label">Mise en délibéré pour décision être rendue le :</label>
-                        {{ form.prochaineAudience }}
+                        <input type="date" name="prochaineAudience" class="form-control" id="editProchaineAudience">
                     </div>
                 `;
             }
@@ -672,7 +667,7 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Date de prochaine audience:</label>
-                        {{ form.prochaineAudience }}
+                        <input type="date" name="prochaineAudience" class="form-control" id="editProchaineAudience">
                     </div>
                 `;
             }
@@ -680,7 +675,7 @@
                 dynamicFieldsEdit.innerHTML = `
                     <div class="mb-3">
                         <label class="form-label">Délibéré prorogé au :</label>
-                        {{ form.prochaineAudience }}
+                        <input type="date" name="prochaineAudience" class="form-control" id="editProchaineAudience">
                     </div>
                 `;
             }

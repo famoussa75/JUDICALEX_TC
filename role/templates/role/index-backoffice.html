@@ -21,7 +21,7 @@
     top: 0; left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* noir à 40% d’opacité */
+    background-color:rgba(20, 54, 66, 0.65); /* noir à 40% d’opacité */
     z-index: 1;
   }
   
@@ -67,10 +67,10 @@
                                     </div>
                                     <div class="col">
                                         <div class="font-weight-medium">
-                                            <h3><span class="badge bg-success">{{ T_roles }}</span> Rôle(s)</h3>
+                                            <h3><span class="badge bg-success" id="T_roles">{{ T_roles }}</span> Rôle(s)</h3>
                                         </div>
                                         <div class="text-muted">
-                                            {{ T_roles_today }} enregistré(s) aujourd'hui
+                                            <span id="T_roles_today"><b>{{ T_roles_today }}</b></span> enregistré(s) aujourd'hui
                                         </div>
                                     </div>
                                 </div>
@@ -86,11 +86,14 @@
                                     </div>
                                     <div class="col">
                                         <div class="font-weight-medium">
-                                            <h3><span class="badge bg-info"> {{ T_affaires }}</span> Affaire(s)</h3>
+                                            <h3><span class="badge bg-info" id="T_affaires"> {{ T_affaires }}</span> Plumitif</h3>
                                         </div>
                                         <div class="text-muted">
-                                            {{ T_affaires_today }} enregistrée(s) aujourd'hui
+                                            <span id="T_enrollements"><b>{{ T_enrollements }}</b></span> affaires enrollées
                                         </div>
+                                        <!-- <div class="text-muted">
+                                            <span id="T_affaires_today">{{ T_affaires_today }}</span> enregistrée(s) aujourd'hui
+                                        </div> -->
                                     </div>
                                 </div>
                             </div>
@@ -105,10 +108,10 @@
                                     </div>
                                     <div class="col">
                                         <div class="font-weight-medium">
-                                            <h3><span class="badge bg-warning"> {{ T_decisions }}</span>  Décision(s)</h3>
+                                            <h3><span class="badge bg-warning" id="T_decisions"> {{ T_decisions }}</span>  Décision(s)</h3>
                                         </div>
                                         <div class="text-muted">
-                                            {{ T_decisions_today }} enregistrée(s) aujourd'hui
+                                            <span id="T_decisions_today"><b>{{ T_decisions_today }}</b></span> enregistrée(s) aujourd'hui
                                         </div>
                                     </div>
                                 </div>
@@ -124,10 +127,10 @@
                                     </div>
                                     <div class="col">
                                         <div class="font-weight-medium">
-                                            <h3><span class="badge bg-primary"> {{ visiteurs_users }}</span> Visiteurs</h3>
+                                            <h3><span class="badge bg-primary" id="visiteurs_users"> {{ visiteurs_users }}</span> Visiteurs</h3>
                                         </div>
                                         <div class="text-muted">
-                                            {{ tribunal_users }} Utilisateurs du tribunal
+                                            <span id="tribunal_users" ><b>{{ tribunal_users }}</b></span> Utilisateurs du tribunal
                                         </div>
                                     </div>
                                 </div>
@@ -169,12 +172,12 @@
                                     <a href="project-overview.html" class="text-reset">Rôles au Fond</a>
                                     </h3>
                                     <div class="text-muted">
-                                    Total : {{ T_roles_fond }}
+                                    Total : <span id="T_roles_fond">{{ T_roles_fond }}</span>
                                     </div>
                                     <div class="mt-3">
                                     <div class="row g-2 align-items-center">
                                         <div class="col-auto">
-                                        {{ fond_pourcentage }}%
+                                        <span id="fond_pourcentage">{{ fond_pourcentage }}</span>%
                                         </div>
                                         <div class="col">
                                         <div class="progress progress-sm">
@@ -200,12 +203,12 @@
                                 <a href="project-overview.html" class="text-reset">Rôles au Référé</a>
                                 </h3>
                                 <div class="text-muted">
-                                Total : {{ T_roles_refere }}
+                                Total : <span id="T_roles_refere">{{ T_roles_refere }}</span>
                                 </div>
                                 <div class="mt-3">
                                 <div class="row g-2 align-items-center">
                                     <div class="col-auto">
-                                    {{ refere_pourcentage }}%
+                                    <span id="refere_pourcentage">{{ refere_pourcentage }}</span>%
                                     </div>
                                     <div class="col">
                                     <div class="progress progress-sm">
@@ -245,7 +248,7 @@
                                                     Section présidentielle
                                                 </div>
                                                 <div class="text-muted">
-                                                {{ president_sp.role.president }}
+                                                 {{ president_sp.role.president }}
                                                 </div>
                                             </div>
                                             <div class="col-auto">
@@ -568,5 +571,7 @@ $(document).ready(function () {
     });
     // @formatter:on
   </script>
+
+
 
 {% endblock %}

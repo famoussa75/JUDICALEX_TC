@@ -42,13 +42,101 @@ from django.db.models.functions import TruncDate
 from django.db.models import Count
 from django.views.decorators.http import require_http_methods
 
+from collections import defaultdict
+
 
 
 # Create your views here.
 def index(request):
     if request.user.is_authenticated:
         return backoffice(request)
-        
+    
+
+def backoffice_data(request):
+    current_year = date.today().year
+    year = int(request.GET.get('year', current_year))
+    today = date.today()
+
+    # Statistiques principales
+    tribunal_users = Account.objects.filter(juridiction=request.user.juridiction).count()
+    visiteurs_users = Account.objects.filter(
+        juridiction=request.user.juridiction,
+        groups__name="Visiteur"
+    ).count()
+
+    T_roles = Roles.objects.filter(juridiction=request.user.juridiction, dateEnreg__year=year).count()
+    T_roles_today = Roles.objects.filter(juridiction=request.user.juridiction, dateEnreg=today).count()
+
+    T_roles_fond = Roles.objects.filter(juridiction=request.user.juridiction, typeAudience='Fond', dateEnreg__year=year).count()
+    fond_pourcentage = round(T_roles_fond / T_roles * 100) if T_roles != 0 else 0
+
+    T_roles_refere = Roles.objects.filter(juridiction=request.user.juridiction, typeAudience='Refere', dateEnreg__year=year).count()
+    refere_pourcentage = round(T_roles_refere / T_roles * 100) if T_roles != 0 else 0
+
+    T_affaires = AffaireRoles.objects.filter(role__juridiction=request.user.juridiction, role__dateEnreg__year=year).count()
+    T_affaires_today = AffaireRoles.objects.filter(role__juridiction=request.user.juridiction, role__dateEnreg=today).count()
+
+    T_decisions = Decisions.objects.filter(juridiction=request.user.juridiction, dateDecision__year=year).count()
+    T_decisions_today = Decisions.objects.filter(juridiction=request.user.juridiction, dateDecision=today).count()
+
+    # Graphes (Affaires sur 5 jours)
+    start_date = today - timedelta(days=4)
+    days = [start_date + timedelta(days=i) for i in range(5)]
+
+    raw_stats = (
+        AffaireRoles.objects
+        .filter(role__juridiction=request.user.juridiction, role__dateEnreg__range=(start_date, today))
+        .annotate(day=TruncDate('role__dateEnreg'))
+        .values('day')
+        .annotate(total=Count('id'))
+    )
+    stats_dict = {item['day']: item['total'] for item in raw_stats}
+
+    chart_labels = [d.strftime('%Y-%m-%d') for d in days]
+    chart_data = [stats_dict.get(d, 0) for d in days]
+
+    # Graphes (Décisions par type)
+    stats_decisions = (
+        Decisions.objects
+        .filter(juridiction=request.user.juridiction, dateDecision__year=year)
+        .values('typeDecision')
+        .annotate(total=Count('id'))
+        .order_by('typeDecision')
+    )
+    decision_labels = [item['typeDecision'] for item in stats_decisions]
+    decision_counts = [item['total'] for item in stats_decisions]
+
+    # Messages défilants
+    messages = list(
+        MessageDefilant.objects.filter(actif=True)
+        .order_by('-date_creation')
+        .values("id", "contenu", "date_creation")
+    )
+
+    return JsonResponse({
+        # Statistiques
+        "tribunal_users": tribunal_users,
+        "visiteurs_users": visiteurs_users,
+        "T_roles": T_roles,
+        "T_roles_today": T_roles_today,
+        "T_roles_fond": T_roles_fond,
+        "fond_pourcentage": fond_pourcentage,
+        "T_roles_refere": T_roles_refere,
+        "refere_pourcentage": refere_pourcentage,
+        "T_affaires": T_affaires,
+        "T_affaires_today": T_affaires_today,
+        "T_decisions": T_decisions,
+        "T_decisions_today": T_decisions_today,
+
+        # Graphes
+        "chart_labels": chart_labels,
+        "chart_data": chart_data,
+        "decision_labels": decision_labels,
+        "decision_counts": decision_counts,
+
+        # Messages
+        "messages": messages,
+    })
 
 
 
@@ -84,6 +172,8 @@ def backoffice(request):
     T_roles_refere = Roles.objects.filter(juridiction=request.user.juridiction, typeAudience='Refere',  dateEnreg__year=year).count()
     refere_pourcentage = round(T_roles_refere / T_roles * 100) if T_roles != 0 else 0
 
+
+    T_enrollements = Enrollement.objects.filter(juridiction=request.user.juridiction).count()
 
     T_affaires = AffaireRoles.objects.filter(role__juridiction=request.user.juridiction,  role__dateEnreg__year=year).count()
     T_affaires_today = AffaireRoles.objects.filter(role__juridiction=request.user.juridiction, role__dateEnreg=today).count()
@@ -165,6 +255,7 @@ def backoffice(request):
         'today_roles_refere':today_roles_refere,
         'today_affaires':today_affaires,
         'T_roles':T_roles,
+        'T_enrollements':T_enrollements,
         'T_roles_today':T_roles_today,
         'T_affaires':T_affaires,
         'T_affaires_today':T_affaires_today,
@@ -211,6 +302,8 @@ def listRole(request):
     current_year = date.today().year
     year = int(request.GET.get('year', current_year))
     query = request.GET.get('q', '').strip()
+    type_audience = request.GET.get('typeAudience', '').strip()
+    section = request.GET.get('section', '').strip()
 
     # Années disponibles
     available_years = list(range(2024, current_year + 1))
@@ -220,6 +313,14 @@ def listRole(request):
         roles = Roles.objects.filter(juridiction=request.user.juridiction_id, dateEnreg__year=year)
     else:
         roles = Roles.objects.filter(dateEnreg__year=year)
+
+    # Filtrage par typeAudience
+    if type_audience:
+        roles = roles.filter(typeAudience=type_audience)
+
+    # Filtrage par section
+    if section:
+        roles = roles.filter(section=section)
 
     # Filtrage par mot-clé (recherche)
     if query:
@@ -232,18 +333,38 @@ def listRole(request):
         )
 
     # Pagination
-    paginator = Paginator(roles, 10)
+    paginator = Paginator(roles, 20)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
+    # Options pour les filtres
+    type_audiences = (
+        ("Refere", "Référé"),
+        ("Fond", "Fond"),
+    )
+
+    sections = (
+        ("Premiere-Section", "Première Section"),
+        ("Deuxieme-Section", "Deuxième Section"),
+        ("Troisieme-Section", "Troisième Section"),
+        ("Quatrieme-Section", "Quatrième Section"),
+        ("Cinquieme-Section", "Cinquième Section"),
+        ("Section-Presidentielle", "Section Présidentielle"),
+    )
+
     context = {
-        'roles': roles,  # optionnel si tu affiches uniquement page_obj
+        'roles': roles,  # utile si besoin d'accès direct
         'page_obj': page_obj,
         'selected_year': year,
         'available_years': available_years,
         'query': query,
+        'type_audiences': type_audiences,
+        'sections': sections,
+        'selected_type_audience': type_audience,
+        'selected_section': section,
     }
     return render(request, 'role/gestion-roles.html', context)
+
 
 def export_roles_excel(request):
     query = request.GET.get('q', '')
@@ -289,13 +410,24 @@ def listAffaire(request):
     current_year = date.today().year
     year = int(request.GET.get('year', current_year))
     query = request.GET.get('q', '').strip()
+    type_audience = request.GET.get('typeAudience', '').strip()
+    section = request.GET.get('section', '').strip()
 
     # Générer la liste d'années à afficher
     available_years = list(range(2024, current_year + 1))
 
+    # Base queryset
     affaires = AffaireRoles.objects.filter(role__dateEnreg__year=year)
 
-    # Recherche
+    # Filtrage par typeAudience
+    if type_audience:
+        affaires = affaires.filter(role__typeAudience=type_audience)
+
+    # Filtrage par section
+    if section:
+        affaires = affaires.filter(role__section=section)
+
+    # Recherche texte
     if query:
         affaires = affaires.filter(
             Q(numRg__icontains=query) |
@@ -305,17 +437,51 @@ def listAffaire(request):
         )
 
     # Pagination
-    paginator = Paginator(affaires, 10)
+    paginator = Paginator(affaires, 20)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
+
+    # Options pour les filtres
+    type_audiences = (
+        ("Refere", "Référé"),
+        ("Fond", "Fond"),
+    )
+
+    sections = (
+        ("Premiere-Section", "Première Section"),
+        ("Deuxieme-Section", "Deuxième Section"),
+        ("Troisieme-Section", "Troisième Section"),
+        ("Quatrieme-Section", "Quatrième Section"),
+        ("Cinquieme-Section", "Cinquième Section"),
+        ("Section-Presidentielle", "Section Présidentielle"),
+    )
+
+    # Récupérer toutes les décisions liées aux affaires affichées
+    decisions = Decisions.objects.filter(affaire__in=page_obj).select_related("affaire")
+
+    # Indexer les décisions par (affaire_id, dateDecision)
+    decisions_map = {
+        (d.affaire_id, d.dateDecision): d.decision
+        for d in decisions
+    }
+
+    # Ajouter la décision correspondante à chaque affaire
+    for affaire in page_obj:
+        key = (affaire.id, affaire.role.dateEnreg)
+        affaire.decision = decisions_map.get(key, "-")
 
     context = {
         'page_obj': page_obj,
         'selected_year': year,
         'available_years': available_years,
         'query': query,
+        'type_audiences': type_audiences,
+        'sections': sections,
+        'selected_type_audience': type_audience,
+        'selected_section': section,
     }
     return render(request, 'role/gestion-affaires.html', context)
+
 
 def export_affaires_excel(request):
     query = request.GET.get('q', '').strip()
@@ -380,7 +546,10 @@ def listEnrollementForAdmin(request):
     current_year = date.today().year
     year = int(request.GET.get('year', current_year))
 
-    query = request.GET.get('q', '')  # Récupération du mot-clé
+    query = request.GET.get('q', '')  # mot-clé recherche
+    type_audience = request.GET.get('typeAudience', '')  # filtre typeAudience
+    section = request.GET.get('section', '')  # filtre section
+
     available_years = list(range(2024, current_year + 1))
 
     # Base queryset
@@ -388,10 +557,19 @@ def listEnrollementForAdmin(request):
         dateEnrollement__year=year
     ).order_by('id')
 
-    # Filtrage par recherche (parties, objet, RG, etc.)
+    # Filtrage par typeAudience
+    if type_audience:
+        enrollements = enrollements.filter(typeAudience=type_audience)
+
+    # Filtrage par section
+    if section:
+        enrollements = enrollements.filter(section=section)
+
+    # Filtrage par recherche
     if query:
         enrollements = enrollements.filter(
             Q(numRg__icontains=query) |
+            Q(numAffaire__icontains=query) |
             Q(typeAudience__icontains=query) |
             Q(section__icontains=query) |
             Q(objet__icontains=query) |
@@ -401,31 +579,34 @@ def listEnrollementForAdmin(request):
             Q(dateAudience__icontains=query) 
         )
 
-
-    paginator = Paginator(enrollements, 10)
+    paginator = Paginator(enrollements, 20)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
     sections = (
-            ("Premiere-Section", "Prémière Section"),
-            ("Deuxieme-Section", "Deuxième Section"),
-            ("Troisieme-Section", "Troisième Section"),
-            ("Quatrieme-Section", "Quatrième Section"),
-            ("Cinquieme-Section", "Cinquième Section"),
-            ("Section-Presidentielle", "Section Présidentielle"),
+        ("Premiere-Section", "Prémière Section"),
+        ("Deuxieme-Section", "Deuxième Section"),
+        ("Troisieme-Section", "Troisième Section"),
+        ("Quatrieme-Section", "Quatrième Section"),
+        ("Cinquieme-Section", "Cinquième Section"),
+        ("Section-Presidentielle", "Section Présidentielle"),
     )
 
+    type_audiences = (
+        ("Refere", "Référé"),
+        ("Fond", "Fond"),
+    )
 
     return render(request, 'role/gestion-enrollements.html', {
         'page_obj': page_obj,
         'available_years': available_years,
         'selected_year': year,
         'sections': sections,
-        'query': query  # pour réafficher dans le champ
+        'type_audiences': type_audiences,
+        'selected_type_audience': type_audience,
+        'selected_section': section,
+        'query': query,
     })
-
-
-
 
 def export_enrollements_excel(request, idJuridiction):
     year = int(request.GET.get('year', date.today().year))
@@ -566,11 +747,17 @@ def edit_affaire(request, idAffaire):
     enrollement = get_object_or_404(Enrollement, id=idAffaire)
 
     numAffaire = request.POST.get('numAffaire', '').strip()
-    affaireRole = AffaireRoles.objects.filter(numAffaire=numAffaire).first()
+    affaireRole = AffaireRoles.objects.filter(numAffaire=numAffaire)
+    print(numAffaire)
   
     if affaireRole :
 
-        messages.error(request, 'Modification non autorisée car cette affaire est déjà au rôle.')
+        for aff in affaireRole:
+            # Mise à jour dans affaire au role
+            aff.demandeurs = request.POST.get('demandeurs', '').strip()
+            aff.defendeurs = request.POST.get('defendeurs', '').strip()
+            aff.objet = request.POST.get('objet', '').strip()
+            aff.save()
 
     else :
 
@@ -605,94 +792,112 @@ def edit_affaire(request, idAffaire):
         enrollement.save()
 
 
-        messages.success(request, 'Affaire modifiée avec succès !')
+    messages.success(request, 'Affaire modifiée avec succès !')
 
     return redirect('role.enrollementForAdmin')
 
     
 
 def createRole(request):
-    
     juridictions = Juridictions.objects.filter(id=request.user.juridiction_id)
-
     form = RoleForm(request.POST or None)
 
-    enrollFormset = modelformset_factory(Enrollement, form=EnrollementForm, extra=0, exclude=['id'])
-    formset = enrollFormset(request.POST or None, queryset=Enrollement.objects.filter(juridiction_id=request.user.juridiction_id))
-    
- 
+    enrollFormset = modelformset_factory(
+        Enrollement, form=EnrollementForm, extra=0, exclude=['id']
+    )
+    formset = enrollFormset(
+        request.POST or None,
+        queryset=Enrollement.objects.filter(
+            juridiction_id=request.user.juridiction_id
+        ).exclude(statut="Annuler")
+    )
+
+
     if request.method == 'POST':
-       
-         if form.is_valid():
-           
+        if form.is_valid():
             try:
                 with transaction.atomic():
                     juridiction_id = request.POST.get('juridiction_id')
                     juridiction = Juridictions.objects.get(pk=juridiction_id)
+
+                    # Création du rôle
                     role = form.save(commit=False)
                     role.juridiction = juridiction
                     role.created_by = request.user
                     role.save()
 
                     if formset.is_valid():
-                        for affaire_form2 in formset:
-                            idAffairefront = affaire_form2.cleaned_data.get('idAffaire')
-                            if idAffairefront is not None:
-                                id_affaire = affaire_form2.cleaned_data.get('idAffaire')
+                        for affaire_form in formset:
+                            if not affaire_form.cleaned_data:
+                                continue
+
+                            numAffaire = affaire_form.cleaned_data.get('numAffaire')
+
+                            # Si pas de numAffaire → créer un Enrollement avant de créer l’AffaireRoles
+                            if not numAffaire:
+                                enr = affaire_form.save(commit=False)
+                                enr.juridiction = juridiction
+                                enr.typeAudience = role.typeAudience
+                                enr.section = role.section
+                                enr.dateEnrollement = date(2024, 12, 31)  
+                                enr.dateAudience = role.dateEnreg  
+                                enr.created_by = request.user
+                                enr.save()
+
+                                # Génération du numéro d’affaire
+                                date_str = enr.dateEnrollement.strftime("%d%m%y")
+                                tribunal = 'TC'
+                                initial = 'R' if enr.typeAudience == 'Refere' else 'F'
+                                enr.numAffaire = f"JUD{initial}{date_str}{tribunal}{enr.id}"
+                                enr.save()
+
+                                numAffaire = enr.numAffaire
+                                id_affaire = enr.idAffaire
                             else:
-                                id_affaire = uuid.uuid4() 
-                            num_ordre = affaire_form2.cleaned_data.get('numOrdre')
-                            num_rg = affaire_form2.cleaned_data.get('numRg')
-                            num_aff = affaire_form2.cleaned_data.get('numAffaire')
-                            demandeurs = affaire_form2.cleaned_data.get('demandeurs')
-                            defendeurs = affaire_form2.cleaned_data.get('defendeurs')
-                            objet = affaire_form2.cleaned_data.get('objet')
-                            mandatDepot = affaire_form2.cleaned_data.get('mandatDepot')
-                            detention = affaire_form2.cleaned_data.get('detention')
-                            prevention = affaire_form2.cleaned_data.get('prevention')
-                            natureInfraction = affaire_form2.cleaned_data.get('natureInfraction')
-                            decision = affaire_form2.cleaned_data.get('decision')
-                            prevenus = affaire_form2.cleaned_data.get('prevenus')
-                            appelants = affaire_form2.cleaned_data.get('appelants')
-                            intimes = affaire_form2.cleaned_data.get('intimes')
-                            partieCiviles = affaire_form2.cleaned_data.get('partieCiviles')
-                            civileResponsables = affaire_form2.cleaned_data.get('civileResponsables')
-                            created_by = request.user
+                                id_affaire = affaire_form.cleaned_data.get('idAffaire') or uuid.uuid4()
 
-                             # Vérifiez si toutes les variables sont None
-                            if all(value is None for value in [
-                                num_ordre, num_rg, num_aff, demandeurs, defendeurs, objet, mandatDepot, 
-                                detention, prevention, natureInfraction, decision, prevenus, appelants, 
-                                intimes, partieCiviles, civileResponsables, created_by
-                            ]):
-                                continue  # Passer à l'itération suivante
-
-                            affaireEnroller = AffaireRoles(role=role,idAffaire=id_affaire,numOrdre=num_ordre,numRg=num_rg,numAffaire=num_aff,objet=objet,
-                                                       mandatDepot=mandatDepot,detention=detention,prevention=prevention,natureInfraction=natureInfraction,decision=decision,
-                                                       prevenus=prevenus,demandeurs=demandeurs,defendeurs=defendeurs,appelants=appelants,intimes=intimes,partieCiviles=partieCiviles,civileResponsables=civileResponsables,created_by=created_by)
+                            # Création de l'affaire liée au rôle
+                            affaireEnroller = AffaireRoles(
+                                role=role,
+                                idAffaire=id_affaire,
+                                numOrdre=affaire_form.cleaned_data.get('numOrdre'),
+                                numRg=affaire_form.cleaned_data.get('numRg'),
+                                numAffaire=numAffaire,
+                                objet=affaire_form.cleaned_data.get('objet'),
+                                mandatDepot=affaire_form.cleaned_data.get('mandatDepot'),
+                                detention=affaire_form.cleaned_data.get('detention'),
+                                prevention=affaire_form.cleaned_data.get('prevention'),
+                                natureInfraction=affaire_form.cleaned_data.get('natureInfraction'),
+                                decision=affaire_form.cleaned_data.get('decision'),
+                                prevenus=affaire_form.cleaned_data.get('prevenus'),
+                                demandeurs=affaire_form.cleaned_data.get('demandeurs'),
+                                defendeurs=affaire_form.cleaned_data.get('defendeurs'),
+                                appelants=affaire_form.cleaned_data.get('appelants'),
+                                intimes=affaire_form.cleaned_data.get('intimes'),
+                                partieCiviles=affaire_form.cleaned_data.get('partieCiviles'),
+                                civileResponsables=affaire_form.cleaned_data.get('civileResponsables'),
+                                created_by=request.user,
+                            )
                             affaireEnroller.save()
 
-                       
-                        messages.success(request, 'Rôle enregistré avec succès !')
-                        return redirect('role.liste')
+                        messages.success(request, "Rôle et affaires enregistrés avec succès !")
+                        return redirect("role.liste")
 
-                        # Reste de votre code après avoir traité les valeurs du formset2
                     else:
-                        print(f"Formset is not valid: {formset.errors}")
-                        messages.error(request, f"Une erreur est survenu lors de la création !  {formset.errors}")
-                        return redirect('role.create')
+                        messages.error(request, f"Erreur Formset : {formset.errors}")
+                        return redirect("role.create")
 
             except IntegrityError as e:
-                print(f"IntegrityError occurred: {e}")
-                return redirect('role.create')
+                messages.error(request, f"Erreur d'intégrité : {e}")
+                return redirect("role.create")
 
-   
     context = {
-        'juridictions':juridictions,
-        'form':form,
-        'formset':formset,
-    }        
-    return render(request, 'role/new-role.html',context)
+        'juridictions': juridictions,
+        'form': form,
+        'formset': formset,
+    }
+    return render(request, 'role/new-role.html', context)
+
 
 def valide_role(request, pk):
     role=Roles.objects.get(pk=pk)
@@ -893,6 +1098,7 @@ def detailAffaire(request, idAffaire):
         ("Radiation", "Radiation"),
         ("Renvoi-sine-die", "Renvoi sine die"),
         ("Affectation", "Affectation"),
+        ("Autre", "Autre"),
     )
 
     affaire = AffaireRoles.objects.filter(idAffaire=idAffaire).first()
@@ -985,7 +1191,6 @@ def fetchForm(request, selectedJuridiction, selectedType, dateRole, selectedSect
        (Q(typeDecision='Renvoi') | Q(typeDecision='Mise-en-delibere') | Q(typeDecision='Delibere-proroge') | Q(typeDecision='Affectation'))
     ).select_related('affaire')
     
-    print(affaireEnrollers)
     for decision in decisionsRenvoyers:
         print("ID de la décision:", decision.idDecision)
         print("Juridiction:", decision.juridiction)
@@ -1054,6 +1259,35 @@ def fetchForm(request, selectedJuridiction, selectedType, dateRole, selectedSect
     # Création du formulaire principal
     form = RoleForm(request.POST or None)
 
+    president = ''
+    greffier = ''
+
+    if selectedSection == 'Premiere-Section':
+        president = 'M. Fulber Aimé SAGNO'
+        greffier = 'Mme. Hawanatou Djoubar SOUMAH'
+
+    elif selectedSection == 'Deuxieme-Section':
+        president = 'M. Mamoudou CAMARA'
+        greffier = 'Mme Maïmouna DIALLO'
+    
+    elif selectedSection == 'Troisieme-Section':
+        president = 'M. Kaman Magloire Théophile KOUADIO'
+        greffier = 'M. Sekou Mohamed CAMARA'
+    
+    elif selectedSection == 'Quatrieme-Section':
+        president = 'M. Mamadou KABA'
+        greffier = 'Mme Aminata DOUNO'
+    
+    elif selectedSection == 'Cinquieme-Section':
+        president = 'M. Alpha Oumar CAMARA'
+        greffier = 'Mme Béatrice Tounkara'
+
+    elif selectedSection == 'Section-Presidentielle':
+        president = 'M. Sekou Kande'
+        greffier = 'M. Abdoulaye Yarie Soumah'
+
+    print(selectedSection)
+
     # Contexte pour les templates
     context = {
         'formset': formset,
@@ -1066,6 +1300,8 @@ def fetchForm(request, selectedJuridiction, selectedType, dateRole, selectedSect
         'selectedType': selectedType,
         'dateRole': dateRole,
         'selectedSection': selectedSection,
+        'president': president,
+        'greffier': greffier,
     }
 
     # Chargement de différents templates selon `juridiction` et `selectedType`
