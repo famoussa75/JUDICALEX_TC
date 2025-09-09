@@ -846,7 +846,7 @@ def createRole(request):
 
                                 # Génération du numéro d’affaire
                                 date_str = enr.dateEnrollement.strftime("%d%m%y")
-                                tribunal = 'TC'
+                                tribunal = 'GNTC'
                                 initial = 'R' if enr.typeAudience == 'Refere' else 'F'
                                 enr.numAffaire = f"JUD{initial}{date_str}{tribunal}{enr.id}"
                                 enr.save()
@@ -955,7 +955,7 @@ def createEnrollement(request):
 
                                 date_str = affaire.dateEnrollement.strftime("%d%m%y")
                                 r_f = affaire.typeAudience
-                                tribunal = 'TC'
+                                tribunal = 'GNTC'
                                 if r_f == 'Refere':
                                     initial = 'R'
                                 else:
