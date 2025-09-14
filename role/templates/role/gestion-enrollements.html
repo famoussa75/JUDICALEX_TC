@@ -86,71 +86,91 @@
                     <div class="col-12">
                         <div class="card">
                             <div class="card-header">
-                               
                                 <div class="row mb-4">
-                                    <div class="col-md-2">
-                                        <form method="get" action="">
-                                            <div class="input-group">
-                                                <button class="btn btn-primary" type="button">Année</button>
-                                                <select name="year" class="form-select" onchange="this.form.submit()">
-                                                    <option value="" disabled>Années</option>
-                                                    {% for y in available_years %}
-                                                        <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>
-                                                    {% endfor %}
-                                                    </select>
-                                                </div>
-                                                 <!-- garder les autres filtres lors de la soumission -->
-                                                <input type="hidden" name="q" value="{{ query }}">
-                                                <input type="hidden" name="typeAudience" value="{{ selected_type_audience }}">
-
-                                        </form>
+                                    <div class="col d-flex justify-content-end">
+                                        <a href="{% url 'export_enrollements_excel' %}?q={{ request.GET.q }}" class="btn btn-success">
+                                            <i class="fa fa-file-excel"></i> Exporter Excel
+                                        </a>
+                                         <!-- Bouton PDF -->
+                                         <a href="{% url 'export_enrollements_pdf'%}?year={{ selected_year }}&q={{ request.GET.q }}&section={{ request.GET.section }}&typeAudience={{ request.GET.typeAudience }}&date={{ request.GET.date }}" class="btn btn-danger ms-2">
+                                            <i class="fa fa-file-pdf"></i> Exporter PDF
+                                        </a>
                                     </div>
-                                    <div class="col-md-2">
-                                      
+                                </div>
+                                <hr>
+                                <h3><i class="fas fa-filter"></i> Filtres</h3>
+                                <div class="row mb-2">
+                                
+                                    <div class="col-2">
+                                        <span>
+                                            <form method="get" action="">
+                                                <div class="input-group mb-3">
+                                                    <button class="btn btn-primary" type="button">Année</button>
+                                                    <select name="year" class="form-select" onchange="this.form.submit()">
+                                                        <option value="" disabled>Années</option>
+                                                        {% for y in available_years %}
+                                                          <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>
+                                                        {% endfor %}
+                                                      </select>
+                                                 </div>
+                                                   <!-- garder les autres filtres lors de la soumission -->
+                                                   <input type="hidden" name="typeAudience" value="{{ selected_type_audience }}">
+                                                   <input type="hidden" name="q" value="{{ query }}">
+                                                   <input type="hidden" name="section" value="{{ selected_section }}">
+                                              </form>
+                                        </span> 
+                                    </div>
+                                    <div class="col-2">
                                         <form method="get" action="">
                                             <div class="input-group">
                                                 <button class="btn btn-primary" type="button">Registre</button>
                                                 <select name="typeAudience" class="form-select" onchange="this.form.submit()">
-                                                    <option value="" selected disabled>Tous</option>
+                                                    <option value="">Tous</option>
                                                     {% for value, label in type_audiences %}
-                                                        <option value="{{ value }}" {% if selected_type_audience == value %}selected{% endif %} >{{ label }}</option>
+                                                        <option value="{{ value }}" {% if selected_type_audience == value %}selected{% endif %}>{{ label }}</option>
                                                     {% endfor %}
-                                                    </select>
-                                                </div>
-                                                 <!-- garder les autres filtres lors de la soumission -->
-                                                 <input type="hidden" name="year" value="{{ selected_year }}">
-                                                 <input type="hidden" name="q" value="{{ query }}">
+                                                </select>
+                                            </div>
+                                            <!-- garder les autres filtres lors de la soumission -->
+                                            <input type="hidden" name="year" value="{{ selected_year }}">
+                                            <input type="hidden" name="q" value="{{ query }}">
+                                            <input type="hidden" name="section" value="{{ selected_section }}">
                                         </form>
+                                    </div>
+                                    
+                                   
+                                    <div class="col-2">
+                                        <span>
+                                            <form method="get" action="">
+                                                <div class="input-group mb-3">
+                                                    <button class="btn btn-primary" type="button">Date</button>
+                                                    <input 
+                                                        type="date" 
+                                                        name="date" 
+                                                        class="form-control" 
+                                                        value="{{ selected_date|default:'' }}" 
+                                                        onchange="this.form.submit()"
+                                                    >
+                                                </div>
+                                                <!-- garder les autres filtres lors de la soumission -->
+                                                <input type="hidden" name="typeAudience" value="{{ selected_type_audience }}">
+                                                <input type="hidden" name="q" value="{{ query }}">
+                                                <input type="hidden" name="section" value="{{ selected_section }}">
+                                            </form>
+                                        </span> 
                                     </div>
                                     
                                     <div class="col-md-4">
                                         <form method="get" action="">
                                             <div class="input-group">
-                                                <input type="text" name="q" class="form-control" placeholder="Rechercher..." value="{{ request.GET.q }}">
-                                                <input type="hidden" name="year" value="{{ selected_year }}">
-                                                <input type="hidden" name="typeAudience" value="{{ selected_type_audience }}">
+                                                <input type="text" name="q" class="form-control" placeholder="Rechercher un rôle..." value="{{ request.GET.q }}">
                                                 <button class="btn btn-primary" type="submit">Rechercher</button>
                                             </div>
-                                             <!-- garder les autres filtres lors de la soumission -->
-                                             <input type="hidden" name="year" value="{{ selected_year }}">
-                                             <input type="hidden" name="typeAudience" value="{{ selected_type_audience }}">
+                                              
                                         </form>
-                                    </div>
-                                    <div class="col-md-4 text-end">
-                                        <!-- Bouton Excel -->
-                                        <a href="{% url 'export_enrollements_excel' user.juridiction_id %}?year={{ selected_year }}&q={{ request.GET.q }}" class="btn btn-success">
-                                            <i class="fa fa-file-excel"></i> Exporter Excel
-                                        </a>
-                                        <!-- Bouton PDF -->
-                                        <a href="{% url 'export_enrollements_pdf' user.juridiction_id %}?year={{ selected_year }}&q={{ request.GET.q }}" class="btn btn-danger ms-2">
-                                            <i class="fa fa-file-pdf"></i> Exporter PDF
-                                        </a>
                                     </div>
                                     
                                 </div>
-                                
-                             
-
                             </div>
                             <div class="card-body border-bottom py-3">
                             
@@ -167,6 +187,7 @@
                                                 <th scope="col" style="text-align: center;">Demanderesse</th>
                                                 <th scope="col" style="text-align: center;">Defenderesse</th>
                                                 <th scope="col" style="text-align: center;">Objet</th>
+                                                <th scope="col" style="text-align: center;">Créée par</th>
                                                 <th scope="col" style="text-align: center;">Action</th>
                                             </tr>
                                         </thead>
@@ -180,7 +201,7 @@
                                                 <td scope="col">
                                                     {% if e.statut == 'Modifier' %}<a type="button" href="{% url 'historique_modifications_enrollement' e.id %}" class="btn btn-light btn-xs" >Modifiée</a> {% endif %} 
                                                     {% if e.statut == 'Annuler' %}<a type="button" href="#" class="btn btn-danger btn-xs" >Annulée</a> {% endif %} 
-                                                    {{e.id}} 
+                                                    {{forloop.counter}} 
                                                 </td>
                                                 <td scope="col"><b>{{e.numAffaire}}</b></td>
                                                 <td scope="col">{{e.numRg}}</td>
@@ -190,6 +211,11 @@
                                                 <td scope="col" style="text-align: center;">{{ e.demandeurs }} </td>
                                                 <td scope="col" style="text-align: center;">{{ e.defendeurs }} </td>
                                                 <td scope="col" style="text-align: center;">{{e.objet}}</td>
+                                                <td scope="col" style="text-align: center;">
+                                                    <span style="font-style: italic;">
+                                                        {{ e.created_by }}
+                                                     </span>
+                                                </td>
                                                 <td class="text-center" style="width: 10%;">
 
                                                     {% if e.statut == 'Annuler' %}
@@ -342,7 +368,7 @@
                                             <ul class="pagination">
                                                 {% if page_obj.has_previous %}
                                                     <li class="page-item">
-                                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_type_audience %}&typeAudience={{ selected_type_audience }}{% endif %}">Précédent</a>
+                                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_type_audience %}&typeAudience={{ selected_type_audience }}{% endif %}{% if selected_date %}&date={{ selected_date }}{% endif %}">Précédent</a>
                                                     </li>
                                                 {% else %}
                                                     <li class="page-item disabled"><span class="page-link">Précédent</span></li>
@@ -353,14 +379,14 @@
                                                         <li class="page-item active"><span class="page-link">{{ num }}</span></li>
                                                     {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
                                                         <li class="page-item">
-                                                            <a class="page-link" href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_type_audience %}&typeAudience={{ selected_type_audience }}{% endif %}">{{ num }}</a>
+                                                            <a class="page-link" href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_type_audience %}&typeAudience={{ selected_type_audience }}{% endif %}{% if selected_date %}&date={{ selected_date }}{% endif %}">{{ num }}</a>
                                                         </li>
                                                     {% endif %}
                                                 {% endfor %}
                                     
                                                 {% if page_obj.has_next %}
                                                     <li class="page-item">
-                                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_type_audience %}&typeAudience={{ selected_type_audience }}{% endif %}">Suivant</a>
+                                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_type_audience %}&typeAudience={{ selected_type_audience }}{% endif %}{% if selected_date %}&date={{ selected_date }}{% endif %}">Suivant</a>
                                                     </li>
                                                 {% else %}
                                                     <li class="page-item disabled"><span class="page-link">Suivant</span></li>

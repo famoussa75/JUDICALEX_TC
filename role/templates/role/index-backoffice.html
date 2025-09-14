@@ -8,7 +8,7 @@
 <style>
   .roles {
     position: relative;
-    background-image: url('/static/_base/assets_role/statics/bg-fullscreen.png'); /* ou tribunal.png */
+    background-image: url('/static/_base/assets_role/statics/tcc.jpg'); /* ou tribunal.png */
     background-size: cover;
     background-position: center;
     height: auto; /* ou ce que tu veux */
@@ -59,45 +59,49 @@
                 </div>
                 <div class="row row-cards mb-4">
                     <div class="col-md-6 col-xl-3">
-                        <div class="card card-sm">
-                            <div class="card-body">
-                                <div class="row align-items-center">
-                                    <div class="col-auto">
-                                        <h2><i class="fas fa-balance-scale mb-3 text-success fs-1"></i></h2>
-                                    </div>
-                                    <div class="col">
-                                        <div class="font-weight-medium">
-                                            <h3><span class="badge bg-success" id="T_roles">{{ T_roles }}</span> Rôle(s)</h3>
+                        <a href="{% url 'role.liste' %}" style="text-decoration: none;">
+                            <div class="card card-sm">
+                                <div class="card-body">
+                                    <div class="row align-items-center">
+                                        <div class="col-auto">
+                                            <h2><i class="fas fa-balance-scale mb-3 text-success fs-1"></i></h2>
                                         </div>
-                                        <div class="text-muted">
-                                            <span id="T_roles_today"><b>{{ T_roles_today }}</b></span> enregistré(s) aujourd'hui
+                                        <div class="col">
+                                            <div class="font-weight-medium">
+                                                <h3><span class="badge bg-success" id="T_roles">{{ T_roles }}</span> Rôle(s)</h3>
+                                            </div>
+                                            <div class="text-muted">
+                                                <span id="T_roles_today"><b>{{ T_roles_today }}</b></span> enregistré(s) aujourd'hui
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </a>
                     </div>
                     <div class="col-md-6 col-xl-3">
-                        <div class="card card-sm">
-                            <div class="card-body">
-                                <div class="row align-items-center">
-                                    <div class="col-auto">
-                                        <h2><i class="fas fa-suitcase fs-1 mb-3 text-info"></i></h2> 
-                                    </div>
-                                    <div class="col">
-                                        <div class="font-weight-medium">
-                                            <h3><span class="badge bg-info" id="T_affaires"> {{ T_affaires }}</span> Plumitif</h3>
+                        <a href="{% url 'role.affaires' %}" style="text-decoration: none;">
+                            <div class="card card-sm">
+                                <div class="card-body">
+                                    <div class="row align-items-center">
+                                        <div class="col-auto">
+                                            <h2><i class="fas fa-suitcase fs-1 mb-3 text-info"></i></h2> 
                                         </div>
-                                        <div class="text-muted">
-                                            <span id="T_enrollements"><b>{{ T_enrollements }}</b></span> affaires enrollées
+                                        <div class="col">
+                                            <div class="font-weight-medium">
+                                                <h3><span class="badge bg-info" id="T_affaires"> {{ T_affaires }}</span> Plumitif</h3>
+                                            </div>
+                                            <div class="text-muted">
+                                                <span id="T_enrollements"><b>{{ T_enrollements }}</b></span> affaires enrollées
+                                            </div>
+                                            <!-- <div class="text-muted">
+                                                <span id="T_affaires_today">{{ T_affaires_today }}</span> enregistrée(s) aujourd'hui
+                                            </div> -->
                                         </div>
-                                        <!-- <div class="text-muted">
-                                            <span id="T_affaires_today">{{ T_affaires_today }}</span> enregistrée(s) aujourd'hui
-                                        </div> -->
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </a>
                     </div>
                     <div class="col-md-6 col-xl-3">
                         <div class="card card-sm">

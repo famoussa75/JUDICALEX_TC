@@ -24,13 +24,24 @@ from reportlab.pdfgen import canvas
 
 from reportlab.lib import colors
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
-from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 
 from itertools import groupby
 from operator import attrgetter
 
 from django.db.models.functions import Coalesce
 from django.db.models import IntegerField
+
+from django.conf import settings
+
+from reportlab.platypus import (
+    SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
+)
+from reportlab.lib.enums import TA_CENTER
+from reportlab.lib.units import mm
+
+import os
+
 
 
 import uuid
@@ -141,6 +152,35 @@ def backoffice_data(request):
 
 
 def backoffice(request):
+
+    t_enrollement = Enrollement.objects.filter(dateEnrollement__year=2025)
+    t_affaireRole = AffaireRoles.objects.all()
+
+# Parcourir tous les enrôlements
+    # for enr in t_enrollement:
+    #     # Vérifier si un AffaireRoles correspond aux colonnes
+    #     matching_roles = AffaireRoles.objects.filter(
+    #         objet=enr.objet,
+    #         demandeurs=enr.demandeurs,
+    #         defendeurs=enr.defendeurs,
+    #         role__typeAudience=enr.typeAudience  # ou role__typeAudience si relation FK
+    #     )
+        
+    #     if matching_roles.exists():
+    #         for role in matching_roles:
+    #             # Mettre à jour numAffaire si différent
+    #             if role.numAffaire != enr.numAffaire:
+    #                 role.numAffaire = enr.numAffaire
+    #                 role.idAffaire = enr.idAffaire
+    #                 role.save(update_fields=["numAffaire","idAffaire"])
+    #                 print(f"✅ Mis à jour: idAffaire={role.idAffaire}, numAffaire={role.numAffaire}")
+    #     else:
+    #         print(f"❌ Pas de correspondance pour {enr.numAffaire}")
+
+
+    
+        
+
 
     current_year = date.today().year
     year = int(request.GET.get('year', current_year))
@@ -299,20 +339,31 @@ def colorize_found(query, text):
     return mark_safe(colored_text)
 
 def listRole(request):
+
+    get_year = request.GET.get('year')
+
     current_year = date.today().year
     year = int(request.GET.get('year', current_year))
     query = request.GET.get('q', '').strip()
     type_audience = request.GET.get('typeAudience', '').strip()
     section = request.GET.get('section', '').strip()
+    selected_date = request.GET.get('date', '').strip()
+
 
     # Années disponibles
     available_years = list(range(2024, current_year + 1))
 
-    # Base queryset selon le groupe utilisateur
-    if request.user.groups.filter(name='Greffe').exists():
-        roles = Roles.objects.filter(juridiction=request.user.juridiction_id, dateEnreg__year=year)
-    else:
+    roles = Roles.objects.filter(dateEnreg__year=year).order_by('dateEnreg')
+
+     # Filtrage par date précise
+    if selected_date:
+        parsed_date = datetime.strptime(selected_date, "%Y-%m-%d").date()
+        roles = roles.filter(dateEnreg=parsed_date)
+
+    # Filtrage par an
+    if get_year:
         roles = Roles.objects.filter(dateEnreg__year=year)
+
 
     # Filtrage par typeAudience
     if type_audience:
@@ -362,58 +413,23 @@ def listRole(request):
         'sections': sections,
         'selected_type_audience': type_audience,
         'selected_section': section,
+        'selected_date':selected_date
     }
     return render(request, 'role/gestion-roles.html', context)
 
 
-def export_roles_excel(request):
-    query = request.GET.get('q', '')
-
-    roles = Roles.objects.all()
-    if query:
-        roles = roles.filter(
-            Q(typeAudience__icontains=query) |
-            Q(section__icontains=query) |
-            Q(president__icontains=query) |
-            Q(greffier__icontains=query) |
-            Q(dateEnreg__icontains=query)
-        )
-
-    # Création du fichier Excel
-    wb = openpyxl.Workbook()
-    ws = wb.active
-    ws.title = "Rôles"
-
-    # En-têtes
-    ws.append(["No", "Type d'audience", "Section", "Président(e)", "Greffier(e)", "Date d'enregistrement"])
-
-    # Lignes
-    for i, role in enumerate(roles, start=1):
-        ws.append([
-            i,
-            role.typeAudience,
-            role.section,
-            role.president,
-            role.greffier,
-            role.dateEnreg.strftime('%Y-%m-%d') if role.dateEnreg else '',
-        ])
-
-    # Réponse
-    response = HttpResponse(
-        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    )
-    response['Content-Disposition'] = 'attachment; filename=roles.xlsx'
-    wb.save(response)
-    return response
-
 def listAffaire(request):
+    get_year = request.GET.get('year')
+
     current_year = date.today().year
     year = int(request.GET.get('year', current_year))
     query = request.GET.get('q', '').strip()
     type_audience = request.GET.get('typeAudience', '').strip()
     section = request.GET.get('section', '').strip()
+    selected_date = request.GET.get('date', '').strip()
 
-    # Générer la liste d'années à afficher
+
+    # Années disponibles
     available_years = list(range(2024, current_year + 1))
 
     # Base queryset
@@ -426,6 +442,14 @@ def listAffaire(request):
     # Filtrage par section
     if section:
         affaires = affaires.filter(role__section=section)
+
+    # Filtrage par date
+    if selected_date:
+        affaires = affaires.filter(role__dateEnreg=selected_date)
+    
+    # Filtrage par an
+    if get_year:
+        affaires = affaires.filter(role__dateEnreg__year=year)
 
     # Recherche texte
     if query:
@@ -479,45 +503,10 @@ def listAffaire(request):
         'sections': sections,
         'selected_type_audience': type_audience,
         'selected_section': section,
+        'selected_date': selected_date,
     }
     return render(request, 'role/gestion-affaires.html', context)
 
-
-def export_affaires_excel(request):
-    query = request.GET.get('q', '').strip()
-
-    affaires = AffaireRoles.objects.all()
-
-    if query:
-        affaires = affaires.filter(
-            Q(numRg__icontains=query) |
-            Q(demandeurs__icontains=query) |
-            Q(defendeurs__icontains=query) |
-            Q(objet__icontains=query)
-        )
-
-    # Création Excel
-    wb = openpyxl.Workbook()
-    ws = wb.active
-    ws.title = "Affaires"
-
-    ws.append(["No", "RG", "Demanderesse", "Défenderesse", "Objet"])
-
-    for i, affaire in enumerate(affaires, start=1):
-        ws.append([
-            i,
-            affaire.numRg,
-            affaire.demandeurs,
-            affaire.defendeurs,
-            affaire.objet,
-        ])
-
-    response = HttpResponse(
-        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    )
-    response['Content-Disposition'] = 'attachment; filename=affaires.xlsx'
-    wb.save(response)
-    return response
 
 
 def listEnrollement(request):
@@ -543,27 +532,36 @@ def listEnrollement(request):
 
 
 def listEnrollementForAdmin(request):
+
+    get_year = request.GET.get('year')
+
     current_year = date.today().year
     year = int(request.GET.get('year', current_year))
-
-    query = request.GET.get('q', '')  # mot-clé recherche
-    type_audience = request.GET.get('typeAudience', '')  # filtre typeAudience
-    section = request.GET.get('section', '')  # filtre section
-
+    query = request.GET.get('q', '').strip()
+    type_audience = request.GET.get('typeAudience', '').strip()
+    section = request.GET.get('section', '').strip()
+    selected_date = request.GET.get('date', '').strip()
     available_years = list(range(2024, current_year + 1))
 
-    # Base queryset
     enrollements = Enrollement.objects.filter(
-        dateEnrollement__year=year
-    ).order_by('id')
+            dateEnrollement__year=year
+        ).order_by('dateEnrollement')
+    
+     # Filtrage par date précise
+    if selected_date:
+        parsed_date = datetime.strptime(selected_date, "%Y-%m-%d").date()
+        enrollements = enrollements.filter(dateEnrollement=parsed_date)
+
+    # Filtrage par an
+    if get_year:
+        enrollements = Enrollement.objects.filter(
+            dateEnrollement__year=year
+        ).order_by('id')
 
     # Filtrage par typeAudience
     if type_audience:
         enrollements = enrollements.filter(typeAudience=type_audience)
 
-    # Filtrage par section
-    if section:
-        enrollements = enrollements.filter(section=section)
 
     # Filtrage par recherche
     if query:
@@ -604,141 +602,11 @@ def listEnrollementForAdmin(request):
         'sections': sections,
         'type_audiences': type_audiences,
         'selected_type_audience': type_audience,
-        'selected_section': section,
+        'selected_date': selected_date,
         'query': query,
     })
 
-def export_enrollements_excel(request, idJuridiction):
-    year = int(request.GET.get('year', date.today().year))
-    query = request.GET.get('q', '')
 
-    enrollements = Enrollement.objects.filter(
-        juridiction=idJuridiction,
-        dateEnrollement__year=year
-    )
-
-    if query:
-        enrollements = enrollements.filter(
-            Q(numRg__icontains=query) |
-            Q(typeAudience__icontains=query) |
-            Q(section__icontains=query) |
-            Q(objet__icontains=query) |
-            Q(demandeurs__icontains=query) |
-            Q(defendeurs__icontains=query) |
-            Q(dateEnrollement__icontains=query) |
-            Q(dateAudience__icontains=query)
-        )
-
-    # Créer un fichier Excel
-    wb = openpyxl.Workbook()
-    ws = wb.active
-    ws.title = "Enrôlements"
-
-    # En-têtes
-    ws.append([
-        "No", "RG", "Type d'audience", "Section",
-        "Date d'enrôlement", "Date d'audience",
-        "Demanderesse", "Défenderesse", "Objet"
-    ])
-
-    # Contenu
-    for i, e in enumerate(enrollements, start=1):
-        ws.append([
-            i,
-            e.numRg,
-            e.typeAudience,
-            e.section,
-            e.dateEnrollement.strftime('%Y-%m-%d') if e.dateEnrollement else '',
-            e.dateAudience.strftime('%Y-%m-%d') if e.dateAudience else '',
-            e.demandeurs,
-            e.defendeurs,
-            e.objet
-        ])
-
-    # Réponse HTTP avec fichier Excel
-    response = HttpResponse(
-        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    )
-    filename = f"enrollements_{year}.xlsx"
-    response['Content-Disposition'] = f'attachment; filename={filename}'
-
-    wb.save(response)
-    return response
-
-
-
-def export_enrollements_pdf(request, juridiction_id):
-    year = request.GET.get('year')
-    search = request.GET.get('q')
-
-    enrollements = Enrollement.objects.filter(juridiction_id=juridiction_id)
-    if year:
-        enrollements = enrollements.filter(dateEnrollement__year=year)
-    if search:
-        enrollements = enrollements.filter(numAffaire__icontains=search)
-
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="enrollements_{year or "tous"}.pdf"'
-
-    doc = SimpleDocTemplate(response, pagesize=landscape(A4), rightMargin=10, leftMargin=10, topMargin=20, bottomMargin=20)
-    elements = []
-    styles = getSampleStyleSheet()
-    style_normal = styles["Normal"]
-    style_normal.fontSize = 8  # police réduite pour éviter débordement
-    style_normal.leading = 10  # espace entre lignes dans une cellule
-
-    # Titre
-    title = Paragraph(f"REGISTRE D'ENROLLEMENTS ({year or 'Tous'})", styles['Title'])
-    elements.append(title)
-    elements.append(Spacer(1, 12))
-
-    # Données du tableau avec Paragraph pour wrap text
-    data = [
-        [
-            Paragraph("NUA", styles["Heading5"]),
-            Paragraph("RG", styles["Heading5"]),
-            Paragraph("Date Enrôlement", styles["Heading5"]),
-            Paragraph("Date Audience", styles["Heading5"]),
-            Paragraph("Demanderesse", styles["Heading5"]),
-            Paragraph("Défenderesse", styles["Heading5"]),
-            Paragraph("Objet", styles["Heading5"])
-        ]
-    ]
-
-    for e in enrollements:
-        data.append([
-            Paragraph(e.numAffaire or "", style_normal),
-            Paragraph(e.numRg or "", style_normal),
-            Paragraph(e.dateEnrollement.strftime('%d/%m/%Y') if e.dateEnrollement else '', style_normal),
-            Paragraph(e.dateAudience.strftime('%d/%m/%Y') if e.dateAudience else '', style_normal),
-            Paragraph(e.demandeurs or "", style_normal),
-            Paragraph(e.defendeurs or "", style_normal),
-            Paragraph(e.objet or "", style_normal)
-        ])
-
-    # Largeurs de colonnes adaptées
-    col_widths = [60, 50, 80, 80, 130, 130, 250]
-
-    # Création du tableau
-    table = Table(data, repeatRows=1, colWidths=col_widths)
-
-    # Style
-    table.setStyle(TableStyle([
-        ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#4CAF50')),
-        ('TEXTCOLOR', (0,0), (-1,0), colors.white),
-        ('ALIGN', (0,0), (-1,-1), 'CENTER'),
-        ('VALIGN', (0,0), (-1,-1), 'TOP'),  # alignement en haut
-        ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0,0), (-1,0), 9),
-        ('BOTTOMPADDING', (0,0), (-1,0), 6),
-
-        ('BACKGROUND', (0,1), (-1,-1), colors.whitesmoke),
-        ('GRID', (0,0), (-1,-1), 0.3, colors.grey),
-    ]))
-
-    elements.append(table)
-    doc.build(elements)
-    return response
 
 
 
@@ -748,7 +616,6 @@ def edit_affaire(request, idAffaire):
 
     numAffaire = request.POST.get('numAffaire', '').strip()
     affaireRole = AffaireRoles.objects.filter(numAffaire=numAffaire)
-    print(numAffaire)
   
     if affaireRole :
 
@@ -1010,7 +877,7 @@ def cancel_affaire(request, id):
     return redirect('role.enrollementForAdmin')  # ou autre URL de redirection
 
 def roleDetail(request, pk):
-    search_query = request.GET.get('search', '')
+    search_query = request.GET.get('q', '').strip()
     role = Roles.objects.filter(idRole=pk).first()
 
     if not role:
@@ -1039,7 +906,7 @@ def roleDetail(request, pk):
 
     # Recherche
     if search_query:
-        affaires = affaires.filter(Q(objet__icontains=search_query))
+        affaires = affaires.filter(Q(objet__icontains=search_query)|Q(demandeurs__icontains=search_query)| Q(defendeurs__icontains=search_query)|Q(objet__icontains=search_query))
 
     # Pagination unique
     paginator = Paginator(affaires, 10)  # 10 affaires par page
@@ -1102,6 +969,7 @@ def detailAffaire(request, idAffaire):
     )
 
     affaire = AffaireRoles.objects.filter(idAffaire=idAffaire).first()
+    print(idAffaire)
     decisions = Decisions.objects.select_related('affaire').filter(
         affaire__objet=affaire.objet,
         affaire__demandeurs=affaire.demandeurs,
@@ -1286,7 +1154,6 @@ def fetchForm(request, selectedJuridiction, selectedType, dateRole, selectedSect
         president = 'M. Sekou Kande'
         greffier = 'M. Abdoulaye Yarie Soumah'
 
-    print(selectedSection)
 
     # Contexte pour les templates
     context = {
@@ -1551,3 +1418,1287 @@ def historique_modifications_enrollement(request, pk):
 def historique_modifications_decisions(request, pk):
     historiques = DecisionHistory.objects.filter(original_id=pk)  # objet_id = ID lié
     return render(request, 'role/histo_modif_decisions.html', {'historiques': historiques, 'original_id': pk})
+
+
+def get_static_path(relative_path: str) -> str:
+    """
+    Retourne le chemin absolu d'un fichier statique pour l'utiliser (ex: ReportLab).
+    relative_path : chemin relatif depuis le dossier 'static', ex: "_base/assets_role/statics/armoirie.png"
+    """
+    # 1. Cherche dans STATICFILES_DIRS
+    for static_dir in getattr(settings, "STATICFILES_DIRS", []):
+        abs_path = os.path.join(static_dir, relative_path)
+        if os.path.exists(abs_path):
+            return abs_path
+
+    # 2. Cherche dans STATIC_ROOT (cas collectstatic en prod)
+    abs_path = os.path.join(settings.STATIC_ROOT, relative_path)
+    if os.path.exists(abs_path):
+        return abs_path
+
+    # 3. Cherche dans chaque app (utile si tu n’as pas encore fait collectstatic)
+    for app in settings.INSTALLED_APPS:
+        app_path = os.path.join(settings.BASE_DIR, app, "static", relative_path)
+        if os.path.exists(app_path):
+            return app_path
+
+    raise FileNotFoundError(f"Static file not found: {relative_path}")
+
+
+def export_roles_excel(request):
+    year = request.GET.get('year')
+    query = request.GET.get('q', '').strip()
+    type_audience = request.GET.get('typeAudience', '').strip()
+    section = request.GET.get('section', '').strip()
+    get_date = request.GET.get('date', '').strip()
+
+    roles = Roles.objects.all()
+    if year:
+        roles = roles.filter(dateEnreg__year=year)
+    if type_audience:
+        roles = roles.filter(typeAudience=type_audience)
+    if section:
+        roles = roles.filter(section=section)
+    if get_date:
+        roles = roles.filter(dateEnreg=get_date)
+    if query:
+        roles = roles.filter(
+            Q(typeAudience__icontains=query) |
+            Q(section__icontains=query) |
+            Q(president__icontains=query) |
+            Q(greffier__icontains=query) |
+            Q(dateEnreg__icontains=query)
+        )
+
+    # Création du fichier Excel
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Rôles"
+
+    # En-têtes
+    ws.append(["No", "Type d'audience", "Section", "Président(e)", "Greffier(e)", "Date d'enregistrement"])
+
+    # Lignes
+    for i, role in enumerate(roles, start=1):
+        ws.append([
+            i,
+            role.typeAudience,
+            role.section,
+            role.president,
+            role.greffier,
+            role.dateEnreg.strftime('%Y-%m-%d') if role.dateEnreg else '',
+        ])
+
+    # Réponse
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename=roles.xlsx'
+    wb.save(response)
+    return response
+
+def export_roles_pdf(request):
+    # =======================
+    # Filtres
+    # =======================
+    year = request.GET.get('year')
+    query = request.GET.get('q', '').strip()
+    type_audience = request.GET.get('typeAudience', '').strip()
+    section = request.GET.get('section', '').strip()
+    get_date = request.GET.get('date', '').strip()
+
+    roles = Roles.objects.all()
+    if year:
+        roles = roles.filter(dateEnreg__year=year)
+    if type_audience:
+        roles = roles.filter(typeAudience=type_audience)
+    if section:
+        roles = roles.filter(section=section)
+    if get_date:
+        roles = roles.filter(dateEnreg=get_date)
+    if query:
+        roles = roles.filter(
+            Q(typeAudience__icontains=query) |
+            Q(section__icontains=query) |
+            Q(president__icontains=query) |
+            Q(greffier__icontains=query) |
+            Q(dateEnreg__icontains=query)
+        )
+
+    # =======================
+    # Réponse HTTP
+    # =======================
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="roles_{year or "tous"}.pdf"'
+
+     # =======================
+    # Callback pour pied de page
+    # =======================
+    def add_footer(canvas, doc):
+        footer_text = f"Téléchargé à partir de Judicalex - {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}"
+        canvas.saveState()
+        canvas.setFont('Helvetica', 8)
+        canvas.drawCentredString(A4[1]/2, 5 * mm, footer_text)  # centré horizontalement, 10 mm du bas
+        canvas.restoreState()
+
+
+    # =======================
+    # Document PDF
+    # =======================
+    doc = SimpleDocTemplate(
+        response,
+        pagesize=landscape(A4),
+        rightMargin=10, leftMargin=10, topMargin=20, bottomMargin=20
+    )
+
+    elements = []
+
+    # =======================
+    # Styles
+    # =======================
+    styles = getSampleStyleSheet()
+    style_normal = styles["Normal"]
+    style_normal.fontSize = 9
+    style_normal.leading = 11
+    style_normal.alignment = TA_CENTER
+
+    style_title = ParagraphStyle(
+        "title",
+        parent=styles["Heading2"],
+        alignment=TA_CENTER,  # centré
+        textColor=colors.HexColor("#000000")
+    )
+
+    # =======================
+    # En-tête
+    # =======================
+    try:
+        armoirie = Image(get_static_path("_base/assets_role/statics/armoirie.png"), width=50, height=50)
+        armoirie.hAlign = 'CENTER'
+
+        branding = Image(get_static_path("_base/assets_role/statics/branding.png"), width=70, height=40)
+        branding.hAlign = 'CENTER'
+
+        simandou = Image(get_static_path("_base/assets_role/statics/simandou.png"), width=70, height=40)
+        simandou.hAlign = 'CENTER'
+
+        judicalex = Image(get_static_path("_base/assets_role/statics/ejustice_logo_white.png"), width=120, height=30)
+        judicalex.hAlign = 'CENTER'
+
+    except Exception:
+        armoirie = Paragraph("[Armoirie manquante]", style_normal)
+        branding = simandou = Paragraph("[Image manquante]", style_normal)
+        judicalex = Paragraph("[Image manquante]", style_normal)
+
+    # === Colonnes avec contenu centré verticalement et horizontalement ===
+    col_gauche = Table(
+        [[armoirie],
+         [Paragraph("<b>République de Guinée</b>", style_normal)],
+         [Paragraph("Travail - Justice - Solidarité", style_normal)],
+         [Paragraph("Ministère de la Justice et des Droits de l'Homme", style_normal)],
+         [branding]],
+        style=TableStyle([
+            ("ALIGN", (0,0), (-1,-1), "CENTER"),
+            ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
+            ("BOTTOMPADDING", (0,0), (-1,-1), 2),
+            ("TOPPADDING", (0,0), (-1,-1), 2),
+        ])
+    )
+
+    col_centre = Table(
+        [[Paragraph("<b>COUR D'APPEL DE CONAKRY</b>", style_title)],
+         [Paragraph("Tribunal de Commerce de Conakry", style_title)]],
+        style=TableStyle([
+            ("ALIGN", (0,0), (-1,-1), "CENTER"),
+            ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
+        ])
+    )
+
+    col_droite = Table(
+        [[judicalex],
+         [Paragraph(
+             "<b>Conception & Réalisation</b><br/>"
+             "Judicalex SARL<br/>"
+             "contact@judicalex-gn.org<br/>"
+             "Tel: 613 87 08 92", style_normal)]],
+        style=TableStyle([
+            ("ALIGN", (0,0), (-1,-1), "CENTER"),
+            ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
+        ])
+    )
+
+    # === Table principale de l'entête avec colonnes de même largeur ===
+    header_table = Table(
+        [[col_gauche, col_centre, col_droite]],
+        colWidths=[250, 250, 250],  # même dimension pour les 3 colonnes
+        rowHeights=120  # hauteur uniforme pour que tout soit centré verticalement
+    )
+    header_table.setStyle(TableStyle([
+        ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
+        ("ALIGN", (0,0), (-1,-1), "CENTER"),
+        ("GRID", (0,0), (-1,-1), 0, colors.white),  # invisible, juste pour structure
+    ]))
+
+    elements.append(header_table)
+    elements.append(Spacer(1, 12))
+
+    # =======================
+    # Titre du tableau avec filtres
+    # =======================
+    titre_filters = []
+
+    if year:
+        titre_filters.append(f"Année: {year}")
+    if type_audience:
+        titre_filters.append(f"Type: {type_audience}")
+    if section:
+        titre_filters.append(f"Section: {section}")
+    if get_date:
+        titre_filters.append(f"Date: {get_date}")
+    if query:
+        titre_filters.append(f"Recherche: {query}")
+
+    # Construire le texte final
+    titre = f"LISTE DES RÔLES"
+    filtre = f"FILTRE :"
+    if filtre:
+        filtre += " – " + ", ".join(titre_filters)
+
+    elements.append(Paragraph(titre, styles['Title']))
+    elements.append(Paragraph(filtre, styles['Normal']))
+    elements.append(Spacer(1, 12))
+
+    # =======================
+    # Tableau des rôles
+    # =======================
+    data = [[
+        Paragraph("No", styles["Heading5"]),
+        Paragraph("Type d'audience", styles["Heading5"]),
+        Paragraph("Section", styles["Heading5"]),
+        Paragraph("Président(e)", styles["Heading5"]),
+        Paragraph("Greffier(e)", styles["Heading5"]),
+        Paragraph("Date d'audience", styles["Heading5"]),
+    ]]
+
+    for i, r in enumerate(roles, start=1):
+        data.append([
+            Paragraph(str(i), style_normal),
+            Paragraph(r.typeAudience or "", style_normal),
+            Paragraph(r.section or "", style_normal),
+            Paragraph(r.president or "", style_normal),
+            Paragraph(r.greffier or "", style_normal),
+            Paragraph(r.dateEnreg.strftime('%d/%m/%Y') if r.dateEnreg else '', style_normal),
+        ])
+
+    col_widths = [40, 150, 120, 160, 160, 120]
+    table = Table(data, repeatRows=1, colWidths=col_widths)
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#4CAF50')),
+        ('TEXTCOLOR', (0,0), (-1,0), colors.white),
+        ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+        ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0,0), (-1,0), 9),
+        ('BOTTOMPADDING', (0,0), (-1,0), 6),
+        ('BACKGROUND', (0,1), (-1,-1), colors.whitesmoke),
+        ('GRID', (0,0), (-1,-1), 0.3, colors.grey),
+    ]))
+
+    elements.append(table)
+
+    # =======================
+    # Génération du PDF
+    # =======================
+    doc.build(elements, onFirstPage=add_footer, onLaterPages=add_footer)
+
+    return response
+
+
+def export_roleDetail_pdf(request):
+    from datetime import datetime
+    # =======================
+    # Récupérer les filtres
+    # =======================
+    query = request.GET.get('q', '').strip()
+    role_id = request.GET.get('role_id', '').strip()
+
+    # Base queryset
+    affaire = AffaireRoles.objects.filter(role_id=role_id)
+    role = Roles.objects.filter(id=role_id).first()
+
+    if query:
+        affaire = affaire.filter(
+            Q(objet__icontains=query) |
+            Q(demandeurs__icontains=query) |
+            Q(defendeurs__icontains=query)
+        )
+
+    # =======================
+    # Réponse HTTP PDF
+    # =======================
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="role_{role.dateEnreg or "tous"}.pdf"'
+
+    # =======================
+    # Callback pour pied de page
+    # =======================
+    def add_footer(canvas, doc):
+        footer_text = f"Téléchargé à partir de Judicalex - {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}"
+        canvas.saveState()
+        canvas.setFont('Helvetica', 8)
+        canvas.drawCentredString(A4[1]/2, 5 * mm, footer_text)
+        canvas.restoreState()
+
+    # =======================
+    # Document PDF
+    # =======================
+    doc = SimpleDocTemplate(
+        response,
+        pagesize=landscape(A4),
+        rightMargin=10, leftMargin=10, topMargin=20, bottomMargin=20
+    )
+
+    elements = []
+
+    # =======================
+    # Styles
+    # =======================
+    styles = getSampleStyleSheet()
+    style_normal = styles["Normal"]
+    style_normal.fontSize = 9
+    style_normal.leading = 11
+    style_normal.alignment = TA_CENTER
+
+    style_title = ParagraphStyle(
+        "title",
+        parent=styles["Heading2"],
+        alignment=TA_CENTER,
+        textColor=colors.HexColor("#000000")
+    )
+
+    # =======================
+    # En-tête (logos et textes)
+    # =======================
+    try:
+        armoirie = Image(get_static_path("_base/assets_role/statics/armoirie.png"), width=50, height=50)
+        armoirie.hAlign = 'CENTER'
+
+        branding = Image(get_static_path("_base/assets_role/statics/branding.png"), width=70, height=40)
+        branding.hAlign = 'CENTER'
+
+        simandou = Image(get_static_path("_base/assets_role/statics/simandou.png"), width=70, height=40)
+        simandou.hAlign = 'CENTER'
+
+        judicalex = Image(get_static_path("_base/assets_role/statics/ejustice_logo_white.png"), width=120, height=30)
+        judicalex.hAlign = 'CENTER'
+
+    except Exception:
+        armoirie = Paragraph("[Armoirie manquante]", style_normal)
+        branding = simandou = Paragraph("[Image manquante]", style_normal)
+        judicalex = Paragraph("[Image manquante]", style_normal)
+
+    col_gauche = Table(
+        [[armoirie],
+         [Paragraph("<b>République de Guinée</b>", style_normal)],
+         [Paragraph("Travail - Justice - Solidarité", style_normal)],
+         [Paragraph("Ministère de la Justice et des Droits de l'Homme", style_normal)],
+         [branding]],
+        style=TableStyle([
+            ("ALIGN", (0,0), (-1,-1), "CENTER"),
+            ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
+            ("BOTTOMPADDING", (0,0), (-1,-1), 2),
+            ("TOPPADDING", (0,0), (-1,-1), 2),
+        ])
+    )
+
+    col_centre = Table(
+        [[Paragraph("<b>COUR D'APPEL DE CONAKRY</b>", style_title)],
+         [Paragraph("Tribunal de Commerce de Conakry", style_title)]],
+        style=TableStyle([
+            ("ALIGN", (0,0), (-1,-1), "CENTER"),
+            ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
+        ])
+    )
+
+    col_droite = Table(
+        [[judicalex],
+         [Paragraph(
+             "<b>Conception & Réalisation</b><br/>"
+             "Judicalex SARL<br/>"
+             "contact@judicalex-gn.org<br/>"
+             "Tel: 613 87 08 92", style_normal)]],
+        style=TableStyle([
+            ("ALIGN", (0,0), (-1,-1), "CENTER"),
+            ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
+        ])
+    )
+
+    header_table = Table(
+        [[col_gauche, col_centre, col_droite]],
+        colWidths=[250, 250, 250],
+        rowHeights=120
+    )
+    header_table.setStyle(TableStyle([
+        ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
+        ("ALIGN", (0,0), (-1,-1), "CENTER"),
+        ("GRID", (0,0), (-1,-1), 0, colors.white),
+    ]))
+    elements.append(header_table)
+    elements.append(Spacer(1, 12))
+
+    # =======================
+    # Titre avec filtres
+    # =======================
+    titre_filters = []
+    if query:
+        titre_filters.append(f"Recherche: {query}")
+
+    titre_final = f"RÔLE D'AUDIENCE DU {role.typeAudience} DU {role.dateEnreg.strftime('%d/%m/%Y') if role.dateEnreg else 'Tous'}"
+    filtre_text = ""
+    if titre_filters:
+        filtre_text = "FILTRE – " + ", ".join(titre_filters)
+
+    elements.append(Paragraph(titre_final, styles['Title']))
+    if filtre_text:
+        elements.append(Paragraph(filtre_text, style_normal))
+    elements.append(Spacer(1, 12))
+
+    # =======================
+    # Tableau des affaires
+    # =======================
+    data = [[
+        Paragraph("No", styles["Heading5"]),
+        Paragraph("NUA", styles["Heading5"]),
+        Paragraph("RG", styles["Heading5"]),
+        Paragraph("Demandeurs", styles["Heading5"]),
+        Paragraph("Défendeurs", styles["Heading5"]),
+        Paragraph("Objet", styles["Heading5"]),
+    ]]
+
+    for i, r in enumerate(affaire, start=1):
+        data.append([
+            Paragraph(str(i), style_normal),
+            Paragraph(r.numAffaire or "", style_normal),
+            Paragraph(r.numRg or "", style_normal),
+            Paragraph(r.demandeurs or "", style_normal),
+            Paragraph(r.defendeurs or "", style_normal),
+            Paragraph(r.objet or "", style_normal),
+        ])
+
+    col_widths = [40, 150, 120, 160, 160, 120]
+    table = Table(data, repeatRows=1, colWidths=col_widths)
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#4CAF50')),
+        ('TEXTCOLOR', (0,0), (-1,0), colors.white),
+        ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+        ('VALIGN', (0,0), (-1,-1), 'TOP'),
+        ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0,0), (-1,0), 9),
+        ('BOTTOMPADDING', (0,0), (-1,0), 6),
+        ('BACKGROUND', (0,1), (-1,-1), colors.whitesmoke),
+        ('GRID', (0,0), (-1,-1), 0.3, colors.grey),
+    ]))
+
+    elements.append(table)
+
+    # =======================
+    # Génération du PDF
+    # =======================
+    doc.build(elements, onFirstPage=add_footer, onLaterPages=add_footer)
+
+    return response
+
+def export_roleDetail_excel(request):
+    query = request.GET.get('q', '').strip()
+    role_id = request.GET.get('role_id', '').strip()
+
+    affaire = AffaireRoles.objects.filter(role_id=role_id)
+    audience = Roles.objects.filter(id=role_id).first()
+   
+    if query:
+        affaire = affaire.filter(
+            Q(typeAudience__icontains=query) |
+            Q(section__icontains=query) |
+            Q(president__icontains=query) |
+            Q(greffier__icontains=query) |
+            Q(dateEnreg__icontains=query)
+        )
+
+    # Création du fichier Excel
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Rôles"
+
+    # En-têtes
+    ws.append(["No", "NUA", "RG", "Demandeurs", "Defendeurs", "Objet"])
+
+    # Lignes
+    for i, role in enumerate(affaire, start=1):
+        ws.append([
+            i,
+            role.numAffaire,
+            role.numRg,
+            role.demandeurs,
+            role.defendeurs,
+            role.objet,
+        ])
+
+    # Réponse
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = f'attachment; filename=roles_{audience.dateEnreg}.xlsx'
+    wb.save(response)
+    return response
+
+
+def export_decisions_pdf(request):
+    from datetime import datetime
+
+    # =======================
+    # Récupérer les filtres
+    # =======================
+    affaire_id = request.GET.get('affaire_id', '').strip()
+    affaire = AffaireRoles.objects.filter(id=affaire_id).first()
+
+    if not affaire:
+        return HttpResponse("Affaire introuvable", status=404)
+
+    decisions = Decisions.objects.select_related('affaire').filter(
+        affaire__objet=affaire.objet,
+        affaire__demandeurs=affaire.demandeurs,
+        affaire__defendeurs=affaire.defendeurs,
+    )
+
+    # =======================
+    # Réponse HTTP PDF
+    # =======================
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="decisions_affaire_{affaire.numAffaire or "tous"}.pdf"'
+
+    # =======================
+    # Callback pour pied de page
+    # =======================
+    def add_footer(canvas, doc):
+        footer_text = f"Téléchargé à partir de Judicalex - {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}"
+        canvas.saveState()
+        canvas.setFont('Helvetica', 8)
+        canvas.drawCentredString(A4[1]/2, 5 * mm, footer_text)
+        canvas.restoreState()
+
+    # =======================
+    # Document PDF
+    # =======================
+    doc = SimpleDocTemplate(
+        response,
+        pagesize=landscape(A4),
+        rightMargin=10, leftMargin=10, topMargin=20, bottomMargin=20
+    )
+
+    elements = []
+
+    # =======================
+    # Styles
+    # =======================
+    styles = getSampleStyleSheet()
+    style_normal = styles["Normal"]
+    style_normal.fontSize = 9
+    style_normal.leading = 11
+    style_normal.alignment = TA_CENTER
+
+    style_title = ParagraphStyle(
+        "title",
+        parent=styles["Heading2"],
+        alignment=TA_CENTER,
+        textColor=colors.HexColor("#000000")
+    )
+
+    # =======================
+    # En-tête (logos et textes)
+    # =======================
+    try:
+        armoirie = Image(get_static_path("_base/assets_role/statics/armoirie.png"), width=50, height=50)
+        armoirie.hAlign = 'CENTER'
+
+        branding = Image(get_static_path("_base/assets_role/statics/branding.png"), width=70, height=40)
+        branding.hAlign = 'CENTER'
+
+        simandou = Image(get_static_path("_base/assets_role/statics/simandou.png"), width=70, height=40)
+        simandou.hAlign = 'CENTER'
+
+        judicalex = Image(get_static_path("_base/assets_role/statics/ejustice_logo_white.png"), width=120, height=30)
+        judicalex.hAlign = 'CENTER'
+
+    except Exception:
+        armoirie = Paragraph("[Armoirie manquante]", style_normal)
+        branding = simandou = Paragraph("[Image manquante]", style_normal)
+        judicalex = Paragraph("[Image manquante]", style_normal)
+
+    col_gauche = Table(
+        [[armoirie],
+         [Paragraph("<b>République de Guinée</b>", style_normal)],
+         [Paragraph("Travail - Justice - Solidarité", style_normal)],
+         [Paragraph("Ministère de la Justice et des Droits de l'Homme", style_normal)],
+         [branding]],
+        style=TableStyle([
+            ("ALIGN", (0,0), (-1,-1), "CENTER"),
+            ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
+            ("BOTTOMPADDING", (0,0), (-1,-1), 2),
+            ("TOPPADDING", (0,0), (-1,-1), 2),
+        ])
+    )
+
+    col_centre = Table(
+        [[Paragraph("<b>COUR D'APPEL DE CONAKRY</b>", style_title)],
+         [Paragraph("Tribunal de Commerce de Conakry", style_title)]],
+        style=TableStyle([
+            ("ALIGN", (0,0), (-1,-1), "CENTER"),
+            ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
+        ])
+    )
+
+    col_droite = Table(
+        [[judicalex],
+         [Paragraph(
+             "<b>Conception & Réalisation</b><br/>"
+             "Judicalex SARL<br/>"
+             "contact@judicalex-gn.org<br/>"
+             "Tel: 613 87 08 92", style_normal)]],
+        style=TableStyle([
+            ("ALIGN", (0,0), (-1,-1), "CENTER"),
+            ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
+        ])
+    )
+
+    header_table = Table(
+        [[col_gauche, col_centre, col_droite]],
+        colWidths=[250, 250, 250],
+        rowHeights=120
+    )
+    header_table.setStyle(TableStyle([
+        ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
+        ("ALIGN", (0,0), (-1,-1), "CENTER"),
+        ("GRID", (0,0), (-1,-1), 0, colors.white),
+    ]))
+    elements.append(header_table)
+    elements.append(Spacer(1, 12))
+
+    # =======================
+    # Titre avec filtre
+    # =======================
+    titre = f"DÉCISIONS DE L'AFFAIRE"
+    sous_titre = f"AFFAIRE N° {affaire.numAffaire} - {affaire.objet}"
+    elements.append(Paragraph(titre, styles['Title']))
+    elements.append(Paragraph(sous_titre, styles['Normal']))
+    elements.append(Spacer(1, 12))
+
+    # =======================
+    # Tableau des décisions
+    # =======================
+    data = [[
+        Paragraph("No", styles["Heading5"]),
+        Paragraph("Audience du", styles["Heading5"]),
+        Paragraph("Type de décision", styles["Heading5"]),
+        Paragraph("Décision", styles["Heading5"]),
+        Paragraph("Prochaine Audience", styles["Heading5"]),
+    ]]
+
+    for i, r in enumerate(decisions, start=1):
+        data.append([
+            Paragraph(str(i), style_normal),
+            Paragraph(r.dateDecision.strftime("%d/%m/%Y") if r.dateDecision else "", style_normal),
+            Paragraph(r.typeDecision or "", style_normal),
+            Paragraph(r.decision or "", style_normal),
+            Paragraph(r.prochaineAudience.strftime("%d/%m/%Y") if r.prochaineAudience else "", style_normal),
+        ])
+
+    col_widths = [40, 150, 120, 160, 160]
+    table = Table(data, repeatRows=1, colWidths=col_widths)
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#4CAF50')),
+        ('TEXTCOLOR', (0,0), (-1,0), colors.white),
+        ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+        ('VALIGN', (0,0), (-1,-1), 'TOP'),
+        ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0,0), (-1,0), 9),
+        ('BOTTOMPADDING', (0,0), (-1,0), 6),
+        ('BACKGROUND', (0,1), (-1,-1), colors.whitesmoke),
+        ('GRID', (0,0), (-1,-1), 0.3, colors.grey),
+    ]))
+
+    elements.append(table)
+
+    # =======================
+    # Génération du PDF
+    # =======================
+    doc.build(elements, onFirstPage=add_footer, onLaterPages=add_footer)
+
+    return response
+
+def export_decisions_excel(request):
+    # Récupérer les filtres
+    affaire_id = request.GET.get('affaire_id', '').strip()
+
+    # Base queryset
+    affaire = AffaireRoles.objects.filter(id=affaire_id).first()
+
+    decisions = Decisions.objects.select_related('affaire').filter(
+        affaire__objet=affaire.objet,
+        affaire__demandeurs=affaire.demandeurs,
+        affaire__defendeurs=affaire.defendeurs,
+    )
+
+    # Création du fichier Excel
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Rôles"
+
+    # En-têtes
+    ws.append(["No", "Audience du", "Type de decision", "Decision", "Prochaine audience"])
+
+    # Lignes
+    for i, aff in enumerate(decisions, start=1):
+        ws.append([
+            i,
+            aff.dateDecision.strftime("%d/%m/%Y"),
+            aff.typeDecision,
+            aff.decision,
+            aff.prochaineAudience.strftime("%d/%m/%Y"),
+        ])
+
+    # Réponse
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = f'attachment; filename=decisions_affaire_{affaire.numAffaire}.xlsx'
+    wb.save(response)
+    return response
+
+
+def export_plumitifs_excel(request):
+
+    year = request.GET.get('year')
+    query = request.GET.get('q', '').strip()
+    type_audience = request.GET.get('typeAudience', '').strip()
+    section = request.GET.get('section', '').strip()
+    get_date = request.GET.get('date', '').strip()
+
+    affaireRole = AffaireRoles.objects.all()
+    if year:
+        affaireRole = affaireRole.filter(role__dateEnreg__year=year)
+    if type_audience:
+        affaireRole = affaireRole.filter(typeAudience=type_audience)
+    if section:
+        affaireRole = affaireRole.filter(section=section)
+    if get_date:
+        affaireRole = affaireRole.filter(role__dateEnreg=get_date)
+
+    if query:
+        affaireRole = affaireRole.filter(
+            Q(numRg__icontains=query) |
+            Q(demandeurs__icontains=query) |
+            Q(defendeurs__icontains=query) |
+            Q(objet__icontains=query)
+        )
+
+    # Création Excel
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "PLUMITIF"
+
+    ws.append(["No", "NUA", "RG", "Demanderesse", "Défenderesse", "Objet", "date d'audience"])
+
+    for i, affaire in enumerate(affaireRole, start=1):
+        ws.append([
+            i,
+            affaire.numAffaire,
+            affaire.numRg,
+            affaire.demandeurs,
+            affaire.defendeurs,
+            affaire.objet,
+            affaire.role.dateEnreg,
+        ])
+
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename=affaires.xlsx'
+    wb.save(response)
+    return response
+
+def export_plumitifs_pdf(request):
+    from datetime import datetime
+
+    # =======================
+    # Filtres
+    # =======================
+    year = request.GET.get('year')
+    query = request.GET.get('q', '').strip()
+    type_audience = request.GET.get('typeAudience', '').strip()
+    section = request.GET.get('section', '').strip()
+    get_date = request.GET.get('date', '').strip()
+
+    affaireRole = AffaireRoles.objects.all()
+    if year:
+        affaireRole = affaireRole.filter(role__dateEnreg__year=year)
+    if type_audience:
+        affaireRole = affaireRole.filter(role__typeAudience=type_audience)
+    if section:
+        affaireRole = affaireRole.filter(role__section=section)
+    if get_date:
+        affaireRole = affaireRole.filter(role__dateEnreg=get_date)
+
+    if query:
+        affaireRole = affaireRole.filter(
+            Q(numRg__icontains=query) |
+            Q(demandeurs__icontains=query) |
+            Q(defendeurs__icontains=query) |
+            Q(objet__icontains=query)
+        )
+
+    # =======================
+    # Réponse HTTP PDF
+    # =======================
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="affaires_{year or "tous"}.pdf"'
+
+    # =======================
+    # Callback pour pied de page
+    # =======================
+    def add_footer(canvas, doc):
+        footer_text = f"Téléchargé à partir de Judicalex - {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}"
+        canvas.saveState()
+        canvas.setFont('Helvetica', 8)
+        canvas.drawCentredString(A4[1]/2, 5 * mm, footer_text)
+        canvas.restoreState()
+
+    # =======================
+    # Document PDF
+    # =======================
+    doc = SimpleDocTemplate(response, pagesize=landscape(A4),
+                            rightMargin=10, leftMargin=10, topMargin=20, bottomMargin=20)
+    elements = []
+    styles = getSampleStyleSheet()
+    style_normal = styles["Normal"]
+    style_normal.fontSize = 9
+    style_normal.leading = 11
+    style_normal.alignment = TA_CENTER
+
+    style_title = ParagraphStyle(
+        "title",
+        parent=styles["Heading2"],
+        alignment=TA_CENTER,
+        textColor=colors.HexColor("#000000")
+    )
+
+    # =======================
+    # En-tête (logos et textes)
+    # =======================
+    try:
+        armoirie = Image(get_static_path("_base/assets_role/statics/armoirie.png"), width=50, height=50)
+        armoirie.hAlign = 'CENTER'
+
+        branding = Image(get_static_path("_base/assets_role/statics/branding.png"), width=70, height=40)
+        branding.hAlign = 'CENTER'
+
+        simandou = Image(get_static_path("_base/assets_role/statics/simandou.png"), width=70, height=40)
+        simandou.hAlign = 'CENTER'
+
+        judicalex = Image(get_static_path("_base/assets_role/statics/ejustice_logo_white.png"), width=120, height=30)
+        judicalex.hAlign = 'CENTER'
+
+    except Exception:
+        armoirie = Paragraph("[Armoirie manquante]", style_normal)
+        branding = simandou = Paragraph("[Image manquante]", style_normal)
+        judicalex = Paragraph("[Image manquante]", style_normal)
+
+    col_gauche = Table(
+        [[armoirie],
+         [Paragraph("<b>République de Guinée</b>", style_normal)],
+         [Paragraph("Travail - Justice - Solidarité", style_normal)],
+         [Paragraph("Ministère de la Justice et des Droits de l'Homme", style_normal)],
+         [branding]],
+        style=TableStyle([
+            ("ALIGN", (0,0), (-1,-1), "CENTER"),
+            ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
+            ("BOTTOMPADDING", (0,0), (-1,-1), 2),
+            ("TOPPADDING", (0,0), (-1,-1), 2),
+        ])
+    )
+
+    col_centre = Table(
+        [[Paragraph("<b>COUR D'APPEL DE CONAKRY</b>", style_title)],
+         [Paragraph("Tribunal de Commerce de Conakry", style_title)]],
+        style=TableStyle([
+            ("ALIGN", (0,0), (-1,-1), "CENTER"),
+            ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
+        ])
+    )
+
+    col_droite = Table(
+        [[judicalex],
+         [Paragraph(
+             "<b>Conception & Réalisation</b><br/>"
+             "Judicalex SARL<br/>"
+             "contact@judicalex-gn.org<br/>"
+             "Tel: 613 87 08 92", style_normal)]],
+        style=TableStyle([
+            ("ALIGN", (0,0), (-1,-1), "CENTER"),
+            ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
+        ])
+    )
+
+    header_table = Table(
+        [[col_gauche, col_centre, col_droite]],
+        colWidths=[250, 250, 250],
+        rowHeights=120
+    )
+    header_table.setStyle(TableStyle([
+        ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
+        ("ALIGN", (0,0), (-1,-1), "CENTER"),
+        ("GRID", (0,0), (-1,-1), 0, colors.white),
+    ]))
+    elements.append(header_table)
+    elements.append(Spacer(1, 12))
+
+    # =======================
+    # Titre avec filtres
+    # =======================
+    titre_filters = []
+    if year:
+        titre_filters.append(f"Année: {year}")
+    if type_audience:
+        titre_filters.append(f"Type: {type_audience}")
+    if section:
+        titre_filters.append(f"Section: {section}")
+    if get_date:
+        titre_filters.append(f"Date: {get_date}")
+    if query:
+        titre_filters.append(f"Recherche: {query}")
+
+    titre = f"PLUMITIF"
+    filtre = ""
+    if titre_filters:
+        filtre = "FILTRE : " + ", ".join(titre_filters)
+
+    elements.append(Paragraph(titre, styles['Title']))
+    if filtre:
+        elements.append(Paragraph(filtre, styles['Normal']))
+    elements.append(Spacer(1, 12))
+
+    # =======================
+    # Tableau des affaires
+    # =======================
+    data = [[
+        Paragraph("No", styles["Heading5"]),
+        Paragraph("NUA", styles["Heading5"]),
+        Paragraph("RG", styles["Heading5"]),
+        Paragraph("Demanderesse", styles["Heading5"]),
+        Paragraph("Défenderesse", styles["Heading5"]),
+        Paragraph("Objet", styles["Heading5"]),
+        Paragraph("Date d'audience", styles["Heading5"])
+    ]]
+
+    for i, affaire in enumerate(affaireRole, start=1):
+        data.append([
+            Paragraph(str(i), style_normal),
+            Paragraph(affaire.numAffaire or "", style_normal),
+            Paragraph(affaire.numRg or "", style_normal),
+            Paragraph(affaire.demandeurs or "", style_normal),
+            Paragraph(affaire.defendeurs or "", style_normal),
+            Paragraph(affaire.objet or "", style_normal),
+            Paragraph(affaire.role.dateEnreg.strftime("%d/%m/%Y") if affaire.role and affaire.role.dateEnreg else "", style_normal),
+        ])
+
+    col_widths = [30, 80, 60, 120, 120, 200, 80]
+    table = Table(data, repeatRows=1, colWidths=col_widths)
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#4CAF50')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 9),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 6),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.whitesmoke),
+        ('GRID', (0, 0), (-1, -1), 0.3, colors.grey),
+    ]))
+
+    elements.append(table)
+
+    # =======================
+    # Génération PDF
+    # =======================
+    doc.build(elements, onFirstPage=add_footer, onLaterPages=add_footer)
+
+    return response
+
+
+def export_enrollements_excel(request):
+
+    # Récupérer les filtres
+    year = request.GET.get('year')
+    query = request.GET.get('q', '').strip()
+    type_audience = request.GET.get('typeAudience', '').strip()
+    get_date = request.GET.get('date', '').strip()
+
+    # Base queryset
+    enrollements = Enrollement.objects.all()
+    if year:
+        enrollements = enrollements.filter(dateEnrollement__year=year)
+    if type_audience:
+        enrollements = enrollements.filter(typeAudience=type_audience)
+    if get_date:
+        enrollements = enrollements.filter(dateEnrollement=get_date)
+    if query:
+        enrollements = enrollements.filter(
+            Q(typeAudience__icontains=query) |
+            Q(demandeurs__icontains=query) |
+            Q(defendeurs__icontains=query) |
+            Q(objet__icontains=query) |
+            Q(numRg__icontains=query) |
+            Q(numAffaire__icontains=query)
+    )
+
+    # Créer un fichier Excel
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Enrôlements"
+
+    # En-têtes
+    ws.append([
+        "No", "RG", "Type d'audience", "Section",
+        "Date d'enrôlement", "Date d'audience",
+        "Demanderesse", "Défenderesse", "Objet"
+    ])
+
+    # Contenu
+    for i, e in enumerate(enrollements, start=1):
+        ws.append([
+            i,
+            e.numRg,
+            e.typeAudience,
+            e.section,
+            e.dateEnrollement.strftime('%Y-%m-%d') if e.dateEnrollement else '',
+            e.dateAudience.strftime('%Y-%m-%d') if e.dateAudience else '',
+            e.demandeurs,
+            e.defendeurs,
+            e.objet
+        ])
+
+    # Réponse HTTP avec fichier Excel
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    filename = f"enrollements_{year}.xlsx"
+    response['Content-Disposition'] = f'attachment; filename={filename}'
+
+    wb.save(response)
+    return response
+
+def export_enrollements_pdf(request):
+
+    # =======================
+    # Filtres
+    # =======================
+    year = request.GET.get('year')
+    query = request.GET.get('q', '').strip()
+    type_audience = request.GET.get('typeAudience', '').strip()
+    get_date = request.GET.get('date', '').strip()
+
+    # Base queryset
+    enrollements = Enrollement.objects.all()
+    if year:
+        enrollements = enrollements.filter(dateEnrollement__year=year)
+    if type_audience:
+        enrollements = enrollements.filter(typeAudience=type_audience)
+    if get_date:
+        enrollements = enrollements.filter(dateEnrollement=get_date)
+    if query:
+        enrollements = enrollements.filter(
+            Q(typeAudience__icontains=query) |
+            Q(demandeurs__icontains=query) |
+            Q(defendeurs__icontains=query) |
+            Q(objet__icontains=query) |
+            Q(numRg__icontains=query) |
+            Q(numAffaire__icontains=query)
+        )
+
+    # =======================
+    # Réponse HTTP PDF
+    # =======================
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="enrollements_{year or "tous"}.pdf"'
+
+    # =======================
+    # Callback pour pied de page
+    # =======================
+    def add_footer(canvas, doc):
+        footer_text = f"Téléchargé à partir de Judicalex - {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}"
+        canvas.saveState()
+        canvas.setFont('Helvetica', 8)
+        canvas.drawCentredString(A4[1]/2, 5 * mm, footer_text)
+        canvas.restoreState()
+
+    # =======================
+    # Document PDF
+    # =======================
+    doc = SimpleDocTemplate(response, pagesize=landscape(A4),
+                            rightMargin=10, leftMargin=10, topMargin=20, bottomMargin=20)
+    elements = []
+    styles = getSampleStyleSheet()
+    style_normal = styles["Normal"]
+    style_normal.fontSize = 9
+    style_normal.leading = 11
+    style_normal.alignment = TA_CENTER
+
+    style_title = ParagraphStyle(
+        "title",
+        parent=styles["Heading2"],
+        alignment=TA_CENTER,
+        textColor=colors.HexColor("#000000")
+    )
+
+    # =======================
+    # En-tête (logos et textes)
+    # =======================
+    try:
+        armoirie = Image(get_static_path("_base/assets_role/statics/armoirie.png"), width=50, height=50)
+        armoirie.hAlign = 'CENTER'
+
+        branding = Image(get_static_path("_base/assets_role/statics/branding.png"), width=70, height=40)
+        branding.hAlign = 'CENTER'
+
+        simandou = Image(get_static_path("_base/assets_role/statics/simandou.png"), width=70, height=40)
+        simandou.hAlign = 'CENTER'
+
+        judicalex = Image(get_static_path("_base/assets_role/statics/ejustice_logo_white.png"), width=120, height=30)
+        judicalex.hAlign = 'CENTER'
+
+    except Exception:
+        armoirie = Paragraph("[Armoirie manquante]", style_normal)
+        branding = simandou = Paragraph("[Image manquante]", style_normal)
+        judicalex = Paragraph("[Image manquante]", style_normal)
+
+    col_gauche = Table(
+        [[armoirie],
+         [Paragraph("<b>République de Guinée</b>", style_normal)],
+         [Paragraph("Travail - Justice - Solidarité", style_normal)],
+         [Paragraph("Ministère de la Justice et des Droits de l'Homme", style_normal)],
+         [branding]],
+        style=TableStyle([
+            ("ALIGN", (0,0), (-1,-1), "CENTER"),
+            ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
+            ("BOTTOMPADDING", (0,0), (-1,-1), 2),
+            ("TOPPADDING", (0,0), (-1,-1), 2),
+        ])
+    )
+
+    col_centre = Table(
+        [[Paragraph("<b>COUR D'APPEL DE CONAKRY</b>", style_title)],
+         [Paragraph("Tribunal de Commerce de Conakry", style_title)]],
+        style=TableStyle([
+            ("ALIGN", (0,0), (-1,-1), "CENTER"),
+            ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
+        ])
+    )
+
+    col_droite = Table(
+        [[judicalex],
+         [Paragraph(
+             "<b>Conception & Réalisation</b><br/>"
+             "Judicalex SARL<br/>"
+             "contact@judicalex-gn.org<br/>"
+             "Tel: 613 87 08 92", style_normal)]],
+        style=TableStyle([
+            ("ALIGN", (0,0), (-1,-1), "CENTER"),
+            ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
+        ])
+    )
+
+    header_table = Table(
+        [[col_gauche, col_centre, col_droite]],
+        colWidths=[250, 250, 250],
+        rowHeights=120
+    )
+    header_table.setStyle(TableStyle([
+        ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
+        ("ALIGN", (0,0), (-1,-1), "CENTER"),
+        ("GRID", (0,0), (-1,-1), 0, colors.white),
+    ]))
+    elements.append(header_table)
+    elements.append(Spacer(1, 12))
+
+    # =======================
+    # Titre avec filtres
+    # =======================
+    titre_filters = []
+    if year:
+        titre_filters.append(f"Année: {year}")
+    if type_audience:
+        titre_filters.append(f"Type: {type_audience}")
+    if get_date:
+        titre_filters.append(f"Date: {get_date}")
+    if query:
+        titre_filters.append(f"Recherche: {query}")
+
+    titre = f"REGISTRE D'ENROLLEMENTS"
+    filtre = ""
+    if titre_filters:
+        filtre = "FILTRE : " + ", ".join(titre_filters)
+
+    elements.append(Paragraph(titre, styles['Title']))
+    if filtre:
+        elements.append(Paragraph(filtre, styles['Normal']))
+    elements.append(Spacer(1, 12))
+
+    # =======================
+    # Tableau des enrollements
+    # =======================
+    data = [
+        [
+            Paragraph("NUA", styles["Heading5"]),
+            Paragraph("RG", styles["Heading5"]),
+            Paragraph("Date Enrôlement", styles["Heading5"]),
+            Paragraph("Date Audience", styles["Heading5"]),
+            Paragraph("Demanderesse", styles["Heading5"]),
+            Paragraph("Défenderesse", styles["Heading5"]),
+            Paragraph("Objet", styles["Heading5"])
+        ]
+    ]
+
+    for e in enrollements:
+        data.append([
+            Paragraph(e.numAffaire or "", style_normal),
+            Paragraph(e.numRg or "", style_normal),
+            Paragraph(e.dateEnrollement.strftime('%d/%m/%Y') if e.dateEnrollement else '', style_normal),
+            Paragraph(e.dateAudience.strftime('%d/%m/%Y') if e.dateAudience else '', style_normal),
+            Paragraph(e.demandeurs or "", style_normal),
+            Paragraph(e.defendeurs or "", style_normal),
+            Paragraph(e.objet or "", style_normal)
+        ])
+
+    col_widths = [60, 50, 80, 80, 130, 130, 250]
+    table = Table(data, repeatRows=1, colWidths=col_widths)
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#4CAF50')),
+        ('TEXTCOLOR', (0,0), (-1,0), colors.white),
+        ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+        ('VALIGN', (0,0), (-1,-1), 'TOP'),
+        ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0,0), (-1,0), 9),
+        ('BOTTOMPADDING', (0,0), (-1,0), 6),
+        ('BACKGROUND', (0,1), (-1,-1), colors.whitesmoke),
+        ('GRID', (0,0), (-1,-1), 0.3, colors.grey),
+    ]))
+
+    elements.append(table)
+
+    # =======================
+    # Génération PDF
+    # =======================
+    doc.build(elements, onFirstPage=add_footer, onLaterPages=add_footer)
+
+    return response
+
+

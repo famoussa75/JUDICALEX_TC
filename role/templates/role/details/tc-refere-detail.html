@@ -110,34 +110,34 @@
                                 </div>
                             </div>
                             <div class="card-header">
-                                <!-- <span class="dropdown">
-                                    <button class="btn dropdown-toggle align-text-top show" data-bs-boundary="viewport" data-bs-toggle="dropdown" aria-expanded="true">Actions</button>
-                                    <div class="dropdown-menu dropdown-menu-end" data-popper-placement="bottom-end" style="position: absolute; inset: 0px 0px auto auto; margin: 0px; transform: translate3d(97px, 38px, 0px);">
-                                        <a href="#" class="dropdown-item" id="suivre_affaire">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24"
-                                                height="24" viewBox="0 0 24 24" stroke-width="2"
-                                                stroke="currentColor" fill="none" stroke-linecap="round"
-                                                stroke-linejoin="round">
-                                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                                <path d="M15 13l4 -4l-4 -4m4 4h-11a4 4 0 0 0 0 8h1" />
-                                            </svg>&nbsp;Suivre
+
+                                <div class="row mb-4">
+                                    <div class="col d-flex justify-content-start">
+                                        <a href="{% url 'role_detail.export_excel' %}?q={{ request.GET.q }}&role_id={{ role.id }}" class="btn btn-success">
+                                            <i class="fa fa-file-excel"></i> Exporter Excel
                                         </a>
-                                        <a href="#" class="dropdown-item" id="ne_pas_suivre_affaire">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
-                                            &nbsp;Ne plus suivre
-                                         </a>
-                                       
+                                         <!-- Bouton PDF -->
+                                         <a href="{% url 'role_detail.export_pdf'%}?q={{ request.GET.q }}&role_id={{ role.id }}" class="btn btn-danger ms-2">
+                                            <i class="fa fa-file-pdf"></i> Exporter PDF
+                                        </a>
                                     </div>
-                                </span> -->
+                                </div>
+                               
+                              
                                  <!-- Champ de recherche -->
-                                 <form class="d-flex align-items-center ms-auto" method="get" style="max-width: 500px;">
-                                    {% csrf_token %}
-                                    <input type="text" class="form-control me-2" name="search" id="recherche-objet" placeholder="Rechercher un objet..." style="flex: 1;">
-                                    <button class="btn btn-primary" type="submit">
-                                        Rechercher
-                                    </button>
-                                </form>
+                                 <div class="col-md-12 d-flex justify-content-end">
+                                    <form method="get" action="" class="w-100" style="max-width: 350px;">
+                                        <div class="input-group">
+                                            <input type="text" name="q" class="form-control" 
+                                                   placeholder="Rechercher une affaire..." value="{{ request.GET.q }}">
+                                            <button class="btn btn-primary" type="submit">Rechercher</button>
+                                        </div>
+                                    </form>
+                                </div>
                                 
+                                <span style="font-style: italic;">
+                                    Rôle Créée par {{ role.created_by }}
+                                 </span>
                             </div>
                             <table class="table table-responsive">
                                 <thead>
@@ -149,6 +149,7 @@
                                         <th>Défendeurs</th>
                                         <th>Objet</th>
                                         <th>Décisions</th>
+                                        <th>Créée par</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -159,7 +160,7 @@
                                             {% if group.grouper == 'Nouvelles Affaires' %} bg-success-subtle
                                             {% elif group.grouper == 'Affaires Encours' %} bg-warning-subtle
                                             {% endif %}">
-                                            <td colspan="7">
+                                            <td colspan="8">
                                                 <b class="text-primary">
                                                     {% if group.grouper == 'Nouvelles Affaires' %}
                                                         ⚖️ {{ group.grouper }}
@@ -193,6 +194,11 @@
                                                                 d="M4 9h8v-3.586a1 1 0 0 1 1.707 -.707l6.586 6.586a1 1 0 0 1 0 1.414l-6.586 6.586a1 1 0 0 1 -1.707 -.707v-3.586h-8a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1z" />
                                                         </svg>
                                                     </a>
+                                                </td>
+                                                <td>
+                                                    <span style="font-style: italic;">
+                                                        {{ affaire.created_by }}
+                                                     </span>
                                                 </td>
                                             </tr>
                                         {% endfor %}

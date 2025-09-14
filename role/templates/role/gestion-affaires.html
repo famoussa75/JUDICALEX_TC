@@ -88,10 +88,24 @@
                         <div class="card">
                             <div class="card-header">
                                 <div class="row mb-4">
+                                    <div class="col d-flex justify-content-end">
+                                        <a href="{% url 'plumitif.export_excel' %}?year={{ selected_year }}&q={{ request.GET.q }}&section={{ request.GET.section }}&typeAudience={{ request.GET.typeAudience }}&date={{ request.GET.date }}" class="btn btn-success">
+                                            <i class="fa fa-file-excel"></i> Exporter Excel
+                                        </a>
+                                         <!-- Bouton PDF -->
+                                         <a href="{% url 'plumitif.export_pdf'%}?year={{ selected_year }}&q={{ request.GET.q }}&section={{ request.GET.section }}&typeAudience={{ request.GET.typeAudience }}&date={{ request.GET.date }}" class="btn btn-danger ms-2">
+                                            <i class="fa fa-file-pdf"></i> Exporter PDF
+                                        </a>
+                                    </div>
+                                </div>
+                                <hr>
+                                <h3><i class="fas fa-filter"></i> Filtres</h3>
+                                <div class="row mb-2">
+                                
                                     <div class="col-2">
                                         <span>
                                             <form method="get" action="">
-                                                <div class="input-group">
+                                                <div class="input-group mb-3">
                                                     <button class="btn btn-primary" type="button">Année</button>
                                                     <select name="year" class="form-select" onchange="this.form.submit()">
                                                         <option value="" disabled>Années</option>
@@ -100,6 +114,10 @@
                                                         {% endfor %}
                                                       </select>
                                                  </div>
+                                                   <!-- garder les autres filtres lors de la soumission -->
+                                                   <input type="hidden" name="typeAudience" value="{{ selected_type_audience }}">
+                                                   <input type="hidden" name="q" value="{{ query }}">
+                                                   <input type="hidden" name="section" value="{{ selected_section }}">
                                               </form>
                                         </span> 
                                     </div>
@@ -136,28 +154,41 @@
                                             <input type="hidden" name="year" value="{{ selected_year }}">
                                             <input type="hidden" name="q" value="{{ query }}">
                                             <input type="hidden" name="typeAudience" value="{{ selected_type_audience }}">
+
                                         </form>
                                     </div>
+                                    <div class="col-2">
+                                        <span>
+                                            <form method="get" action="">
+                                                <div class="input-group mb-3">
+                                                    <button class="btn btn-primary" type="button">Date</button>
+                                                    <input 
+                                                        type="date" 
+                                                        name="date" 
+                                                        class="form-control" 
+                                                        value="{{ selected_date|default:'' }}" 
+                                                        onchange="this.form.submit()"
+                                                    >
+                                                </div>
+                                                <!-- garder les autres filtres lors de la soumission -->
+                                                <input type="hidden" name="typeAudience" value="{{ selected_type_audience }}">
+                                                <input type="hidden" name="q" value="{{ query }}">
+                                                <input type="hidden" name="section" value="{{ selected_section }}">
+                                            </form>
+                                        </span> 
+                                    </div>
                                     
-                                   
                                     <div class="col-md-4">
                                         <form method="get" action="">
                                             <div class="input-group">
-                                                <input type="text" name="q" class="form-control" placeholder="Rechercher une affaire..." value="{{ query }}">
+                                                <input type="text" name="q" class="form-control" placeholder="Rechercher un rôle..." value="{{ request.GET.q }}">
                                                 <button class="btn btn-primary" type="submit">Rechercher</button>
                                             </div>
-                                             <!-- garder les autres filtres lors de la soumission -->
-                                             <input type="hidden" name="year" value="{{ selected_year }}">
-                                             <input type="hidden" name="typeAudience" value="{{ selected_type_audience }}">
+                                              
                                         </form>
                                     </div>
-                                    <div class="col-md-2 text-end">
-                                        <a href="{% url 'affaires.export' %}?q={{ query }}" class="btn btn-success">
-                                            <i class="fa fa-file-excel"></i> Exporter Excel
-                                        </a>
-                                    </div>
+                                    
                                 </div>
-                                
                             </div>
                             <div class="card-body border-bottom py-3">
 
@@ -172,6 +203,7 @@
                                             <th scope="col" style="text-align: center;">Objet</th>
                                             <th scope="col" style="text-align: center;">Date d'audience</th>
                                             <th scope="col" style="text-align: center;">Décisions</th>
+                                            <th scope="col" style="text-align: center;">Créée par</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -192,6 +224,12 @@
                                             <td style="text-align: center;">
                                                 {{ affaire.decision|truncatechars:60 }}
                                             </td>
+                                            <td scope="col" style="text-align: center;">
+                                                <span style="font-style: italic;">
+                                                    {{ affaire.created_by }}
+                                                 </span>
+                                            </td>
+
                                             
                                         </tr>
                                         {% endfor %}
@@ -203,7 +241,7 @@
                                         <ul class="pagination">
                                             {% if page_obj.has_previous %}
                                                 <li class="page-item">
-                                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_section %}&section={{ selected_section }}{% endif %}{% if selected_type_audience %}&typeAudience={{ selected_type_audience }}{% endif %}">Précédent</a>
+                                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_section %}&section={{ selected_section }}{% endif %}{% if selected_type_audience %}&typeAudience={{ selected_type_audience }}{% endif %}{% if selected_date %}&date={{ selected_date }}{% endif %}">Précédent</a>
                                                 </li>
                                             {% else %}
                                                 <li class="page-item disabled"><span class="page-link">Précédent</span></li>
@@ -214,14 +252,14 @@
                                                     <li class="page-item active"><span class="page-link">{{ num }}</span></li>
                                                 {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
                                                     <li class="page-item">
-                                                        <a class="page-link" href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_section %}&section={{ selected_section }}{% endif %}{% if selected_type_audience %}&typeAudience={{ selected_type_audience }}{% endif %}">{{ num }}</a>
+                                                        <a class="page-link" href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_section %}&section={{ selected_section }}{% endif %}{% if selected_type_audience %}&typeAudience={{ selected_type_audience }}{% endif %}{% if selected_date %}&date={{ selected_date }}{% endif %}">{{ num }}</a>
                                                     </li>
                                                 {% endif %}
                                             {% endfor %}
                                 
                                             {% if page_obj.has_next %}
                                                 <li class="page-item">
-                                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_section %}&section={{ selected_section }}{% endif %}{% if selected_type_audience %}&typeAudience={{ selected_type_audience }}{% endif %}">Suivant</a>
+                                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_section %}&section={{ selected_section }}{% endif %}{% if selected_type_audience %}&typeAudience={{ selected_type_audience }}{% endif %}{% if selected_date %}&date={{ selected_date }}{% endif %}">Suivant</a>
                                                 </li>
                                             {% else %}
                                                 <li class="page-item disabled"><span class="page-link">Suivant</span></li>

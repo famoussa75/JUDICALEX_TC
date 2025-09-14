@@ -113,14 +113,25 @@
                                         Nouvelle décision
                                     </a>
                                 </div>
+                                <div class="row col-md-10">
+                                    <div class="col d-flex justify-content-end">
+                                        <a href="{% url 'decisions.export_excel' %}?q={{ request.GET.q }}&affaire_id={{ affaire.id }}" class="btn btn-success">
+                                            <i class="fa fa-file-excel"></i> Exporter Excel
+                                        </a>
+                                         <!-- Bouton PDF -->
+                                         <a href="{% url 'decisions.export_pdf'%}?q={{ request.GET.q }}&affaire_id={{ affaire.id }}" class="btn btn-danger ms-2">
+                                            <i class="fa fa-file-pdf"></i> Exporter PDF
+                                        </a>
+                                    </div>
+                                </div>
                             </div>
                        
                             <table class="table table-transparent table-responsive mb-5">
                                 <thead>
                                     <tr>
                                         <th class="text-center" style="width: 1%;font-size: small;">N°</th>
+                                        <th class="text-center" style="font-size:small;">Audience du</th>
                                         <th class="text-center" style="font-size:small;text-align: center;">Type de décision</th>
-                                        <th class="text-center" style="font-size:small;">Décision du</th>
                                         <th style="font-size:small;">Décision</th>
                                         <th style="font-size:small;">Prochaine Audience</th>
                                         <th style="width: 10%;"></th>
@@ -136,12 +147,12 @@
                                         {% if decision.statut == 'Modifier' %}<a type="button" href="{% url 'historique_modifications_decisions' decision.id %}" class="btn btn-light btn-xs" >Modifiée</a>{% endif %} {{forloop.counter}} 
                                     </td>
 
+                                    <td class="text-center">{{ decision.dateDecision|default:"Non défini" }}</td>
+
                                     <td class="text-center">
                                         <p class="strong mb-1">{{decision.typeDecision}}</p>
                                     </td>
 
-                                    <td class="text-center">{{ decision.dateDecision|default:"Non défini" }}</td>
-                                
                                     <td>
                                         <p class="strong mb-1" style="white-space: pre-wrap;">{{decision.decision}}</p>
                                     </td>
