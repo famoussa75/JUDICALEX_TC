@@ -455,6 +455,7 @@ def listAffaire(request):
     if query:
         affaires = affaires.filter(
             Q(numRg__icontains=query) |
+            Q(numAffaire__icontains=query) |
             Q(demandeurs__icontains=query) |
             Q(defendeurs__icontains=query) |
             Q(objet__icontains=query)
