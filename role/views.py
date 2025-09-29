@@ -339,9 +339,7 @@ def colorize_found(query, text):
     return mark_safe(colored_text)
 
 def listRole(request):
-
-    get_year = request.GET.get('year')
-
+    # Récupération des paramètres GET
     current_year = date.today().year
     year = int(request.GET.get('year', current_year))
     query = request.GET.get('q', '').strip()
@@ -349,21 +347,15 @@ def listRole(request):
     section = request.GET.get('section', '').strip()
     selected_date = request.GET.get('date', '').strip()
 
-
-    # Années disponibles
+    # Années disponibles pour le filtre
     available_years = list(range(2024, current_year + 1))
 
-    roles = Roles.objects.filter(dateEnreg__year=year).order_by('dateEnreg')
+    # Base queryset
+    roles = Roles.objects.all().order_by('dateEnreg')
 
-     # Filtrage par date précise
-    if selected_date:
-        parsed_date = datetime.strptime(selected_date, "%Y-%m-%d").date()
-        roles = roles.filter(dateEnreg=parsed_date)
-
-    # Filtrage par an
-    if get_year:
-        roles = Roles.objects.filter(dateEnreg__year=year)
-
+    # Filtrage par année
+    if year:
+        roles = roles.filter(dateEnreg__year=year)
 
     # Filtrage par typeAudience
     if type_audience:
@@ -373,7 +365,15 @@ def listRole(request):
     if section:
         roles = roles.filter(section=section)
 
-    # Filtrage par mot-clé (recherche)
+    # Filtrage par date précise
+    if selected_date:
+        try:
+            parsed_date = datetime.strptime(selected_date, "%Y-%m-%d").date()
+            roles = roles.filter(dateEnreg=parsed_date)
+        except ValueError:
+            pass  # ignore si la date est mal formée
+
+    # Filtrage par recherche globale
     if query:
         roles = roles.filter(
             Q(typeAudience__icontains=query) |
@@ -404,7 +404,7 @@ def listRole(request):
     )
 
     context = {
-        'roles': roles,  # utile si besoin d'accès direct
+        'roles': roles,  # utile si accès direct nécessaire
         'page_obj': page_obj,
         'selected_year': year,
         'available_years': available_years,
@@ -413,14 +413,13 @@ def listRole(request):
         'sections': sections,
         'selected_type_audience': type_audience,
         'selected_section': section,
-        'selected_date':selected_date
+        'selected_date': selected_date
     }
+
     return render(request, 'role/gestion-roles.html', context)
 
-
 def listAffaire(request):
-    get_year = request.GET.get('year')
-
+    # Paramètres GET
     current_year = date.today().year
     year = int(request.GET.get('year', current_year))
     query = request.GET.get('q', '').strip()
@@ -428,12 +427,15 @@ def listAffaire(request):
     section = request.GET.get('section', '').strip()
     selected_date = request.GET.get('date', '').strip()
 
-
     # Années disponibles
     available_years = list(range(2024, current_year + 1))
 
     # Base queryset
-    affaires = AffaireRoles.objects.filter(role__dateEnreg__year=year)
+    affaires = AffaireRoles.objects.select_related('role').all().order_by('role__dateEnreg')
+
+    # Filtrage par année
+    if year:
+        affaires = affaires.filter(role__dateEnreg__year=year)
 
     # Filtrage par typeAudience
     if type_audience:
@@ -443,13 +445,13 @@ def listAffaire(request):
     if section:
         affaires = affaires.filter(role__section=section)
 
-    # Filtrage par date
+    # Filtrage par date précise (role__dateEnreg ou role__dateAudience si besoin)
     if selected_date:
-        affaires = affaires.filter(role__dateEnreg=selected_date)
-    
-    # Filtrage par an
-    if get_year:
-        affaires = affaires.filter(role__dateEnreg__year=year)
+        try:
+            parsed_date = datetime.strptime(selected_date, "%Y-%m-%d").date()
+            affaires = affaires.filter(role__dateEnreg=parsed_date)
+        except ValueError:
+            pass  # Ignore si la date est mal formée
 
     # Recherche texte
     if query:
@@ -482,18 +484,15 @@ def listAffaire(request):
     )
 
     # Récupérer toutes les décisions liées aux affaires affichées
-    decisions = Decisions.objects.filter(affaire__in=page_obj).select_related("affaire")
+    affaire_ids = [a.id for a in page_obj]
+    decisions = Decisions.objects.filter(affaire_id__in=affaire_ids).select_related("affaire")
 
-    # Indexer les décisions par (affaire_id, dateDecision)
-    decisions_map = {
-        (d.affaire_id, d.dateDecision): d.decision
-        for d in decisions
-    }
+    # Indexer les décisions par affaire_id
+    decisions_map = {d.affaire_id: d.decision for d in decisions}
 
     # Ajouter la décision correspondante à chaque affaire
     for affaire in page_obj:
-        key = (affaire.id, affaire.role.dateEnreg)
-        affaire.decision = decisions_map.get(key, "-")
+        affaire.decision = decisions_map.get(affaire.id, "-")
 
     context = {
         'page_obj': page_obj,
@@ -506,8 +505,8 @@ def listAffaire(request):
         'selected_section': section,
         'selected_date': selected_date,
     }
-    return render(request, 'role/gestion-affaires.html', context)
 
+    return render(request, 'role/gestion-affaires.html', context)
 
 
 def listEnrollement(request):
@@ -533,9 +532,7 @@ def listEnrollement(request):
 
 
 def listEnrollementForAdmin(request):
-
-    get_year = request.GET.get('year')
-
+    # Récupération des paramètres GET
     current_year = date.today().year
     year = int(request.GET.get('year', current_year))
     query = request.GET.get('q', '').strip()
@@ -544,27 +541,33 @@ def listEnrollementForAdmin(request):
     selected_date = request.GET.get('date', '').strip()
     available_years = list(range(2024, current_year + 1))
 
-    enrollements = Enrollement.objects.filter(
-            dateEnrollement__year=year
-        ).order_by('dateEnrollement')
-    
-     # Filtrage par date précise
-    if selected_date:
-        parsed_date = datetime.strptime(selected_date, "%Y-%m-%d").date()
-        enrollements = enrollements.filter(dateEnrollement=parsed_date)
+    # Base queryset
+    enrollements = Enrollement.objects.all().order_by('dateEnrollement')
 
-    # Filtrage par an
-    if get_year:
-        enrollements = Enrollement.objects.filter(
-            dateEnrollement__year=year
-        ).order_by('id')
+    # Filtrage par année
+    if year:
+        enrollements = enrollements.filter(dateEnrollement__year=year)
 
     # Filtrage par typeAudience
     if type_audience:
         enrollements = enrollements.filter(typeAudience=type_audience)
 
+    # Filtrage par section
+    if section:
+        enrollements = enrollements.filter(section=section)
 
-    # Filtrage par recherche
+    # Filtrage par date précise (dateEnrollement et dateAudience)
+    if selected_date:
+        try:
+            parsed_date = datetime.strptime(selected_date, "%Y-%m-%d").date()
+            enrollements = enrollements.filter(
+                Q(dateEnrollement=parsed_date)
+            )
+        except ValueError:
+            # Si la date est mal formée, on ignore le filtre
+            pass
+
+    # Filtrage par recherche globale
     if query:
         enrollements = enrollements.filter(
             Q(numRg__icontains=query) |
@@ -575,13 +578,15 @@ def listEnrollementForAdmin(request):
             Q(demandeurs__icontains=query) |
             Q(defendeurs__icontains=query) |
             Q(dateEnrollement__icontains=query) |
-            Q(dateAudience__icontains=query) 
+            Q(dateAudience__icontains=query)
         )
 
+    # Pagination
     paginator = Paginator(enrollements, 20)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
+    # Choices pour le template
     sections = (
         ("Premiere-Section", "Prémière Section"),
         ("Deuxieme-Section", "Deuxième Section"),
@@ -603,12 +608,10 @@ def listEnrollementForAdmin(request):
         'sections': sections,
         'type_audiences': type_audiences,
         'selected_type_audience': type_audience,
+        'selected_section': section,
         'selected_date': selected_date,
         'query': query,
     })
-
-
-
 
 
 def edit_affaire(request, idAffaire):
@@ -2188,9 +2191,9 @@ def export_plumitifs_excel(request):
     if year:
         affaireRole = affaireRole.filter(role__dateEnreg__year=year)
     if type_audience:
-        affaireRole = affaireRole.filter(typeAudience=type_audience)
+        affaireRole = affaireRole.filter(role__typeAudience=type_audience)
     if section:
-        affaireRole = affaireRole.filter(section=section)
+        affaireRole = affaireRole.filter(role__section=section)
     if get_date:
         affaireRole = affaireRole.filter(role__dateEnreg=get_date)
 

@@ -45,17 +45,46 @@ AffaireFormSet = inlineformset_factory(Roles,AffaireRoles, form=RoleAffaireForm,
 class EnrollementForm(forms.ModelForm):
     class Meta: 
         model = Enrollement
-        fields =('juridiction','numOrdre','numAffaire','section','numRg','objet','demandeurs','defendeurs','juridiction','typeAudience','dateEnrollement','dateAudience')  
+        # On exclut les champs générés automatiquement ou définis dans la vue
+        exclude = ['id', 'numAffaire', 'juridiction', 'section', 'typeAudience', 'created_by']
+
         widgets = {
-            'numOrdre': forms.NumberInput(attrs={'class': 'form-control','required': True, 'value': 1}),
-            'numRg': forms.TextInput(attrs={'class': 'form-control','required': True}),
-            'demandeurs': forms.Textarea(attrs={'class': 'form-control','required': True,'rows': 2}),
-            'defendeurs': forms.Textarea(attrs={'class': 'form-control','required': True,'rows': 2}),
-            'numAffaire': forms.TextInput(attrs={'class': 'form-control','required': True, 'readonly': True}),
-            'objet': forms.Textarea(attrs={'class': 'form-control','required': True,'rows': 2}),
-            'dateEnrollement':forms.DateInput(attrs={'type':'date','class': 'form-control', 'required': True}),
-            'dateAudience':forms.DateInput(attrs={'type':'date','class': 'form-control', 'required': True}),
+            'numOrdre': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'required': True,
+                'value': 1
+            }),
+            'numRg': forms.TextInput(attrs={
+                'class': 'form-control',
+                'required': True
+            }),
+            'demandeurs': forms.Textarea(attrs={
+                'class': 'form-control',
+                'required': True,
+                'rows': 2
+            }),
+            'defendeurs': forms.Textarea(attrs={
+                'class': 'form-control',
+                'required': True,
+                'rows': 2
+            }),
+            'objet': forms.Textarea(attrs={
+                'class': 'form-control',
+                'required': True,
+                'rows': 2
+            }),
+            'dateEnrollement': forms.DateInput(attrs={
+                'type': 'date',
+                'class': 'form-control',
+                'required': True
+            }),
+            'dateAudience': forms.DateInput(attrs={
+                'type': 'date',
+                'class': 'form-control',
+                'required': True
+            }),
         }
+
 
 class DecisionsForm(forms.ModelForm):
     class Meta:

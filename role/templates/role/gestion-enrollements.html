@@ -88,7 +88,7 @@
                             <div class="card-header">
                                 <div class="row mb-4">
                                     <div class="col d-flex justify-content-end">
-                                        <a href="{% url 'export_enrollements_excel' %}?q={{ request.GET.q }}" class="btn btn-success">
+                                        <a href="{% url 'export_enrollements_excel' %}?year={{ selected_year }}&q={{ request.GET.q }}&section={{ request.GET.section }}&typeAudience={{ request.GET.typeAudience }}&date={{ request.GET.date }}" class="btn btn-success">
                                             <i class="fa fa-file-excel"></i> Exporter Excel
                                         </a>
                                          <!-- Bouton PDF -->
@@ -98,7 +98,12 @@
                                     </div>
                                 </div>
                                 <hr>
-                                <h3><i class="fas fa-filter"></i> Filtres</h3>
+                                <h3 class="mb-3">
+                                    <i class="fas fa-filter"></i> Filtres 
+                                    <small class="text-muted">| Total : {{ page_obj.paginator.count }}</small>
+                                </h3>
+                                
+                                </h3>
                                 <div class="row mb-2">
                                 
                                     <div class="col-2">
@@ -116,7 +121,6 @@
                                                    <!-- garder les autres filtres lors de la soumission -->
                                                    <input type="hidden" name="typeAudience" value="{{ selected_type_audience }}">
                                                    <input type="hidden" name="q" value="{{ query }}">
-                                                   <input type="hidden" name="section" value="{{ selected_section }}">
                                               </form>
                                         </span> 
                                     </div>
@@ -134,7 +138,7 @@
                                             <!-- garder les autres filtres lors de la soumission -->
                                             <input type="hidden" name="year" value="{{ selected_year }}">
                                             <input type="hidden" name="q" value="{{ query }}">
-                                            <input type="hidden" name="section" value="{{ selected_section }}">
+                                            <input type="hidden" name="date" value="{{ selected_date }}">
                                         </form>
                                     </div>
                                     
@@ -155,7 +159,8 @@
                                                 <!-- garder les autres filtres lors de la soumission -->
                                                 <input type="hidden" name="typeAudience" value="{{ selected_type_audience }}">
                                                 <input type="hidden" name="q" value="{{ query }}">
-                                                <input type="hidden" name="section" value="{{ selected_section }}">
+                                                <input type="hidden" name="year" value="{{ selected_year }}">
+
                                             </form>
                                         </span> 
                                     </div>
@@ -164,6 +169,7 @@
                                         <form method="get" action="">
                                             <div class="input-group">
                                                 <input type="text" name="q" class="form-control" placeholder="Rechercher un rôle..." value="{{ request.GET.q }}">
+                                                  <!-- garder les autres filtres lors de la soumission -->
                                                 <button class="btn btn-primary" type="submit">Rechercher</button>
                                             </div>
                                               
