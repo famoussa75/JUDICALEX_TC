@@ -666,8 +666,7 @@ def edit_affaire(request, idAffaire):
     messages.success(request, 'Affaire modifiée avec succès !')
 
     return redirect('role.enrollementForAdmin')
-
-    
+   
 
 def createRole(request):
     juridictions = Juridictions.objects.filter(id=request.user.juridiction_id)

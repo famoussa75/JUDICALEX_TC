@@ -95,7 +95,7 @@ class DecisionsForm(forms.ModelForm):
             'prochaineAudience'
         ]
         widgets = {
-            'decision': forms.Textarea(attrs={'class': 'form-control', 'cols':'30', 'rows':'5', 'required':'true', 'readonly':'true', 'style': 'color: gray; font-style: italic;'}),
+            'decision': forms.Textarea(attrs={'class': 'form-control', 'cols':'30', 'rows':'5', 'required':'true', 'style': 'color: gray; font-style: italic;'}),
             'typeDecision': forms.Select(attrs={'class': 'form-control', 'required':'true', 'id':'typeDecision'}),
             'objet': forms.Textarea(attrs={'class': 'form-control'}),
             'president': forms.TextInput(attrs={'class': 'form-control', 'required':'true'}),
