@@ -530,7 +530,6 @@ def listEnrollement(request):
         return render(request, 'role/registres-enrollements.html',{'juridictions':juridictions})
 
 
-
 def listEnrollementForAdmin(request):
     # Récupération des paramètres GET
     current_year = date.today().year
@@ -855,11 +854,13 @@ def createEnrollement(request):
             if formset.errors:
                 messages.error(request, f"Erreurs dans le formset : {formset.errors}")    
 
-   
+    is_chef = request.user.groups.filter(name='Chef').exists()
+
     context = {
         'juridictions':juridictions,
         'form':form,
         'formset':formset,
+        'is_chef':is_chef,
     }        
     return render(request, 'role/new-enrollement.html',context)
 
@@ -1050,7 +1051,9 @@ def detailAffaire(request, idAffaire):
   
 
 def fetchForm(request, selectedJuridiction, selectedType, dateRole, selectedSection):
+
     juridiction = Juridictions.objects.filter(id=selectedJuridiction).first()
+
     affaireEnrollers = Enrollement.objects.filter(
         juridiction=juridiction, typeAudience=selectedType, dateAudience=dateRole, section=selectedSection, statut='Creer'
     )
@@ -2209,9 +2212,9 @@ def export_plumitifs_excel(request):
     ws = wb.active
     ws.title = "PLUMITIF"
 
-    ws.append(["No", "NUA", "RG", "Demanderesse", "Défenderesse", "Objet", "date d'audience"])
-
+    ws.append(["No", "NUA", "RG", "Demanderesse", "Défenderesse", "Objet", "date d'audience", "Décisions"])
     for i, affaire in enumerate(affaireRole, start=1):
+        decision_text = Decisions.objects.filter(affaire=affaire).first() or ""
         ws.append([
             i,
             affaire.numAffaire,
@@ -2220,6 +2223,7 @@ def export_plumitifs_excel(request):
             affaire.defendeurs,
             affaire.objet,
             affaire.role.dateEnreg,
+            decision_text.decision,
         ])
 
     response = HttpResponse(
@@ -2399,10 +2403,14 @@ def export_plumitifs_pdf(request):
         Paragraph("Demanderesse", styles["Heading5"]),
         Paragraph("Défenderesse", styles["Heading5"]),
         Paragraph("Objet", styles["Heading5"]),
-        Paragraph("Date d'audience", styles["Heading5"])
+        Paragraph("Date d'audience", styles["Heading5"]),
+        Paragraph("Décisions", styles["Heading5"])
     ]]
 
     for i, affaire in enumerate(affaireRole, start=1):
+
+        decision_text = Decisions.objects.filter(affaire=affaire).first() or ""
+
         data.append([
             Paragraph(str(i), style_normal),
             Paragraph(affaire.numAffaire or "", style_normal),
@@ -2411,9 +2419,10 @@ def export_plumitifs_pdf(request):
             Paragraph(affaire.defendeurs or "", style_normal),
             Paragraph(affaire.objet or "", style_normal),
             Paragraph(affaire.role.dateEnreg.strftime("%d/%m/%Y") if affaire.role and affaire.role.dateEnreg else "", style_normal),
+            Paragraph(decision_text.decision, style_normal),
         ])
 
-    col_widths = [30, 80, 60, 120, 120, 200, 80]
+    col_widths = [30, 80, 60, 120, 120, 90, 80, 110]
     table = Table(data, repeatRows=1, colWidths=col_widths)
     table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#4CAF50')),
@@ -2704,4 +2713,18 @@ def export_enrollements_pdf(request):
 
     return response
 
+def check_doublon(request):
+    numRg = request.GET.get('numRg', '').strip()
+    demandeurs = request.GET.get('demandeurs', '').strip()
+    defendeurs = request.GET.get('defendeurs', '').strip()
+    objet = request.GET.get('objet', '').strip()
 
+    # On cherche des enregistrements ressemblants
+    doublons = Enrollement.objects.filter(
+        (Q(demandeurs__icontains=demandeurs) & Q(defendeurs__icontains=defendeurs))
+    ).values('id', 'numRg', 'demandeurs', 'defendeurs', 'objet')[:5]
+
+    return JsonResponse({
+        'has_doublon': doublons.exists(),
+        'doublons': list(doublons)
+    })

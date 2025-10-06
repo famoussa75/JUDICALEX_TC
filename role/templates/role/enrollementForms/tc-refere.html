@@ -15,7 +15,7 @@
 <!-- Tableau dynamique pour afficher les formulaires du formset -->
 <table class="table table-bordered" >
     <button type="button" name="add" id="dynamic-ar"
-        class="btn btn-outline-primary mb-2" title="Ajouter une ligne">
+        class="btn btn-outline-primary mb-2 {% if not is_chef %}disabled{% endif %}" title="Ajouter une ligne">
         <i class="fa fa-plus"></i>&nbsp;Ajouter
     </button>
     <thead>
@@ -52,30 +52,111 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
 
-<script>
-    
-    let formIndex = 0; // Compteur global
+<!-- Modal d’alerte doublon -->
+<div class="modal fade" id="doublonModal" tabindex="-1" aria-labelledby="doublonLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header bg-warning">
+          <h5 class="modal-title" id="doublonLabel">⚠️ Risque de doublon détecté</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" id="doublonContent"></div>
+        <div class="modal-footer">
+          <a type="button" href="{% url 'role.createEnrollement' %}" class="btn btn-secondary" >Créer à nouveau</a>
+          <!-- <button type="button" class="btn btn-danger" id="forceContinueBtn" data-bs-dismiss="modal" >Continuer malgré tout</button> -->
+        </div>
+      </div>
+    </div>
+</div>
 
+<script>
+    document.addEventListener('hidden.bs.modal', function (event) {
+        if (document.querySelectorAll('.modal.show').length === 0) {
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+        }
+    });
+    
+    $('#doublonModal').on('hidden.bs.modal', function () {
+        $('.modal-backdrop').remove();
+    });
+</script>
+
+<script>
+    let formIndex = parseInt($("#id_form-TOTAL_FORMS").val() || 0);
+    
+    // ✅ Ajouter une nouvelle ligne
+    $("#dynamic-ar").on("click", function() {
+        const newRow = `
+            <tr>
+                <td><input type="number" name="form-${formIndex}-numOrdre" value="${formIndex + 1}" class="form-control" required></td>
+                <td><input type="text" name="form-${formIndex}-numRg" class="form-control" required></td>
+                <td><input type="date" name="form-${formIndex}-dateEnrollement" class="form-control" required></td>
+                <td><textarea rows="2" name="form-${formIndex}-demandeurs" class="form-control" required></textarea></td>
+                <td><textarea rows="2" name="form-${formIndex}-defendeurs" class="form-control" required></textarea></td>
+                <td><textarea rows="2" name="form-${formIndex}-objet" class="form-control" required></textarea></td>
+                <td><input type="date" name="form-${formIndex}-dateAudience" class="form-control" required></td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-outline-danger remove-input-field">
+                        <i class="fa fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+    
+        $("#formset-body").append(newRow);
+        formIndex++;
+        $("#id_form-TOTAL_FORMS").val(formIndex);
+    });
+    
+    // ✅ Supprimer une ligne
+    $(document).on("click", ".remove-input-field", function() {
+        $(this).closest("tr").remove();
+        updateFormIndexes();
+    });
+    
+    // ✅ Re-numérotation correcte après suppression
+    function updateFormIndexes() {
+        formIndex = 0;
+        $("#formset-body tr").each(function() {
+            $(this)
+                .find("input, textarea")
+                .each(function() {
+                    const name = $(this).attr("name");
+                    const newName = name.replace(/form-(\d+)-/, `form-${formIndex}-`);
+                    $(this).attr("name", newName);
+                });
+            formIndex++;
+        });
+        $("#id_form-TOTAL_FORMS").val(formIndex);
+    }
+</script>
+
+<script>
+
+    let formIndex = 0;
+    let hasPotentialDoublon = false; // 🔒 bloque soumission si vrai
+    const checkDoublonURL = "{% url 'check_doublon' %}";
+    
     document.getElementById('excelFile').addEventListener('change', function(e) {
         const file = e.target.files[0];
         const reader = new FileReader();
-        
+    
         reader.onload = function(e) {
             const data = new Uint8Array(e.target.result);
             const workbook = XLSX.read(data, { type: 'array' });
             const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
             let rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
-
-            // Filtrer les lignes vides
+    
             rows = rows.filter(row => row.some(cell => cell !== null && cell !== undefined && cell !== ''));
-
-            // Effacer anciennes lignes
             document.getElementById('formset-body').innerHTML = '';
             formIndex = 0;
-
+            hasPotentialDoublon = false; // reset du flag
+    
             rows.slice(1).forEach(row => {
                 if (row.every(cell => cell === null || cell === '')) return;
-
+    
                 const numOrdre = row[0] || '';
                 const numRg = row[1] || '';
                 const dateEnrollement = convertExcelDate(row[2]);
@@ -83,26 +164,7 @@
                 const defendeurs = row[4] || '';
                 const objet = row[5] || '';
                 const dateAudience = convertExcelDate(row[6]);
-
-                // Fonction de conversion
-                function convertExcelDate(excelDate) {
-                        if (!excelDate) return ''; // Vide ou null
-
-                        let date;
-                        if (typeof excelDate === 'number') {
-                            // Date stockée au format Excel (nombre de jours depuis 1899-12-30)
-                            date = new Date((excelDate - 25569) * 86400 * 1000);
-                        } else {
-                            // Tente conversion à partir d'une chaîne
-                            date = new Date(excelDate);
-                        }
-
-                        // Vérifier si la date est valide
-                        if (isNaN(date.getTime())) return '';
-
-                        return date.toISOString().split('T')[0];
-                    }
-
+    
                 const newRow = `
                     <tr>
                         <td><input type="number" name="form-${formIndex}-numOrdre" value="${numOrdre}" class="form-control" required></td>
@@ -114,38 +176,62 @@
                         <td><input type="date" name="form-${formIndex}-dateAudience" value="${dateAudience}" class="form-control" required></td>
                         <td><button type="button" class="btn btn-outline-danger remove-input-field"><i class="fa fa-trash"></i></button></td>
                     </tr>`;
-
+                
                 document.getElementById('formset-body').insertAdjacentHTML('beforeend', newRow);
+                checkDoublon(numRg, demandeurs, defendeurs, objet);
                 formIndex++;
             });
-
-            console.log(formIndex);
-            // Mettre à jour le total
+    
             $('#id_form-TOTAL_FORMS').val(formIndex);
         };
-
+    
         reader.readAsArrayBuffer(file);
     });
-
-    $("#dynamic-ar").click(function() {
-        const newRow = `
-            <tr>
-                <td><input type="number" name="form-${formIndex}-numOrdre" value="${formIndex+1}" class="form-control" required></td>
-                <td><input type="text" name="form-${formIndex}-numRg" class="form-control" required></td>
-                <td><input type="date" name="form-${formIndex}-dateEnrollement" class="form-control" required></td>
-                <td><textarea rows="2" name="form-${formIndex}-demandeurs" class="form-control" required></textarea></td>
-                <td><textarea rows="2" name="form-${formIndex}-defendeurs" class="form-control" required></textarea></td>
-                <td><textarea rows="2" name="form-${formIndex}-objet" class="form-control" required></textarea></td>
-                <td><input type="date" name="form-${formIndex}-dateAudience" class="form-control" required></td>
-                <td><button type="button" class="btn btn-outline-danger remove-input-field"><i class="fa fa-trash"></i></button></td>
-            </tr>`;
-        $("#formset-body").append(newRow);
-
-        formIndex++;
-        $("#id_form-TOTAL_FORMS").val(formIndex);
+    
+    function convertExcelDate(excelDate) {
+        if (!excelDate) return '';
+        let date;
+        if (typeof excelDate === 'number') {
+            date = new Date((excelDate - 25569) * 86400 * 1000);
+        } else {
+            date = new Date(excelDate);
+        }
+        if (isNaN(date.getTime())) return '';
+        return date.toISOString().split('T')[0];
+    }
+    
+    function checkDoublon(numRg, demandeurs, defendeurs, objet) {
+        fetch(`${checkDoublonURL}?numRg=${encodeURIComponent(numRg)}&demandeurs=${encodeURIComponent(demandeurs)}&defendeurs=${encodeURIComponent(defendeurs)}&objet=${encodeURIComponent(objet)}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.has_doublon) {
+                    hasPotentialDoublon = true;
+    
+                    let content = `<p>Des enregistrements similaires existent déjà :</p><ul>`;
+                    data.doublons.forEach(d => {
+                        content += `<li><strong>${d.numRg || '(sans numéro RG)'}</strong> – ${d.demandeurs} c/ ${d.defendeurs}<br><em>${d.objet}</em></li>`;
+                    });
+                    content += `</ul><p>Veuillez vérifier avant de continuer.</p>`;
+                    document.getElementById('doublonContent').innerHTML = content;
+    
+                    new bootstrap.Modal(document.getElementById('doublonModal')).show();
+                }
+            })
+            .catch(err => console.error('Erreur vérif doublon:', err));
+    }
+    
+    // 🔒 Bloque la soumission si un doublon est détecté
+    document.getElementById('importForm').addEventListener('submit', function(e) {
+        if (hasPotentialDoublon) {
+            e.preventDefault();
+            alert("Un risque de doublon a été détecté. Vérifiez avant de soumettre.");
+        }
     });
-
+    
+    
+    
 </script>
 
 
 
+    

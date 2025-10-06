@@ -38,6 +38,8 @@ urlpatterns = [
      path('fetch-form-enrollement/<selectedJuridiction>/<selectedType>/', views.fetchFormEnrollement, name='role.fetchFormEnrollement'),
 
      path('download-pdf/', views.download_pdf, name='download_pdf'),
+     path('check-doublon/', views.check_doublon, name='check_doublon'),
+
 
 
 ]

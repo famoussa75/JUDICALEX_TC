@@ -46,7 +46,7 @@ class EnrollementForm(forms.ModelForm):
     class Meta: 
         model = Enrollement
         # On exclut les champs générés automatiquement ou définis dans la vue
-        exclude = ['id', 'numAffaire', 'juridiction', 'section', 'typeAudience', 'created_by']
+        exclude = ['id', 'juridiction', 'section', 'typeAudience', 'created_by']
 
         widgets = {
             'numOrdre': forms.NumberInput(attrs={
@@ -57,6 +57,11 @@ class EnrollementForm(forms.ModelForm):
             'numRg': forms.TextInput(attrs={
                 'class': 'form-control',
                 'required': True
+            }),
+            'numAffaire': forms.TextInput(attrs={
+                'class': 'form-control',
+                'required': True,
+                'readonly': True
             }),
             'demandeurs': forms.Textarea(attrs={
                 'class': 'form-control',
