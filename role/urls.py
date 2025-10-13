@@ -5,6 +5,7 @@ urlpatterns = [
      path('', views.index, name='role.index'),
      path("backoffice-data/", views.backoffice_data, name="backoffice_data"),
      path('roles/', views.listRole, name='role.liste'),
+     path('roles/attentes/', views.affairesAttentes, name='role.attentes'),
      path('roles/export-excel/', views.export_roles_excel, name='role.export_excel'),
      path('roles/export-pdf/', views.export_roles_pdf, name='role.export_pdf'),
      path('roles/valide/<int:pk>/', views.valide_role, name='role.valider'),

@@ -51,7 +51,7 @@
                                     <p class="h3">{{ affaire.role.juridiction }}</p>
                                     <p class="h4 text-muted" >NUA : {{ affaire.numAffaire }}</p>
                                     <p class="h4" >AFFAIRE N° : {{ affaire.numRg }}</p>
-                                    <p class="h4">{{ affaire.role.section }}</p>
+                                    <p class="h4">{{ affaire.role.get_section_display }}</p>
                                     <p class="h4">{{ affaire.role.get_typeAudience_display }}</p>
 
                                     {% if is_suivi %}
@@ -150,7 +150,7 @@
                                     <td class="text-center">{{ decision.dateDecision|default:"Non défini" }}</td>
 
                                     <td class="text-center">
-                                        <p class="strong mb-1">{{decision.typeDecision}}</p>
+                                        <p class="strong mb-1">{{decision.get_typeDecision_display}}</p>
                                     </td>
 
                                     <td>
@@ -428,10 +428,22 @@
                 text = `Mise en délibéré pour décision être rendue le  ${formatDate(date)}`;
             }
             else if (type === "Vide-du-delibere") {
-                const gagnant = document.getElementById("gagnant")?.value || "";
+                // 🔹 Récupérer le choix du radio bouton (sur la forme / sur le fond)
+                const typeResultat = document.querySelector('input[name="type_resultat"]:checked')?.value || "";
+
+                // 🔹 Récupérer le dispositif
                 const dispositif = document.getElementById("id_dispositif")?.value || "";
-                text = `Vidé du délibéré en faveur de ${gagnant} - Dispositif : ${dispositif}`;
+
+                // 🔹 Construire le texte final
+                if (typeResultat && dispositif) {
+                    text = `Vidé du délibéré ${typeResultat.toLowerCase()} – Dispositif : ${dispositif}`;
+                } else if (typeResultat) {
+                    text = `Vidé du délibéré ${typeResultat.toLowerCase()}`;
+                } else {
+                    text = "Vidé du délibéré";
+                }
             }
+
             else if (type === "Affectation") {
                 const date = document.getElementById("prochaineAudience")?.value || "";
                 const section = document.getElementById("selectSection")?.value || "";
@@ -489,15 +501,50 @@
             else if (selectedValue === "Vide-du-delibere") {
                 dynamicFields.innerHTML = `
                     <div class="mb-3">
-                        <label class="form-label">Vidé du délibéré en faveur de :</label>
-                        <input type="text" name="gagnant" class="form-control" id="gagnant">
+                        <label class="form-label d-block">Vidé du délibéré :</label>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="type_resultat" id="sur_forme" value="Sur la forme" required>
+                            <label class="form-check-label" for="sur_forme">Sur la forme</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="type_resultat" id="sur_fond" value="Sur le fond">
+                            <label class="form-check-label" for="sur_fond">Sur le fond et/ou autre</label>
+                        </div>
                     </div>
+                    <!-- Conteneur pour afficher la date de prochaine audience -->
+                    <div id="prochaineAudienceContainer"></div>
+
                     <div class="mb-3">
                         <label class="form-label">Dispositif</label>
                         {{ form.dispositif }}
                     </div>
                 `;
+
+                 // ⚙️ Gestion du comportement dynamique
+                    const surFormeRadio = document.getElementById('sur_forme');
+                    const surFondRadio = document.getElementById('sur_fond');
+                    const prochaineAudienceContainer = document.getElementById('prochaineAudienceContainer');
+
+                    function updateAudienceField() {
+                        if (surFormeRadio.checked) {
+                            // ✅ Afficher le champ date si "Sur la forme" est coché
+                            prochaineAudienceContainer.innerHTML = `
+                                <div class="mb-3">
+                                    <label class="form-label">Date de prochaine audience</label>
+                                    {{ form.prochaineAudience }}
+                                </div>
+                            `;
+                        } else {
+                            // ❌ Supprimer le champ si "Sur le fond" est sélectionné
+                            prochaineAudienceContainer.innerHTML = '';
+                        }
+                    }
+
+                    // 🧠 Ajout des écouteurs
+                    surFormeRadio.addEventListener('change', updateAudienceField);
+                    surFondRadio.addEventListener('change', updateAudienceField);
             }
+
             else if (selectedValue === "Affectation") {
                 dynamicFields.innerHTML = `
                     <div class="mb-3">

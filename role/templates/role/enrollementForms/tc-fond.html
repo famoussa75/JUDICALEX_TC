@@ -51,23 +51,44 @@
 
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+<style>
+    #doublonModal .modal-body {
+      scrollbar-width: thin;
+      scrollbar-color: #aaa transparent;
+    }
+    
+    #doublonModal .modal-body::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    #doublonModal .modal-body::-webkit-scrollbar-thumb {
+      background-color: #bbb;
+      border-radius: 10px;
+    }
+    </style>
+    
 
 <!-- Modal d’alerte doublon -->
 <div class="modal fade" id="doublonModal" tabindex="-1" aria-labelledby="doublonLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-      <div class="modal-content">
-        <div class="modal-header bg-warning">
-          <h5 class="modal-title" id="doublonLabel">⚠️ Risque de doublon détecté</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    <!-- 🟢 Ajout de modal-dialog-scrollable -->
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title" id="doublonLabel">⚠️ Risque de doublon détecté</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <!-- 🟢 Le contenu devient scrollable automatiquement -->
+            <div class="modal-body" id="doublonContent" style="max-height: 70vh; overflow-y: auto;"></div>
+
+            <div class="modal-footer">
+                <a type="button" href="{% url 'role.createEnrollement' %}" class="btn btn-secondary">Créer à nouveau</a>
+                <!-- <button type="button" class="btn btn-danger" id="forceContinueBtn" data-bs-dismiss="modal">Continuer malgré tout</button> -->
+            </div>
         </div>
-        <div class="modal-body" id="doublonContent"></div>
-        <div class="modal-footer">
-          <a type="button" href="{% url 'role.createEnrollement' %}" class="btn btn-secondary" >Créer à nouveau</a>
-          <!-- <button type="button" class="btn btn-danger" id="forceContinueBtn" data-bs-dismiss="modal" >Continuer malgré tout</button> -->
-        </div>
-      </div>
     </div>
 </div>
+
 
 <script>
     document.addEventListener('hidden.bs.modal', function (event) {
@@ -134,16 +155,15 @@
 </script>
 
 <script>
-
     let formIndex = 0;
     let hasPotentialDoublon = false; // 🔒 bloque soumission si vrai
     const checkDoublonURL = "{% url 'check_doublon' %}";
-    
+
     document.getElementById('excelFile').addEventListener('change', function(e) {
         const file = e.target.files[0];
         const reader = new FileReader();
     
-        reader.onload = function(e) {
+        reader.onload = async function(e) {
             const data = new Uint8Array(e.target.result);
             const workbook = XLSX.read(data, { type: 'array' });
             const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
@@ -152,10 +172,12 @@
             rows = rows.filter(row => row.some(cell => cell !== null && cell !== undefined && cell !== ''));
             document.getElementById('formset-body').innerHTML = '';
             formIndex = 0;
-            hasPotentialDoublon = false; // reset du flag
     
-            rows.slice(1).forEach(row => {
-                if (row.every(cell => cell === null || cell === '')) return;
+            const doublonsGroupés = []; // 🟡 Contient les doublons regroupés par affaire
+    
+            // ✅ Boucle sur toutes les lignes (sauf l’en-tête)
+            for (const row of rows.slice(1)) {
+                if (row.every(cell => !cell)) continue;
     
                 const numOrdre = row[0] || '';
                 const numRg = row[1] || '';
@@ -165,6 +187,7 @@
                 const objet = row[5] || '';
                 const dateAudience = convertExcelDate(row[6]);
     
+                // ➕ Ajout dans le tableau du formulaire
                 const newRow = `
                     <tr>
                         <td><input type="number" name="form-${formIndex}-numOrdre" value="${numOrdre}" class="form-control" required></td>
@@ -178,11 +201,55 @@
                     </tr>`;
                 
                 document.getElementById('formset-body').insertAdjacentHTML('beforeend', newRow);
-                checkDoublon(numRg, demandeurs, defendeurs, objet);
+    
+                // 🔍 Vérifie les doublons pour cette affaire
+                const doublons = await checkDoublon(numRg, demandeurs, defendeurs, objet);
+                if (doublons.length > 0) {
+                    doublonsGroupés.push({
+                        affaire: { numRg, demandeurs, defendeurs, objet },
+                        doublons
+                    });
+                }
+    
                 formIndex++;
-            });
+            }
     
             $('#id_form-TOTAL_FORMS').val(formIndex);
+    
+            // 🧾 Si des doublons sont trouvés, on les affiche par groupe
+            if (doublonsGroupés.length > 0) {
+                let content = `<p>Des enregistrements similaires ont été trouvés :</p>`;
+    
+                doublonsGroupés.forEach((groupe, idx) => {
+                    const { affaire, doublons } = groupe;
+                    content += `
+                        <div class="p-2 mb-3 border rounded bg-light">
+                            <h6 class="text-primary">Affaire importée #${idx + 1}</h6>
+                            <p>
+                                <strong>${affaire.numRg || '(sans numéro RG)'}</strong> – 
+                                ${affaire.demandeurs} c/ ${affaire.defendeurs}<br>
+                                <em>${affaire.objet}</em>
+                            </p>
+                            <div class="ps-3">
+                                <p class="mb-1"><strong>Correspondances trouvées :</strong></p>
+                                <ul>`;
+                    doublons.forEach(d => {
+                        content += `
+                            <li>
+                                <strong>${d.numRg || '(sans numéro RG)'}</strong> – 
+                                ${d.demandeurs} c/ ${d.defendeurs}<br>
+                                <em>${d.objet}</em>
+                            </li>`;
+                    });
+                    content += `</ul></div></div>`;
+                });
+    
+                document.getElementById('doublonContent').innerHTML = content;
+                new bootstrap.Modal(document.getElementById('doublonModal')).show();
+                hasPotentialDoublon = true;
+            } else {
+                hasPotentialDoublon = false;
+            }
         };
     
         reader.readAsArrayBuffer(file);
@@ -200,36 +267,27 @@
         return date.toISOString().split('T')[0];
     }
     
-    function checkDoublon(numRg, demandeurs, defendeurs, objet) {
-        fetch(`${checkDoublonURL}?numRg=${encodeURIComponent(numRg)}&demandeurs=${encodeURIComponent(demandeurs)}&defendeurs=${encodeURIComponent(defendeurs)}&objet=${encodeURIComponent(objet)}`)
-            .then(res => res.json())
-            .then(data => {
-                if (data.has_doublon) {
-                    hasPotentialDoublon = true;
-    
-                    let content = `<p>Des enregistrements similaires existent déjà :</p><ul>`;
-                    data.doublons.forEach(d => {
-                        content += `<li><strong>${d.numRg || '(sans numéro RG)'}</strong> – ${d.demandeurs} c/ ${d.defendeurs}<br><em>${d.objet}</em></li>`;
-                    });
-                    content += `</ul><p>Veuillez vérifier avant de continuer.</p>`;
-                    document.getElementById('doublonContent').innerHTML = content;
-    
-                    new bootstrap.Modal(document.getElementById('doublonModal')).show();
-                }
-            })
-            .catch(err => console.error('Erreur vérif doublon:', err));
+    // ✅ La fonction checkDoublon renvoie une *liste* de doublons trouvés
+    async function checkDoublon(numRg, demandeurs, defendeurs, objet) {
+        try {
+            const res = await fetch(`${checkDoublonURL}?numRg=${encodeURIComponent(numRg)}&demandeurs=${encodeURIComponent(demandeurs)}&defendeurs=${encodeURIComponent(defendeurs)}&objet=${encodeURIComponent(objet)}`);
+            const data = await res.json();
+            return data.has_doublon ? data.doublons : [];
+        } catch (err) {
+            console.error('Erreur vérif doublon:', err);
+            return [];
+        }
     }
     
-    // 🔒 Bloque la soumission si un doublon est détecté
+    // 🔒 Bloque la soumission si un doublon a été détecté
     document.getElementById('importForm').addEventListener('submit', function(e) {
         if (hasPotentialDoublon) {
             e.preventDefault();
             alert("Un risque de doublon a été détecté. Vérifiez avant de soumettre.");
         }
     });
-    
 </script>
-
+    
 
     
 

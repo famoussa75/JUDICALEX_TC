@@ -1,5 +1,5 @@
 from django import forms
-from . models import Roles,AffaireRoles,Enrollement
+from . models import AffaireAttentes, Roles,AffaireRoles,Enrollement
 from django.forms import inlineformset_factory
 from .models import Decisions
 from .models import MessageDefilant
@@ -21,25 +21,22 @@ class RoleForm(forms.ModelForm):
 class RoleAffaireForm(forms.ModelForm):
     class Meta: 
         model = AffaireRoles   
-        fields =('numOrdre','numRg','objet','demandeurs','defendeurs','appelants','intimes','partieCiviles','civileResponsables','numAffaire','mandatDepot','natureInfraction','prevenus','detention','prevention')  
+        fields =('numOrdre','numRg','objet','demandeurs','defendeurs','numAffaire')  
         widgets = {
             'numOrdre': forms.NumberInput(attrs={'class': 'form-control','required': True}),
             'numRg': forms.TextInput(attrs={'class': 'form-control','required': True, 'readonly': True}),
             'demandeurs': forms.Textarea(attrs={'class': 'form-control','required': True,'rows': 2}),
             'defendeurs': forms.Textarea(attrs={'class': 'form-control','required': True,'rows': 2}),
-            'appelants': forms.Textarea(attrs={'class': 'form-control','required': True,'rows': 2}),
-            'intimes': forms.Textarea(attrs={'class': 'form-control','required': True,'rows': 2}),
-            'partieCiviles': forms.Textarea(attrs={'class': 'form-control','required': True,'rows': 2}),
-            'civileResponsables': forms.Textarea(attrs={'class': 'form-control','required': True,'rows': 2}),
             'numAffaire': forms.TextInput(attrs={'class': 'form-control','required': True, 'readonly': True}),
-            'mandatDepot': forms.Textarea(attrs={'class': 'form-control','required': True,'rows': 2}),
-            'detention': forms.Textarea(attrs={'class': 'form-control','required': True,'rows': 2}),
-            'prevention': forms.Textarea(attrs={'class': 'form-control','required': True,'rows': 2}),
-            'natureInfraction': forms.Textarea(attrs={'class': 'form-control','required': True,'rows': 2}),
-            'prevenus': forms.Textarea(attrs={'class': 'form-control','required': True,'rows': 2}),
             'objet': forms.Textarea(attrs={'class': 'form-control','required': True,'rows': 2}),
         }
 AffaireFormSet = inlineformset_factory(Roles,AffaireRoles, form=RoleAffaireForm, extra=1, can_delete=True,can_delete_extra=True)
+
+
+class RoleAffaireAttentesForm(forms.ModelForm):
+    class Meta:
+        model = AffaireAttentes
+        fields = '__all__'
 
 
 class EnrollementForm(forms.ModelForm):

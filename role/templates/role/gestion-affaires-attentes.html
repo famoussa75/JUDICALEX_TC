@@ -1,0 +1,245 @@
+{% extends 'role/layout.html' %}
+
+
+{% block title %}Gestion des rôles{% endblock title %}
+
+{% block content %}
+{% load static %}
+
+<style>
+    tr.pending td {
+  color: #6c757d !important; /* couleur Bootstrap text-muted */
+}
+
+</style>
+<section class="content">
+
+    <div class="content__header rounded-0">
+        <div class="content__wrap">
+          <h1 class="text-center my-2"><span class="text-warning"><i class="fa fa-clock fs-1"></i> Affaires en attentes</span></h1>
+          <p class="text-center mb-4">Gerez les rôles d'audiences du tribunal</p>
+          <nav aria-label="breadcrumb" style="font-size: 18px;">
+            <ol class="breadcrumb">
+               <li class="breadcrumb-item"><a href="{% url 'role.index' %}">Accueil</a></li>
+               <li class="breadcrumb-item active" aria-current="page">Affaires en attentes</li>
+            </ol>
+         </nav>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="p-2">
+
+            <!-- Page title -->
+            <div class="page-header d-print-none mt-4">
+                <div class="row align-items-center mb-2">
+                    <div class="col-4">
+                        <!-- Page pre-title -->
+
+                        <h1 class="" style="color:white">
+                            <span class="text-primary"><i class="fa fa-clock"></i> Affaires en attentes </span>
+                           
+                        </h1>
+                    </div>
+                  
+                    <!-- Page title actions -->
+                    <div class="col-auto ms-auto d-print-none">
+                        <div class="btn-list">
+
+                            <a href="{% url 'role.affaires' %}" class="btn btn-primary d-none d-sm-inline-block">
+                                <i class="fa fa-list"></i>
+                                Plumitif Général
+                            </a>
+                            <a href="#" class="btn btn-primary d-sm-none btn-icon" data-bs-toggle="modal"
+                                data-bs-target="#modal-report" aria-label="Create new report">
+                                <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
+                                <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
+                                    viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                    <line x1="12" y1="5" x2="12" y2="19" />
+                                    <line x1="5" y1="12" x2="19" y2="12" />
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- <div class="alert alert-success alert-dismissible mt-3" role="alert">
+                <div class="d-flex">
+                    <div>
+                        
+                    </div>
+                    <div>
+                        <h4 class="alert-title">Felicitation !</h4>
+                        <div class="text-muted"> Message</div>
+                    </div>
+                </div>
+                <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+            </div><br /> -->
+
+        </div>
+        <div class="page-body">
+            <div class="p-2">
+                <div class="row row-deck row-cards">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <!-- <div class="row mb-4">
+                                    <div class="col d-flex justify-content-end">
+                                        <a href="{% url 'plumitif.export_excel' %}?year={{ selected_year }}&q={{ request.GET.q }}&section={{ request.GET.section }}&typeAudience={{ request.GET.typeAudience }}&date={{ request.GET.date }}" class="btn btn-success">
+                                            <i class="fa fa-file-excel"></i> Exporter Excel
+                                        </a>
+                                         <a href="{% url 'plumitif.export_pdf'%}?year={{ selected_year }}&q={{ request.GET.q }}&section={{ request.GET.section }}&typeAudience={{ request.GET.typeAudience }}&date={{ request.GET.date }}" class="btn btn-danger ms-2">
+                                            <i class="fa fa-file-pdf"></i> Exporter PDF
+                                        </a>
+                                    </div>
+                                </div> 
+                                <hr>
+                                -->
+                                <h3 class="mb-3">
+                                    <i class="fas fa-filter"></i> Filtres 
+                                    <small class="text-muted">| Total : {{ page_obj.paginator.count }}</small>
+                                </h3>
+                                <div class="row mb-2 justify-content-end">
+                                    <div class="col-md-4">
+                                      <form method="get" action="">
+                                        <div class="input-group">
+                                          <input type="text" name="q" class="form-control" placeholder="Rechercher une affaire..." value="{{ request.GET.q }}">
+                                          <button class="btn btn-primary" type="submit">Rechercher</button>
+                                        </div>
+                                      </form>
+                                    </div>
+                                  </div>
+                                  
+                            </div>
+                            <div class="card-body border-bottom py-3">
+
+                                {% regroup page_obj by typeDecision as grouped_affaires %}
+
+                                <table class="table table-hover table-bordered align-middle">
+                                    <thead class="table-light">
+                                        <tr class="text-center">
+                                            <th>ID</th>
+                                            <th>NUA</th>
+                                            <th>RG</th>
+                                            <th>Demandeurs</th>
+                                            <th>Défendeurs</th>
+                                            <th>Objet</th>
+                                            <th>Rôle provenance</th>
+                                            <th>Rôle reprise</th>
+                                            <th>Statut</th>
+                                            <th>Créé par</th>
+                                        </tr>
+                                    </thead>
+                                
+                                    <tbody>
+                                        {% for group in grouped_affaires %}
+                                            <!-- 🟩 En-tête du groupe -->
+                                            <tr class="text-center bg-info-subtle">
+                                                <td colspan="10">
+                                                    <b class="text-primary">
+                                                      {{ group.grouper|default:"Type de décision non défini" }}
+                                                    </b>
+                                                </td>
+                                            </tr>
+                                
+                                            <!-- 🧾 Lignes des affaires du groupe -->
+                                            {% for affaire in group.list %}
+                                                <tr class="{% if affaire.statut == 'Pending' %}pending{% endif %}">
+                                                    <td class="text-center">{{ affaire.id }}</td>
+                                                    <td class="text-center">
+                                                        <b>
+                                                            <a href="{% url 'affaires.details' affaire.idAffaire %}">
+                                                                {{ affaire.numAffaire }}
+                                                            </a>
+                                                        </b>
+                                                    </td>
+                                                    <td class="text-center">{{ affaire.numRg }}</td>
+                                                    <td class="text-center">{{ affaire.demandeurs }}</td>
+                                                    <td class="text-center">{{ affaire.defendeurs }}</td>
+                                                    <td class="text-center">{{ affaire.objet }}</td>
+                                                    <td class="text-center">
+                                                        <a href="{% url 'role.detail' affaire.roleProvenance.idRole %}">
+                                                            {{ affaire.roleProvenance.dateEnreg }}
+                                                        </a>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        {% if affaire.roleReprise %}
+                                                            <a href="{% url 'role.detail' affaire.roleReprise.idRole %}">
+                                                                {{ affaire.roleReprise.dateEnreg }}
+                                                            </a>
+                                                        {% else %}
+                                                            ---
+                                                        {% endif %}
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <i>{{ affaire.get_statut_display }}</i>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <i>{{ affaire.created_by }}</i>
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        {% empty %}
+                                            <tr>
+                                                <td colspan="10" class="text-center text-muted">Aucune affaire trouvée</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                                
+                                <div class="pagination mt-3 d-flex justify-content-center">
+                                    <nav aria-label="Page navigation">
+                                        <ul class="pagination">
+                                            {% if page_obj.has_previous %}
+                                                <li class="page-item">
+                                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}">Précédent</a>
+                                                </li>
+                                            {% else %}
+                                                <li class="page-item disabled"><span class="page-link">Précédent</span></li>
+                                            {% endif %}
+                                
+                                            {% for num in page_obj.paginator.page_range %}
+                                                {% if page_obj.number == num %}
+                                                    <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                                                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                                    <li class="page-item">
+                                                        <a class="page-link" href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}">{{ num }}</a>
+                                                    </li>
+                                                {% endif %}
+                                            {% endfor %}
+                                
+                                            {% if page_obj.has_next %}
+                                                <li class="page-item">
+                                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}">Suivant</a>
+                                                </li>
+                                            {% else %}
+                                                <li class="page-item disabled"><span class="page-link">Suivant</span></li>
+                                            {% endif %}
+                                        </ul>
+                                    </nav>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+
+    $(document).ready(function () {
+        $('#nav-affaire').addClass('bg-primary text-white');
+        $('#txt-affaire').addClass('text-white');
+    });
+    
+    </script>
+
+
+
+{% endblock %}

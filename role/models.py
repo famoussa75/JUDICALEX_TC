@@ -61,19 +61,29 @@ class AffaireRoles(models.Model):
     numRg = models.CharField(max_length=200,null=True, blank=True, verbose_name=_('Numéro Rg'))
     numAffaire = models.CharField(max_length=200,null=True, blank=True, verbose_name=_('Numéro Affaire'))
     objet = models.TextField(null=True, blank=True, verbose_name=_('Objet'))
-    mandatDepot = models.TextField(null=True, blank=True, verbose_name=_('Mandats de Dépôt'))
-    detention = models.TextField(null=True, blank=True, verbose_name=_('Detention'))
-    prevention = models.TextField(null=True, blank=True, verbose_name=_('Prevention'))
-    natureInfraction = models.TextField(null=True, blank=True, verbose_name=_('Nature des infractions'))
-    decision = models.TextField(null=True, blank=True, verbose_name=_('Décision'))
-    prevenus = models.TextField(null=True, blank=True, verbose_name=_('Prévenus'))
     demandeurs = models.TextField(null=True, blank=True, verbose_name=_('Demandeurs'))
     defendeurs = models.TextField(null=True, blank=True, verbose_name=_('Défendeurs'))
-    appelants = models.TextField(null=True, blank=True, verbose_name=_('Appelants'))
-    intimes = models.TextField(null=True, blank=True, verbose_name=_('Intimés'))
-    partieCiviles = models.TextField(null=True, blank=True, verbose_name=_('Parties civiles'))
-    civileResponsables = models.TextField(null=True, blank=True, verbose_name=_('Civiles Responsables'))
     role = models.ForeignKey(Roles, on_delete=models.CASCADE,null=True, blank=True, verbose_name=_('Role'))
+    created_at = models.DateTimeField(auto_now=True, verbose_name=_('Date creation'))
+    created_by = models.ForeignKey(Account,blank=True, null=True, on_delete=models.CASCADE, verbose_name=_('Creer par'))
+
+class AffaireAttentes(models.Model):
+
+    STATUT = (
+        ("Pending", "En attente"),
+        ("Start", "Repris"),
+    )
+
+    idAffaire = models.UUIDField(default=uuid.uuid4, editable=False)
+    numOrdre = models.IntegerField(null=False, blank=False, verbose_name=_('Numéro d\'ordre'))
+    numRg = models.CharField(max_length=200,null=True, blank=True, verbose_name=_('Numéro Rg'))
+    numAffaire = models.CharField(max_length=200,null=True, blank=True, verbose_name=_('Numéro Affaire'))
+    objet = models.TextField(null=True, blank=True, verbose_name=_('Objet'))
+    demandeurs = models.TextField(null=True, blank=True, verbose_name=_('Demandeurs'))
+    defendeurs = models.TextField(null=True, blank=True, verbose_name=_('Défendeurs'))
+    roleProvenance = models.ForeignKey(Roles, on_delete=models.CASCADE,null=True, blank=True,  related_name="affaires_provenance", verbose_name=_('Role provenance'))
+    roleReprise = models.ForeignKey(Roles, on_delete=models.CASCADE,null=True, blank=True,  related_name="affaires_reprise", verbose_name=_('Role reprise'))
+    statut = models.TextField(null=True, blank=True,choices=STATUT, default="Pending", verbose_name=_('Statut'))
     created_at = models.DateTimeField(auto_now=True, verbose_name=_('Date creation'))
     created_by = models.ForeignKey(Account,blank=True, null=True, on_delete=models.CASCADE, verbose_name=_('Creer par'))
 
@@ -87,6 +97,8 @@ class Decisions(models.Model):
         ("Delibere-proroge", "Délibéré prorogé"),
         ("Radiation", "Radiation"),
         ("Renvoi-sine-die", "Renvoi sine die"),
+        ("Renvoi-chambre-conseil", "Renvoi en chambre de conseil"),
+        ("Sursis-statuer", "Sursis à statuer"),
         ("Affectation", "Affectation"),
         ("Autre", "Autre"),
     )

@@ -39,6 +39,10 @@
                     <!-- Page title actions -->
                     <div class="col-auto ms-auto d-print-none">
                         <div class="btn-list">
+                            <a href="{% url 'role.attentes' %}" class="btn btn-dark d-none d-sm-inline-block">
+                                <i class="fa fa-clock"></i>
+                                Affaires en attentes
+                            </a>
 
                             <a href="{% url 'role.createEnrollement' %}" class="btn btn-primary d-none d-sm-inline-block">
                                 <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
@@ -92,7 +96,6 @@
                                         <a href="{% url 'plumitif.export_excel' %}?year={{ selected_year }}&q={{ request.GET.q }}&section={{ request.GET.section }}&typeAudience={{ request.GET.typeAudience }}&date={{ request.GET.date }}" class="btn btn-success">
                                             <i class="fa fa-file-excel"></i> Exporter Excel
                                         </a>
-                                         <!-- Bouton PDF -->
                                          <a href="{% url 'plumitif.export_pdf'%}?year={{ selected_year }}&q={{ request.GET.q }}&section={{ request.GET.section }}&typeAudience={{ request.GET.typeAudience }}&date={{ request.GET.date }}" class="btn btn-danger ms-2">
                                             <i class="fa fa-file-pdf"></i> Exporter PDF
                                         </a>
@@ -187,7 +190,7 @@
                                     <div class="col-md-4">
                                         <form method="get" action="">
                                             <div class="input-group">
-                                                <input type="text" name="q" class="form-control" placeholder="Rechercher un rôle..." value="{{ request.GET.q }}">
+                                                <input type="text" name="q" class="form-control" placeholder="Rechercher une affaire..." value="{{ request.GET.q }}">
                                                 <button class="btn btn-primary" type="submit">Rechercher</button>
                                             </div>
                                               

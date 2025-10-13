@@ -51,41 +51,101 @@
     </div>
 </div> -->
 
-<p style="margin-bottom: -20px;"><b>INFO :</b> Nous vous suggérons au debut de la liste les affaires enrollées, renvoyées, en délibérés prorogés et mises en délibérées. Vous pouvez aussi ajouter d'autres affaires. </p>
+<!-- <p style="margin-bottom: -20px;"><b>INFO :</b> Nous vous suggérons au debut de la liste les affaires enrollées, renvoyées, en délibérés prorogés et mises en délibérées. Vous pouvez aussi ajouter d'autres affaires. </p> -->
+
+{% if affaireAttentes %}
 <hr class="mb-3" style="color: red; height:2px">
 
-
-{{ formset.management_form }}
-<button type="button" name="add" id="dynamic-ar"
-    class="btn btn-outline-primary mb-2" title="Ajouter une ligne">
-    <i class="fa fa-plus"></i>&nbsp; Ajouter une nouvelle ligne
-</button>
-<table class="table table-bordered" id="dynamicAddRemove">
-   
-    <tr>
-        <th style="width:80px;">N° Ordre</th>
-        <th style="width:150px;">NUA</th>
-        <th style="width:100px;">RG</th>
-        <th>Demandeurs</th>
-        <th>Défendeurs</th>
-        <th>Objet</th>
-    </tr>
+<div class="card shadow-sm mb-4 border-primary">
+    <div class="card-header d-flex justify-content-between align-items-center bg-warning text-white">
+      <h5 class="mb-0">
+        <i class="fa fa-list me-2"></i>📋 Affaires en attente
+      </h5>
+      <button type="button" class="btn btn-sm btn-light text-danger" data-bs-toggle="collapse" data-bs-target="#affairesAttenteCard" aria-expanded="true" title="Fermer cette section">
+        <i class="fa fa-times"></i>
+      </button>
+    </div>
   
-
-    {% for form_data in formset %}
-    <tr class="blinking-border">
-        <td hidden>{{ form_data.idAffaire }}</td>
-        <td>{{ form_data.numOrdre }}</td>
-        <td>{{ form_data.numAffaire }}</td>
-        <td>{{ form_data.numRg}}</td>
-        <td>{{ form_data.demandeurs }}</td>
-        <td>{{ form_data.defendeurs }}</td>
-        <td>{{ form_data.objet }}</td>
-    </tr>
-    {% endfor %}
-     
+    <div id="affairesAttenteCard" class="collapse show">
+      <div class="card-body">
+        <p><b>Aide :</b> Cocher une affaire pour l'ajoutée aux affaires pre-générées</p>
+        <table class="table table-hover table-bordered align-middle" id="affairesAttenteTable">
+          <thead class="table-light">
+            <tr>
+              <th style="width:40px;">#</th>
+              <th style="width:80px;">N° Ordre</th>
+              <th style="width:150px;">NUA</th>
+              <th style="width:100px;">RG</th>
+              <th>Demandeurs</th>
+              <th>Défendeurs</th>
+              <th>Objet</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for attente in affaireAttentes %}
+            <tr data-id="{{ attente.idAffaire }}"
+                data-numordre="{{ attente.numOrdre }}"
+                data-numaffaire="{{ attente.numAffaire }}"
+                data-numrg="{{ attente.numRg }}"
+                data-demandeurs="{{ attente.demandeurs }}"
+                data-defendeurs="{{ attente.defendeurs }}"
+                data-objet="{{ attente.objet }}">
+              <td class="text-center">
+                <input type="checkbox" class="form-check-input select-affaire">
+              </td>
+              <td>{{ attente.numOrdre }}</td>
+              <td>{{ attente.numAffaire }}</td>
+              <td>{{ attente.numRg }}</td>
+              <td>{{ attente.demandeurs|truncatewords:10 }}</td>
+              <td>{{ attente.defendeurs|truncatewords:10 }}</td>
+              <td>{{ attente.objet|truncatewords:10 }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="7" class="text-center text-muted">Aucune affaire en attente</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+</div>
+{% endif %}
     
+
+<hr>
+
+<h5 class="mt-4 mb-2 text-success">🧾 Affaires pre-générées</h5>
+{{ formset.management_form }}
+<table class="table table-bordered" id="dynamicAddRemove">
+    <thead>
+        <tr>
+            <th style="width:80px;">N° Ordre</th>
+            <th style="width:150px;">NUA</th>
+            <th style="width:100px;">RG</th>
+            <th>Demandeurs</th>
+            <th>Défendeurs</th>
+            <th>Objet</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for form_data in formset %}
+        <tr>
+            <td hidden>{{ form_data.idAffaire }}</td>
+            <td>{{ form_data.numOrdre }}</td>
+            <td>{{ form_data.numAffaire }}</td>
+            <td>{{ form_data.numRg }}</td>
+            <td>{{ form_data.demandeurs }}</td>
+            <td>{{ form_data.defendeurs }}</td>
+            <td>{{ form_data.objet }}</td>
+            <td></td>
+        </tr>
+        {% endfor %}
+    </tbody>
 </table>
+
+
 
 <div class="card-footer d-flex align-items-center">
     <button type="submit" class="btn btn-outline-primary btn-block"
@@ -96,39 +156,78 @@
 </div>
 
 
-
 <script type="text/javascript">
     $(document).ready(function() {
-
-        var i = parseInt($("#id_form-TOTAL_FORMS").val()); // nombre de formulaires existants
-
-        $("#dynamic-ar").click(function() {
-            // Ajouter une nouvelle ligne avec le bon index
-            $("#dynamicAddRemove").append(
-                '<tr>' +
-                    '<td hidden><input type="hidden" name="form-' + i + '-idAffaire" class="form-control" /></td>' +
-                    '<td><input type="number" name="form-' + i + '-numOrdre" class="form-control" required min="1" /></td>' +
-                    '<td><input type="text" name="form-' + i + '-numAffaire" value="auto-généré" disabled class="form-control" /></td>' +
-                    '<td><input type="text" name="form-' + i + '-numRg" class="form-control" required /></td>' +
-                    '<td><textarea rows="2" name="form-' + i + '-demandeurs" class="form-control" required></textarea></td>' +
-                    '<td><textarea rows="2" name="form-' + i + '-defendeurs" class="form-control" required></textarea></td>' +
-                    '<td><textarea rows="2" name="form-' + i + '-objet" class="form-control" required></textarea></td>' +
-                    '<td><button type="button" class="btn btn-outline-danger remove-input-field" title="Supprimer la ligne"><i class="fa fa-trash"></i></button></td>' +
-                '</tr>'
-            );
-
-            i++; // incrémenter l’index
-            $("#id_form-TOTAL_FORMS").val(i); // mettre à jour le TOTAL_FORMS
+    
+        let formCount = parseInt($('#id_form-TOTAL_FORMS').val(), 10) || 0;
+    
+        // Quand une affaire en attente est cochée
+        $('#affairesAttenteTable').on('change', '.select-affaire', function() {
+            const row = $(this).closest('tr');
+            const idAffaire = row.data('id');
+    
+            if ($(this).is(':checked')) {
+                // Ajouter l’affaire cochée dans le formset
+                const newRow = $(`
+                    <tr data-id="${idAffaire}">
+                        <td hidden>
+                            <input type="hidden" name="form-${formCount}-idAffaire" value="${idAffaire}" class="form-control" />
+                        </td>
+                        <td><input type="number" name="form-${formCount}-numOrdre" value="${row.data('numordre')}" class="form-control" required /></td>
+                        <td><input type="text" name="form-${formCount}-numAffaire" value="${row.data('numaffaire')}" class="form-control" readonly /></td>
+                        <td><input type="text" name="form-${formCount}-numRg" value="${row.data('numrg')}" class="form-control" /></td>
+                        <td><textarea rows="2" name="form-${formCount}-demandeurs" class="form-control">${row.data('demandeurs')}</textarea></td>
+                        <td><textarea rows="2" name="form-${formCount}-defendeurs" class="form-control">${row.data('defendeurs')}</textarea></td>
+                        <td><textarea rows="2" name="form-${formCount}-objet" class="form-control">${row.data('objet')}</textarea></td>
+                        <td class="text-center">
+                            <button type="button" class="btn btn-outline-danger btn-sm remove-row" title="Retirer">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `);
+    
+                $('#dynamicAddRemove tbody').append(newRow);
+                formCount++;
+                $('#id_form-TOTAL_FORMS').val(formCount);
+    
+            } else {
+                // Retirer l’affaire décochée du formset
+                $('#dynamicAddRemove tbody tr[data-id="' + idAffaire + '"]').remove();
+                reindexForms();
+            }
         });
-
-        // Supprimer une ligne
-        $(document).on('click', '.remove-input-field', function() {
-            $(this).parents('tr').remove();
-            i--;
-            $("#id_form-TOTAL_FORMS").val(i);
+    
+        // Suppression manuelle d’une ligne dans le formset
+        $('#dynamicAddRemove').on('click', '.remove-row', function() {
+            const idAffaire = $(this).closest('tr').data('id');
+            $(this).closest('tr').remove();
+    
+            // Décoche la case correspondante dans la liste d’attente
+            $('#affairesAttenteTable tr[data-id="' + idAffaire + '"] .select-affaire').prop('checked', false);
+    
+            reindexForms();
         });
+    
+        // Fonction pour reindexer les formulaires après suppression
+        function reindexForms() {
+            $('#dynamicAddRemove tbody tr').each(function(index) {
+                $(this).find(':input').each(function() {
+                    const name = $(this).attr('name');
+                    if (name) {
+                        const newName = name.replace(/form-\d+-/, `form-${index}-`);
+                        $(this).attr('name', newName);
+                        $(this).attr('id', `id_${newName}`);
+                    }
+                });
+            });
+    
+            formCount = $('#dynamicAddRemove tbody tr').length;
+            $('#id_form-TOTAL_FORMS').val(formCount);
+        }
+    
     });
-</script>
-
+    </script>
+    
 
 
