@@ -99,6 +99,7 @@ class Decisions(models.Model):
         ("Renvoi-sine-die", "Renvoi sine die"),
         ("Renvoi-chambre-conseil", "Renvoi en chambre de conseil"),
         ("Sursis-statuer", "Sursis à statuer"),
+        ("Mise-en-etat", "Mise en état"),
         ("Affectation", "Affectation"),
         ("Autre", "Autre"),
     )

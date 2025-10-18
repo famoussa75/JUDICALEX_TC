@@ -1069,6 +1069,7 @@ def detailAffaire(request, idAffaire):
         ("Renvoi-sine-die", "Renvoi sine die"),
         ("Renvoi-chambre-conseil", "Renvoi en chambre de conseil"),
         ("Sursis-statuer", "Sursis à statuer"),
+        ("Mise-en-etat", "Mise en état"),
         ("Affectation", "Affectation"),
         ("Autre", "Autre"),
     )
@@ -1118,6 +1119,7 @@ def detailAffaire(request, idAffaire):
                 "Renvoi-chambre-conseil",
                 "Sursis-statuer",
                 "Radiation",
+                "Mise-en-etat",
                 "Autre",
             ]:
                 # Vérifier si l’affaire n’est pas déjà dans les attentes
