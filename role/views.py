@@ -39,6 +39,8 @@ from reportlab.platypus import (
 )
 from reportlab.lib.enums import TA_CENTER
 from reportlab.lib.units import mm
+from reportlab.graphics.barcode import qr
+from reportlab.graphics.shapes import Drawing
 
 import os
 
@@ -1073,7 +1075,7 @@ def detailAffaire(request, idAffaire):
         affaire__objet=affaire.objet,
         affaire__demandeurs=affaire.demandeurs,
         affaire__defendeurs=affaire.defendeurs,
-    )
+    ).order_by('id')
     affaireRole = AffaireRoles.objects.select_related('role__juridiction').get(id=affaire.id)
     affaireEnroller = Enrollement.objects.filter(idAffaire=idAffaire).first()
 
@@ -1112,6 +1114,7 @@ def detailAffaire(request, idAffaire):
                 "Renvoi-sine-die",
                 "Renvoi-chambre-conseil",
                 "Sursis-statuer",
+                "Autre",
             ]:
                 # Vérifier si l’affaire n’est pas déjà dans les attentes
                 if not AffaireAttentes.objects.filter(idAffaire=affaire.idAffaire).exists():
@@ -1167,7 +1170,7 @@ def fetchForm(request, selectedJuridiction, selectedType, dateRole, selectedSect
         Q(juridiction=juridiction) &
         Q(affaire__role__typeAudience=selectedType) &
         Q(section=selectedSection) &
-       (Q(typeDecision='Renvoi') | Q(typeDecision='Mise-en-delibere') | Q(typeDecision='Delibere-proroge') | Q(typeDecision='Affectation'))
+       (Q(typeDecision='Renvoi') | Q(typeDecision='Mise-en-delibere') | Q(typeDecision='Delibere-proroge') | Q(typeDecision='Vide-du-delibere') | Q(typeDecision='Affectation'))
     ).select_related('affaire')
     
     for decision in decisionsRenvoyers:
@@ -1734,7 +1737,7 @@ def export_roles_pdf(request):
              "<b>Conception & Réalisation</b><br/>"
              "Judicalex SARL<br/>"
              "contact@judicalex-gn.org<br/>"
-             "Tel: 613 87 08 92", style_normal)]],
+             "Tel: 613 87 08 92 / 612 73 55 77", style_normal)]],
         style=TableStyle([
             ("ALIGN", (0,0), (-1,-1), "CENTER"),
             ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
@@ -1857,12 +1860,31 @@ def export_roleDetail_pdf(request):
     # Callback pour pied de page
     # =======================
     def add_footer(canvas, doc):
-        footer_text = f"Téléchargé à partir de Judicalex - {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}"
+        page_width, page_height = canvas._pagesize
+        footer_text = f"Téléchargé à partir de judicalex-gn.org - {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}"
+
         canvas.saveState()
         canvas.setFont('Helvetica', 8)
-        canvas.drawCentredString(A4[1]/2, 5 * mm, footer_text)
+        
+        page_num = f"P.{doc.page}"
+        canvas.drawString(10 * mm, 5 * mm, page_num)
+        canvas.drawCentredString(page_width / 2, 5 * mm, footer_text)
+
+        # Restaurer l’état
         canvas.restoreState()
 
+    def add_header(canvas, doc):
+        page_width, page_height = canvas._pagesize
+        canvas.saveState()
+        canvas.setFont('Helvetica-Bold', 10)
+        
+        # Paragraphe que tu veux répéter
+        header_text = f"TCC - RÔLE D'AUDIENCE DE {role.get_typeAudience_display().upper()} DU {role.dateEnreg.strftime('%d/%m/%Y') if role.dateEnreg else 'TOUS'}"
+        
+        # Centrer en haut
+        canvas.drawCentredString(page_width / 2, page_height - 20, header_text)
+        
+        canvas.restoreState()
     # =======================
     # Document PDF
     # =======================
@@ -1919,47 +1941,43 @@ def export_roleDetail_pdf(request):
          [branding]],
         style=TableStyle([
             ("ALIGN", (0,0), (-1,-1), "CENTER"),
-            ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
+            ("VALIGN", (0,0), (-1,-1), "TOP"),
             ("BOTTOMPADDING", (0,0), (-1,-1), 2),
             ("TOPPADDING", (0,0), (-1,-1), 2),
         ])
     )
 
-    col_centre = Table(
-        [[Paragraph("<b>COUR D'APPEL DE CONAKRY</b>", style_title)],
-         [Paragraph("Tribunal de Commerce de Conakry", style_title)]],
-        style=TableStyle([
-            ("ALIGN", (0,0), (-1,-1), "CENTER"),
-            ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
-        ])
+   # Style pour le titre principal
+    style_title2 = ParagraphStyle(
+        name="TitleCenter",
+        alignment=1,  # centré
+        fontSize=12,
+        leading=16,
+        underline=True,
+        spaceAfter=6
     )
 
-    col_droite = Table(
-        [[judicalex],
-         [Paragraph(
-             "<b>Conception & Réalisation</b><br/>"
-             "Judicalex SARL<br/>"
-             "contact@judicalex-gn.org<br/>"
-             "Tel: 613 87 08 92", style_normal)]],
-        style=TableStyle([
-            ("ALIGN", (0,0), (-1,-1), "CENTER"),
-            ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
-        ])
+    # Style normal pour filtre
+    style_normal2 = ParagraphStyle(
+        name="NormalCenter",
+        alignment=1,  # centré
+        fontSize=12,
+        leading=16,
     )
 
-    header_table = Table(
-        [[col_gauche, col_centre, col_droite]],
-        colWidths=[250, 250, 250],
-        rowHeights=120
-    )
-    header_table.setStyle(TableStyle([
-        ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
-        ("ALIGN", (0,0), (-1,-1), "CENTER"),
-        ("GRID", (0,0), (-1,-1), 0, colors.white),
-    ]))
-    elements.append(header_table)
-    elements.append(Spacer(1, 12))
+    # Titre final et composition du tribunal
+    titre_final = f"""
+    <para>
+    <b>RÔLE D'AUDIENCE DE {role.get_typeAudience_display().upper()} DU {role.dateEnreg.strftime('%d/%m/%Y') if role.dateEnreg else 'TOUS'}</b><br/>
+    <b>COMPOSITION DU TRIBUNAL</b><br/>
+    <b>PRÉSIDENT(E) :</b> {role.president or ''}<br/>
+    {f'<b>JUGE(S) CONSULAIRE(S) :</b> {role.juge}<br/>' if role.juge else ''}
+    <b>GREFFIER(E) :</b> {role.greffier or ''}
+    </para>
+    """
 
+    # Texte filtre si nécessaire
+    filtre_text = ""
     # =======================
     # Titre avec filtres
     # =======================
@@ -1967,26 +1985,87 @@ def export_roleDetail_pdf(request):
     if query:
         titre_filters.append(f"Recherche: {query}")
 
-    titre_final = f"RÔLE D'AUDIENCE DU {role.typeAudience} DU {role.dateEnreg.strftime('%d/%m/%Y') if role.dateEnreg else 'Tous'}"
-    filtre_text = ""
     if titre_filters:
         filtre_text = "FILTRE – " + ", ".join(titre_filters)
 
-    elements.append(Paragraph(titre_final, styles['Title']))
+    # Colonne centrale : tribunal + rôle
+    centre_elements = [
+        Paragraph("<b>COUR D'APPEL DE CONAKRY</b>", style_title),
+        Paragraph("Tribunal de Commerce de Conakry", style_title),
+        Paragraph("* &nbsp;&nbsp; * &nbsp;&nbsp; *", style_title),
+        Paragraph(titre_final, style_title2)
+    ]
+
     if filtre_text:
-        elements.append(Paragraph(filtre_text, style_normal))
+        centre_elements.append(Paragraph(filtre_text, style_normal2))
+
+    col_centre = Table(
+        [[e] for e in centre_elements],  # Chaque élément sur une ligne
+        style=TableStyle([
+            ("ALIGN", (0,0), (-1,-1), "CENTER"),
+            ("VALIGN", (0,0), (-1,-1), "TOP"),
+            ("BOTTOMPADDING", (0,0), (-1,-1), 4),
+            ("TOPPADDING", (0,0), (-1,-1), 4),
+        ])
+    )
+
+   # URL du rôle en ligne
+    role_url = "https://judicalex-gn.org/role/123"  # Remplace par l'URL dynamique
+
+    # Générer le QR code
+    qr_code = qr.QrCodeWidget(role_url)
+    bounds = qr_code.getBounds()
+    width = bounds[2] - bounds[0]
+    height = bounds[3] - bounds[1]
+
+    # Mettre le QR code dans un Drawing pour pouvoir l’insérer dans un flowable
+    qr_drawing = Drawing(75, 75)  # taille du QR code
+    qr_drawing.add(qr_code)
+
+    # Table de droite (footer)
+    col_droite = Table(
+        [
+            [judicalex],
+            [Paragraph(
+                "<b>Conception & Réalisation</b><br/>"
+                "Judicalex SARL<br/>"
+                "contact@judicalex-gn.org<br/>"
+                "Tel: 613 87 08 92 / 612 73 55 77<br/><br/>", style_normal)],
+            [qr_drawing],  # QR code ici
+        ],
+        style=TableStyle([
+            ("ALIGN", (0,0), (-1,-1), "CENTER"),
+            ("VALIGN", (0,0), (-1,-1), "TOP"),
+            ("TOPPADDING", (0,0), (-1,-1), 2),
+            ("BOTTOMPADDING", (0,0), (-1,-1), 2),
+        ])
+    )
+
+    header_table = Table(
+        [[col_gauche, col_centre, col_droite]],
+        colWidths=[155, 440, 155],
+        rowHeights=170
+    )
+    header_table.setStyle(TableStyle([
+        ("VALIGN", (0,0), (-1,-1), "TOP"),
+        ("ALIGN", (0,0), (-1,-1), "CENTER"),
+        ("GRID", (0,0), (-1,-1), 0, colors.white),
+    ]))
+    elements.append(header_table)
     elements.append(Spacer(1, 12))
+
+
 
     # =======================
     # Tableau des affaires
     # =======================
     data = [[
-        Paragraph("No", styles["Heading5"]),
-        Paragraph("NUA", styles["Heading5"]),
-        Paragraph("RG", styles["Heading5"]),
-        Paragraph("Demandeurs", styles["Heading5"]),
-        Paragraph("Défendeurs", styles["Heading5"]),
-        Paragraph("Objet", styles["Heading5"]),
+        Paragraph("<b>No</b>", style_normal),
+        Paragraph("<b>NUA</b>", style_normal),
+        Paragraph("<b>RG</b>", style_normal),
+        Paragraph("<b>Demandeurs</b>", style_normal),
+        Paragraph("<b>Défendeurs</b>", style_normal),
+        Paragraph("<b>Objet</b>", style_normal),
     ]]
 
     for i, r in enumerate(affaire, start=1):
@@ -1999,26 +2078,35 @@ def export_roleDetail_pdf(request):
             Paragraph(r.objet or "", style_normal),
         ])
 
-    col_widths = [40, 150, 120, 160, 160, 120]
+    col_widths = [35, 120, 40, 190, 190, 170]
     table = Table(data, repeatRows=1, colWidths=col_widths)
+
     table.setStyle(TableStyle([
+        # --- En-têtes ---
         ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#4CAF50')),
         ('TEXTCOLOR', (0,0), (-1,0), colors.white),
-        ('ALIGN', (0,0), (-1,-1), 'CENTER'),
-        ('VALIGN', (0,0), (-1,-1), 'TOP'),
         ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
         ('FONTSIZE', (0,0), (-1,0), 9),
+        ('ALIGN', (0,0), (-1,0), 'CENTER'),    # ✅ centre les en-têtes
+        ('VALIGN', (0,0), (-1,0), 'MIDDLE'),   # ✅ centre verticalement
         ('BOTTOMPADDING', (0,0), (-1,0), 6),
+
+        # --- Corps de tableau ---
         ('BACKGROUND', (0,1), (-1,-1), colors.whitesmoke),
+        ('ALIGN', (0,1), (-1,-1), 'CENTER'),
+        ('VALIGN', (0,1), (-1,-1), 'TOP'),
+
+        # --- Bordures ---
         ('GRID', (0,0), (-1,-1), 0.3, colors.grey),
     ]))
 
     elements.append(table)
+    
 
     # =======================
     # Génération du PDF
     # =======================
-    doc.build(elements, onFirstPage=add_footer, onLaterPages=add_footer)
+    doc.build(elements, onFirstPage=add_footer, onLaterPages=lambda canvas, doc: [add_header(canvas, doc), add_footer(canvas, doc)])
 
     return response
 
@@ -2177,7 +2265,7 @@ def export_decisions_pdf(request):
              "<b>Conception & Réalisation</b><br/>"
              "Judicalex SARL<br/>"
              "contact@judicalex-gn.org<br/>"
-             "Tel: 613 87 08 92", style_normal)]],
+             "Tel: 613 87 08 92 / 612 73 55 77", style_normal)]],
         style=TableStyle([
             ("ALIGN", (0,0), (-1,-1), "CENTER"),
             ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
@@ -2456,7 +2544,7 @@ def export_plumitifs_pdf(request):
              "<b>Conception & Réalisation</b><br/>"
              "Judicalex SARL<br/>"
              "contact@judicalex-gn.org<br/>"
-             "Tel: 613 87 08 92", style_normal)]],
+             "Tel: 613 87 08 92 / 612 73 55 77", style_normal)]],
         style=TableStyle([
             ("ALIGN", (0,0), (-1,-1), "CENTER"),
             ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
@@ -2729,7 +2817,7 @@ def export_enrollements_pdf(request):
              "<b>Conception & Réalisation</b><br/>"
              "Judicalex SARL<br/>"
              "contact@judicalex-gn.org<br/>"
-             "Tel: 613 87 08 92", style_normal)]],
+             "Tel: 613 87 08 92 / 612 73 55 77", style_normal)]],
         style=TableStyle([
             ("ALIGN", (0,0), (-1,-1), "CENTER"),
             ("VALIGN", (0,0), (-1,-1), "MIDDLE"),

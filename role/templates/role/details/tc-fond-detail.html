@@ -50,32 +50,25 @@
                                     <p class="h3" style="margin-bottom:-25px ;">COUR D'APPEL DE CONAKRY</p><br>
                                     <p style="margin-bottom:-10px ;">..............</p><br>
                                     <p class="h3">Tribunal du Commerce de Conakry</p>
-                                    <p class="h3">{{role.section}}</p><br>
-                                    <div class="mt-4">
-                                        
+                                    <p class="h3">{{role.get_section_display}}</p><br>
+                                    <div class="btn-group" role="group" aria-label="Actions rôle">
+
                                         {% if role.statut == 'Valider' %}
-                                            <a href="#" class="btn btn-secondary {% if not is_chef %}disabled{% endif %}">
-                                                <!-- Download SVG icon from http://tabler-icons.io/i/x -->
-                                                <i class="fa fa-check"></i>
-                                                Déjà validé
-                                            </a>
+                                            <button type="button" class="btn btn-secondary" disabled>
+                                                <i class="fa fa-check-circle me-1"></i> Déjà validé
+                                            </button>
                                         {% else %}
-                                            <a href="{% url 'role.valider' role.id %}" class="btn btn-success {% if not is_chef %}disabled{% endif %}" >
-                                                <!-- Download SVG icon from http://tabler-icons.io/i/x -->
-                                                <i class="fa fa-check"></i>
-                                                Valider ce rôle
+                                            <a href="{% url 'role.valider' role.id %}" class="btn btn-primary {% if not is_chef %}disabled{% endif %}">
+                                                <i class="fa fa-check-circle me-1"></i> Valider
                                             </a>
-                                            
                                         {% endif %}
-                                            
-                                       
-                                        &nbsp;&nbsp;
-                                        <a href="#" class="btn btn-danger {% if not is_chef %}disabled{% endif %}" data-bs-toggle="modal" id="" data-bs-target="#modal-danger" aria-label="" >
-                                            <!-- Download SVG icon from http://tabler-icons.io/i/x -->
-                                            <i class="fa fa-trash" ></i>
-                                            Supprimer ce rôle
-                                        </a>
+                                    
+                                        <button type="button" class="btn btn-warning {% if not is_chef %}disabled{% endif %}" data-bs-toggle="modal" data-bs-target="#modal-danger">
+                                            <i class="fa fa-trash me-1"></i> Supprimer
+                                        </button>
+                                    
                                     </div>
+                                    
                                 </div>
                                 <div class="col-6"></div>
                                 <div class="col-3 text-center">
