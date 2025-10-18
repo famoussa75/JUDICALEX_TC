@@ -1,4 +1,7 @@
+from copy import deepcopy
 import html
+from io import BytesIO
+from PyPDF2 import PdfReader
 from django.http import HttpResponse,JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
@@ -1114,6 +1117,7 @@ def detailAffaire(request, idAffaire):
                 "Renvoi-sine-die",
                 "Renvoi-chambre-conseil",
                 "Sursis-statuer",
+                "Radiation",
                 "Autre",
             ]:
                 # Vérifier si l’affaire n’est pas déjà dans les attentes
@@ -1832,14 +1836,12 @@ def export_roles_pdf(request):
 
 
 def export_roleDetail_pdf(request):
-    from datetime import datetime
     # =======================
     # Récupérer les filtres
     # =======================
     query = request.GET.get('q', '').strip()
     role_id = request.GET.get('role_id', '').strip()
 
-    # Base queryset
     affaire = AffaireRoles.objects.filter(role_id=role_id)
     role = Roles.objects.filter(id=role_id).first()
 
@@ -1857,44 +1859,25 @@ def export_roleDetail_pdf(request):
     response['Content-Disposition'] = f'attachment; filename="role_{role.dateEnreg or "tous"}.pdf"'
 
     # =======================
-    # Callback pour pied de page
+    # Callbacks pour en-tête et pied de page
     # =======================
-    def add_footer(canvas, doc):
+    def add_footer(canvas, doc, total_pages):
         page_width, page_height = canvas._pagesize
         footer_text = f"Téléchargé à partir de judicalex-gn.org - {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}"
-
         canvas.saveState()
         canvas.setFont('Helvetica', 8)
-        
-        page_num = f"P.{doc.page}"
+        page_num = f"P.{doc.page} sur {total_pages}"
         canvas.drawString(10 * mm, 5 * mm, page_num)
         canvas.drawCentredString(page_width / 2, 5 * mm, footer_text)
-
-        # Restaurer l’état
         canvas.restoreState()
 
     def add_header(canvas, doc):
         page_width, page_height = canvas._pagesize
         canvas.saveState()
         canvas.setFont('Helvetica-Bold', 10)
-        
-        # Paragraphe que tu veux répéter
         header_text = f"TCC - RÔLE D'AUDIENCE DE {role.get_typeAudience_display().upper()} DU {role.dateEnreg.strftime('%d/%m/%Y') if role.dateEnreg else 'TOUS'}"
-        
-        # Centrer en haut
         canvas.drawCentredString(page_width / 2, page_height - 20, header_text)
-        
         canvas.restoreState()
-    # =======================
-    # Document PDF
-    # =======================
-    doc = SimpleDocTemplate(
-        response,
-        pagesize=landscape(A4),
-        rightMargin=10, leftMargin=10, topMargin=20, bottomMargin=20
-    )
-
-    elements = []
 
     # =======================
     # Styles
@@ -1905,33 +1888,20 @@ def export_roleDetail_pdf(request):
     style_normal.leading = 11
     style_normal.alignment = TA_CENTER
 
-    style_title = ParagraphStyle(
-        "title",
-        parent=styles["Heading2"],
-        alignment=TA_CENTER,
-        textColor=colors.HexColor("#000000")
-    )
+    style_title = ParagraphStyle("title", parent=styles["Heading2"], alignment=TA_CENTER, textColor=colors.HexColor("#000000"))
+    style_title2 = ParagraphStyle(name="TitleCenter", alignment=1, fontSize=12, leading=16, underline=True, spaceAfter=6)
+    style_normal2 = ParagraphStyle(name="NormalCenter", alignment=1, fontSize=12, leading=16)
 
     # =======================
-    # En-tête (logos et textes)
+    # En-tête du PDF
     # =======================
     try:
         armoirie = Image(get_static_path("_base/assets_role/statics/armoirie.png"), width=50, height=50)
-        armoirie.hAlign = 'CENTER'
-
-        branding = Image(get_static_path("_base/assets_role/statics/branding.png"), width=70, height=40)
-        branding.hAlign = 'CENTER'
-
+        branding = Image(get_static_path("_base/assets_role/statics/branding.png"), width=80, height=50)
         simandou = Image(get_static_path("_base/assets_role/statics/simandou.png"), width=70, height=40)
-        simandou.hAlign = 'CENTER'
-
         judicalex = Image(get_static_path("_base/assets_role/statics/ejustice_logo_white.png"), width=120, height=30)
-        judicalex.hAlign = 'CENTER'
-
     except Exception:
-        armoirie = Paragraph("[Armoirie manquante]", style_normal)
-        branding = simandou = Paragraph("[Image manquante]", style_normal)
-        judicalex = Paragraph("[Image manquante]", style_normal)
+        armoirie = branding = simandou = judicalex = Paragraph("[Image manquante]", style_normal)
 
     col_gauche = Table(
         [[armoirie],
@@ -1939,33 +1909,14 @@ def export_roleDetail_pdf(request):
          [Paragraph("Travail - Justice - Solidarité", style_normal)],
          [Paragraph("Ministère de la Justice et des Droits de l'Homme", style_normal)],
          [branding]],
-        style=TableStyle([
+         style=TableStyle([
             ("ALIGN", (0,0), (-1,-1), "CENTER"),
             ("VALIGN", (0,0), (-1,-1), "TOP"),
-            ("BOTTOMPADDING", (0,0), (-1,-1), 2),
-            ("TOPPADDING", (0,0), (-1,-1), 2),
+            ("BOTTOMPADDING", (0,0), (-1,-1), 4),
+            ("TOPPADDING", (0,0), (-1,-1), 4),
         ])
     )
 
-   # Style pour le titre principal
-    style_title2 = ParagraphStyle(
-        name="TitleCenter",
-        alignment=1,  # centré
-        fontSize=12,
-        leading=16,
-        underline=True,
-        spaceAfter=6
-    )
-
-    # Style normal pour filtre
-    style_normal2 = ParagraphStyle(
-        name="NormalCenter",
-        alignment=1,  # centré
-        fontSize=12,
-        leading=16,
-    )
-
-    # Titre final et composition du tribunal
     titre_final = f"""
     <para>
     <b>RÔLE D'AUDIENCE DE {role.get_typeAudience_display().upper()} DU {role.dateEnreg.strftime('%d/%m/%Y') if role.dateEnreg else 'TOUS'}</b><br/>
@@ -1976,88 +1927,67 @@ def export_roleDetail_pdf(request):
     </para>
     """
 
-    # Texte filtre si nécessaire
-    filtre_text = ""
-    # =======================
-    # Titre avec filtres
-    # =======================
-    titre_filters = []
-    if query:
-        titre_filters.append(f"Recherche: {query}")
+    filtre_text = f"FILTRE – Recherche : {query}" if query else ""
 
-    if titre_filters:
-        filtre_text = "FILTRE – " + ", ".join(titre_filters)
-
-    # Colonne centrale : tribunal + rôle
     centre_elements = [
         Paragraph("<b>COUR D'APPEL DE CONAKRY</b>", style_title),
         Paragraph("Tribunal de Commerce de Conakry", style_title),
         Paragraph("* &nbsp;&nbsp; * &nbsp;&nbsp; *", style_title),
         Paragraph(titre_final, style_title2)
     ]
-
     if filtre_text:
         centre_elements.append(Paragraph(filtre_text, style_normal2))
 
-    col_centre = Table(
-        [[e] for e in centre_elements],  # Chaque élément sur une ligne
-        style=TableStyle([
+    col_centre = Table([[e] for e in centre_elements],
+       style=TableStyle([
             ("ALIGN", (0,0), (-1,-1), "CENTER"),
             ("VALIGN", (0,0), (-1,-1), "TOP"),
-            ("BOTTOMPADDING", (0,0), (-1,-1), 4),
-            ("TOPPADDING", (0,0), (-1,-1), 4),
+            ("BOTTOMPADDING", (0,0), (-1,-1), 6),
+            ("TOPPADDING", (0,0), (-1,-1), 6),
         ])
     )
 
-   # URL du rôle en ligne
-    role_url = "https://judicalex-gn.org/role/123"  # Remplace par l'URL dynamique
-
-    # Générer le QR code
+    role_url = f"https://judicalex-gn.org/role/{role.id}"
     qr_code = qr.QrCodeWidget(role_url)
-    bounds = qr_code.getBounds()
-    width = bounds[2] - bounds[0]
-    height = bounds[3] - bounds[1]
-
-    # Mettre le QR code dans un Drawing pour pouvoir l’insérer dans un flowable
-    qr_drawing = Drawing(75, 75)  # taille du QR code
+    qr_drawing = Drawing(55, 55)
+    qr_drawing.scale(0.8, 0.8)
     qr_drawing.add(qr_code)
+    
 
-    # Table de droite (footer)
+    # Style pour le texte en italique
+    style_italic = ParagraphStyle(
+        name="Italic",
+        fontName="Helvetica-Oblique",
+        fontSize=8,
+        alignment=1,  # centre le texte
+        textColor=colors.black,
+        spaceBefore=-8,  # réduit l’espace au-dessus du texte
+
+    )
+
+
     col_droite = Table(
         [
             [judicalex],
-            [Paragraph(
-                "<b>Conception & Réalisation</b><br/>"
-                "Judicalex SARL<br/>"
-                "contact@judicalex-gn.org<br/>"
-                "Tel: 613 87 08 92 / 612 73 55 77<br/><br/>", style_normal)],
-            [qr_drawing],  # QR code ici
+            [Paragraph("<b>Conception & Réalisation</b><br/>Judicalex SARL<br/>contact@judicalex-gn.org<br/>Tel: 613 87 08 92 / 612 73 55 77<br/><br/>", style_normal)],
+            [qr_drawing],
+            [Paragraph("<i>Télécharger / consulter en ligne</i>", style_italic)],  # ✅ texte sous le QR code
+
         ],
-        style=TableStyle([
+       style=TableStyle([
             ("ALIGN", (0,0), (-1,-1), "CENTER"),
             ("VALIGN", (0,0), (-1,-1), "TOP"),
-            ("TOPPADDING", (0,0), (-1,-1), 2),
-            ("BOTTOMPADDING", (0,0), (-1,-1), 2),
-        ])
+            ("TOPPADDING", (0,0), (-1,-1), 4),
+            ("BOTTOMPADDING", (0,0), (-1,-1), 4),
+              # 🔽 Réduction spécifique sous le QR code (3e ligne, index 2)
+            ("BOTTOMPADDING", (0, 2), (0, 2), -6),
+        ]),
     )
 
-    header_table = Table(
-        [[col_gauche, col_centre, col_droite]],
-        colWidths=[155, 440, 155],
-        rowHeights=170
-    )
-    header_table.setStyle(TableStyle([
-        ("VALIGN", (0,0), (-1,-1), "TOP"),
-        ("ALIGN", (0,0), (-1,-1), "CENTER"),
-        ("GRID", (0,0), (-1,-1), 0, colors.white),
-    ]))
-    elements.append(header_table)
-    elements.append(Spacer(1, 12))
-
-
+    header_table = Table([[col_gauche, col_centre, col_droite]], colWidths=[155, 440, 155], rowHeights=170)
 
     # =======================
-    # Tableau des affaires
+    # Contenu principal
     # =======================
     data = [[
         Paragraph("<b>No</b>", style_normal),
@@ -2078,37 +2008,55 @@ def export_roleDetail_pdf(request):
             Paragraph(r.objet or "", style_normal),
         ])
 
-    col_widths = [35, 120, 40, 190, 190, 170]
-    table = Table(data, repeatRows=1, colWidths=col_widths)
-
+    table = Table(data, repeatRows=1, colWidths=[35, 120, 40, 190, 190, 170])
     table.setStyle(TableStyle([
-        # --- En-têtes ---
         ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#4CAF50')),
         ('TEXTCOLOR', (0,0), (-1,0), colors.white),
         ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0,0), (-1,0), 9),
-        ('ALIGN', (0,0), (-1,0), 'CENTER'),    # ✅ centre les en-têtes
-        ('VALIGN', (0,0), (-1,0), 'MIDDLE'),   # ✅ centre verticalement
-        ('BOTTOMPADDING', (0,0), (-1,0), 6),
-
-        # --- Corps de tableau ---
-        ('BACKGROUND', (0,1), (-1,-1), colors.whitesmoke),
-        ('ALIGN', (0,1), (-1,-1), 'CENTER'),
-        ('VALIGN', (0,1), (-1,-1), 'TOP'),
-
-        # --- Bordures ---
+        ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
         ('GRID', (0,0), (-1,-1), 0.3, colors.grey),
     ]))
 
-    elements.append(table)
-    
+    # =======================
+    # Éléments du PDF
+    # =======================
+    elements = [header_table, Spacer(1, 12), table]
 
     # =======================
-    # Génération du PDF
+    # 1️⃣ Duplication (évite corruption)
     # =======================
-    doc.build(elements, onFirstPage=add_footer, onLaterPages=lambda canvas, doc: [add_header(canvas, doc), add_footer(canvas, doc)])
+    elements_temp = deepcopy(elements)
+    elements_final = deepcopy(elements)
+
+    # =======================
+    # 2️⃣ Première passe — compter les pages
+    # =======================
+    buffer_temp = BytesIO()
+    doc_temp = SimpleDocTemplate(
+        buffer_temp,
+        pagesize=landscape(A4),
+        rightMargin=10, leftMargin=10, topMargin=20, bottomMargin=20
+    )
+    doc_temp.build(elements_temp)
+    buffer_temp.seek(0)
+    total_pages = len(PdfReader(buffer_temp).pages)
+
+    # =======================
+    # 3️⃣ Deuxième passe — PDF final
+    # =======================
+    def footer_final(canvas, doc): add_footer(canvas, doc, total_pages)
+    def later_final(canvas, doc): add_header(canvas, doc); add_footer(canvas, doc, total_pages)
+
+    doc_final = SimpleDocTemplate(
+        response,
+        pagesize=landscape(A4),
+        rightMargin=10, leftMargin=10, topMargin=20, bottomMargin=20
+    )
+    doc_final.build(elements_final, onFirstPage=footer_final, onLaterPages=later_final)
 
     return response
+
 
 def export_roleDetail_excel(request):
     query = request.GET.get('q', '').strip()
